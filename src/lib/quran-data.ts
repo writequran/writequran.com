@@ -46,6 +46,26 @@ export const prepareTypingData = (rawText: string): NormalizedData => {
   };
 };
 
+/**
+ * Finds the nearest logical checkIndex for a given character offset in the visual displayString.
+ * Useful for mapping mouse clicks back to the typing cursor position.
+ */
+export const findCheckIndexByDisplayOffset = (block: MushafBlock, displayOffset: number): number => {
+  if (displayOffset <= 0) return 0;
+  
+  // Find the largest mapping index that is less than or equal to the display offset.
+  // The mapping array is sorted by definition as it follows the visual string order.
+  let closestIndex = 0;
+  for (let i = 0; i < block.mapping.length; i++) {
+    if (block.mapping[i] <= displayOffset) {
+      closestIndex = i;
+    } else {
+      break;
+    }
+  }
+  return closestIndex;
+};
+
 import quranDataRaw from '../data/quran-uthmani.json';
 
 // Bypass TS index checks for the rapid integration of the cloud dataset

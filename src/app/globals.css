@@ -1,8 +1,18 @@
 @import "tailwindcss";
 
+/* Self-hosted me_quran font — purpose-built for Uthmani Quranic text rendering.
+   Handles correct Allah ligature, Lam-Shaddah-Fatha stacking, and dagger alif placement. */
+@font-face {
+  font-family: "me_quran";
+  src: url("/fonts/me_quran.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme inline {
   --font-sans: var(--font-inter), sans-serif;
-  --font-quran: var(--font-quran), "Scheherazade New", "KFGQPC Uthman Taha Naskh", "me_quran", "Amiri Quran", "Traditional Arabic", serif;
+  --font-quran: "me_quran", var(--font-quran), "Scheherazade New", "KFGQPC Uthman Taha Naskh", "Amiri Quran", "Traditional Arabic", serif;
 }
 
 @custom-variant dark (&:is(.dark *));
@@ -15,12 +25,14 @@
     direction: ltr;
   }
   .quran-text {
-    font-family: var(--font-quran), "Scheherazade New", "KFGQPC Uthman Taha Naskh", "Amiri Quran", "Traditional Arabic", serif;
+    font-family: "me_quran", "Scheherazade New", "KFGQPC Uthman Taha Naskh", "Amiri Quran", "Traditional Arabic", serif;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
-    /* Do NOT set font-feature-settings here — it overrides the font's internal
-       OpenType mark/mkmk tables which control diacritic-to-base anchoring in
-       Scheherazade New. Let the font engine use its defaults. */
+    
+    /* Explicitly enable the core Arabic shaping and ligature features.
+       'mark' and 'mkmk' are critical for diacritic stacking/anchoring.
+       'ccmp', 'rlig', 'calt' handle glyph substitutions and complex ligatures. */
+    font-feature-settings: "mark" 1, "mkmk" 1, "ccmp" 1, "rlig" 1, "calt" 1;
     font-variant-ligatures: common-ligatures;
   }
 }
