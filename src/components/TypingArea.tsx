@@ -188,13 +188,19 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
 
     return parts.map((part, i) => {
       const isMarker = part.startsWith('\u06DD');
+      
+      // Determine if this specific part should be visible based on typing state and visibility mode
+      let show = isTyped || visibilityMode === "all" || (visibilityMode === "ayah" && isInActiveAyah);
+
       if (isMarker) {
         if (!isTyped) {
           isInActiveAyah = false;
         }
         const digits = part.slice(1);
+        const markerMaskBackground = show ? "bg-[#FDFBF7] dark:bg-[#121212]" : "";
+        
         return (
-          <span key={i} className="relative inline-flex items-center justify-center mx-1 text-[#C1A063] transition-colors duration-300 select-none">
+          <span key={i} className={`relative inline-flex items-center justify-center mx-1 text-[#C1A063] transition-all duration-300 select-none ${markerMaskBackground}`}>
             {/* Base Circle establishing the exact normal glyph size without expansion */}
             <span className="leading-none quran-text">{'\u06DD'}</span>
 
@@ -208,18 +214,21 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
         );
       }
 
-      let show = isTyped || visibilityMode === "all" || (visibilityMode === "ayah" && isInActiveAyah);
-
       let colorClass = "";
+      let maskClass = "";
+      
       if (show) {
         colorClass = "text-[#2A2826] dark:text-neutral-100";
+        // Apply solid background mask only to revealed text to allow guide lines to show in empty space
+        maskClass = "bg-[#FDFBF7] dark:bg-[#121212]";
       } else {
         // Use transparent color instead of opacity-0 to keep the layout run intact for shaping
         colorClass = "text-transparent";
+        maskClass = "bg-transparent";
       }
 
       return (
-        <span key={i} className={`${colorClass} transition-colors duration-300`}>
+        <span key={i} className={`${colorClass} ${maskClass} transition-all duration-300`}>
           {part}
         </span>
       );
@@ -245,7 +254,7 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
       >
         <div className="absolute inset-2 border-2 border-[#D6C19E] dark:border-neutral-700 opacity-50 pointer-events-none" />
 
-        <div className="w-full text-[2.2rem] leading-[2] text-center">
+        <div className="w-full text-[2.2rem] leading-[2.8] text-center mushaf-rules">
           {pageData.preBismillah && (
             <div className="w-full text-[#2A2826] dark:text-neutral-100 flex justify-center mb-4 select-none">
               <span>{pageData.preBismillah}</span>
@@ -303,12 +312,12 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
             const renderUntyped = renderTextWithMarkers(untypedWithJ, false);
 
             return (
-              <span key={blockIndex} data-block-index={blockIndex} className="inline whitespace-normal">
-                {renderTyped}
-                <span ref={targetRef} className="text-transparent pointer-events-none select-none">{targetWithJ}</span>
-                {renderUntyped}
-                {" "}
-              </span>
+                <span key={blockIndex} data-block-index={blockIndex} className="inline whitespace-normal">
+                  {renderTyped}
+                  <span ref={targetRef} className="text-transparent pointer-events-none select-none bg-transparent">{targetWithJ}</span>
+                  {renderUntyped}
+                  {" "}
+                </span>
             );
           })}
         </div>

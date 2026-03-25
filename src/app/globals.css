@@ -1,7 +1,16 @@
 @import "tailwindcss";
 
-/* Self-hosted me_quran font — purpose-built for Uthmani Quranic text rendering.
-   Handles correct Allah ligature, Lam-Shaddah-Fatha stacking, and dagger alif placement. */
+/* Specialized King Fahd Complex (KFGQPC) font — the Medina Mushaf gold standard.
+   Correctly handles complex clusters like U+06DF (Small Round High Waw) and Superscript Alef stacking. */
+@font-face {
+  font-family: "KFGQPC_Uthman_Taha_Naskh";
+  src: url("/fonts/KFGQPC_Uthman_Taha_Naskh.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Self-hosted me_quran font — kept as high-quality fallback. */
 @font-face {
   font-family: "me_quran";
   src: url("/fonts/me_quran.ttf") format("truetype");
@@ -12,7 +21,7 @@
 
 @theme inline {
   --font-sans: var(--font-inter), sans-serif;
-  --font-quran: "me_quran", var(--font-quran), "Scheherazade New", "KFGQPC Uthman Taha Naskh", "Amiri Quran", "Traditional Arabic", serif;
+  --font-quran: "KFGQPC_Uthman_Taha_Naskh", "me_quran", var(--font-quran), "Scheherazade New", "Amiri Quran", "Traditional Arabic", serif;
 }
 
 @custom-variant dark (&:is(.dark *));
@@ -25,14 +34,44 @@
     direction: ltr;
   }
   .quran-text {
-    font-family: "me_quran", "Scheherazade New", "KFGQPC Uthman Taha Naskh", "Amiri Quran", "Traditional Arabic", serif;
+    /* KFGQPC_Uthman_Taha_Naskh is first — it is the industry standard for
+       100% accurate Quranic typography, specifically Medina Mushaf clusters:
+       - Allah ligature (ٱللّه)
+       - Ya-Nida (يَـٰٓأَيُّهَا)
+       - Small Round High Waw (U+06DF) in أُو۟لَٰٓئِ
+       - Complex Superscript Alef and Maddah stacking
+       me_quran and others serve as high-quality fallbacks. */
+    font-family: "KFGQPC_Uthman_Taha_Naskh", "me_quran", "Scheherazade New", "Amiri Quran", "Traditional Arabic", serif;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     
-    /* Explicitly enable the core Arabic shaping and ligature features.
-       'mark' and 'mkmk' are critical for diacritic stacking/anchoring.
-       'ccmp', 'rlig', 'calt' handle glyph substitutions and complex ligatures. */
-    font-feature-settings: "mark" 1, "mkmk" 1, "ccmp" 1, "rlig" 1, "calt" 1;
+    /* Do NOT set font-feature-settings — it overrides the font's internal
+       OpenType mark/mkmk tables which anchor diacritics to base glyphs. */
     font-variant-ligatures: common-ligatures;
   }
+
+  /* Elegant mushaf guide lines (notebook style). 
+     Row height = font-size (2.2rem) * line-height (2.8) = 6.16rem.
+     The background-position-y offset ensures the rule sits precisely under the baseline. */
+  .mushaf-rules {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent calc(6.16rem - 1px),
+      var(--mushaf-rule) calc(6.16rem - 1px),
+      var(--mushaf-rule) 6.16rem
+    );
+    background-size: 100% 6.16rem;
+    /* Adjust this offset if the rule strikes through the letters in your browser */
+    background-position-y: 5.1rem;
+    background-repeat: repeat-y;
+  }
+}
+
+:root {
+  --mushaf-rule: rgba(214, 193, 158, 0.4); /* Day mode: Muted beige */
+}
+
+.dark {
+  --mushaf-rule: rgba(56, 56, 56, 0.6);   /* Night mode: Subtle dark gray */
 }
