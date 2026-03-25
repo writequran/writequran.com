@@ -182,32 +182,36 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
 
   let isInActiveAyah = false;
 
-  const renderTextWithMarkers = (text: string, isTyped: boolean) => {
+  const renderTextWithMarkers = (text: string, isTyped: boolean, isHint: boolean = false) => {
     if (!text) return null;
     const parts = text.split(/(\u06DD[\u0660-\u0669]+)/g);
 
     return parts.map((part, i) => {
       const isMarker = part.startsWith('\u06DD');
       
-      // Determine if this specific part should be visible based on typing state and visibility mode
-      let show = isTyped || visibilityMode === "all" || (visibilityMode === "ayah" && isInActiveAyah);
+      // Determine visibility for foreground text
+      // Hint layer is always 'visible' within its layer, but its layer's opacity is controlled by the parent
+      let show = isHint || isTyped || visibilityMode === "all" || (visibilityMode === "ayah" && isInActiveAyah);
 
       if (isMarker) {
-        if (!isTyped) {
+        if (!isTyped && !isHint) {
           isInActiveAyah = false;
         }
+        
+        // Suppress markers in the hint layer to reduce clutter
+        if (isHint) return null;
+
         const digits = part.slice(1);
-        const markerMaskBackground = show ? "bg-[#FDFBF7] dark:bg-[#121212]" : "";
+        const markerMaskBackground = (show && !isHint) ? "bg-[#FDFBF7] dark:bg-[#121212]" : "";
+        const markerColor = "text-[#C1A063]";
         
         return (
-          <span key={i} className={`relative inline-flex items-center justify-center mx-1 text-[#C1A063] transition-all duration-300 select-none ${markerMaskBackground}`}>
+          <span key={i} className={`relative inline-flex items-center justify-center mx-1 ${markerColor} transition-all duration-300 select-none ${markerMaskBackground}`}>
             {/* Base Circle establishing the exact normal glyph size without expansion */}
             <span className="leading-none quran-text">{'\u06DD'}</span>
 
-            {/* Isolated absolute layer bounding perfectly inside the circle to guarantee absolute centering. 
-                Synchronized to quran-text to normalize physical descender baseline metrics against the circle.
-                Translated slightly upward to compensate for the Amiri optical center shift. */}
-            <span className="absolute inset-0 flex items-center justify-center text-[0.45em] quran-text leading-none z-10 translate-y-[0em]">
+            {/* Isolated absolute layer bounding perfectly inside the circle to guarantee absolute centering. */}
+            <span className={`absolute inset-0 flex items-center justify-center text-[0.45em] quran-text leading-none z-10 translate-y-[0em]`}>
               {digits}
             </span>
           </span>
@@ -217,7 +221,11 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
       let colorClass = "";
       let maskClass = "";
       
-      if (show) {
+      if (isHint) {
+        // Significantly soften the hint layer to avoid distraction
+        colorClass = "text-neutral-200/30 dark:text-neutral-800/20";
+        maskClass = "bg-transparent";
+      } else if (show) {
         colorClass = "text-[#2A2826] dark:text-neutral-100";
         // Apply solid background mask only to revealed text to allow guide lines to show in empty space
         maskClass = "bg-[#FDFBF7] dark:bg-[#121212]";
@@ -254,72 +262,87 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
       >
         <div className="absolute inset-2 border-2 border-[#D6C19E] dark:border-neutral-700 opacity-50 pointer-events-none" />
 
-        <div className="w-full text-[2.2rem] leading-[2.8] text-center mushaf-rules">
+        <div className="w-full text-[2.2rem] leading-[2.8] text-center mushaf-rules relative">
           {pageData.preBismillah && (
             <div className="w-full text-[#2A2826] dark:text-neutral-100 flex justify-center mb-4 select-none">
               <span>{pageData.preBismillah}</span>
             </div>
           )}
-          {pageData.blocks.map((block, blockIndex) => {
-            const blockStart = block.globalCheckOffset;
-            const blockLength = block.checkString.length;
-            const blockEnd = blockStart + blockLength;
 
-            const isFinished = currentIndex >= blockEnd;
-            const isFuture = currentIndex < blockStart;
-            const isActive = !isFinished && !isFuture;
+          {/* BACKGROUND HINT LAYER (GHOST TEXT) */}
+          <div className="absolute inset-0 px-8 py-16 pointer-events-none select-none transition-opacity duration-300">
+            {pageData.blocks.map((block, blockIndex) => {
+              const blockStart = block.globalCheckOffset;
+              const blockLength = block.checkString.length;
+              const blockEnd = blockStart + blockLength;
+              const isActive = currentIndex >= blockStart && currentIndex < blockEnd;
 
-            if (isFinished) {
+              const showHint = visibilityMode === "all" || (visibilityMode === "ayah" && isActive);
+              const hintOpacity = showHint ? "opacity-100" : "opacity-0";
+
               return (
-                <span key={blockIndex} data-block-index={blockIndex}>
-                  {renderTextWithMarkers(block.displayString, true)}
+                <span key={`hint-${blockIndex}`} className={`transition-opacity duration-300 ${hintOpacity}`}>
+                  {renderTextWithMarkers(block.displayString, false, true)}
+                  {" "}
                 </span>
               );
-            }
+            })}
+          </div>
 
-            if (isFuture) {
+          {/* FOREGROUND TYPING LAYER */}
+          <div className="relative z-10">
+            {pageData.blocks.map((block, blockIndex) => {
+              const blockStart = block.globalCheckOffset;
+              const blockLength = block.checkString.length;
+              const blockEnd = blockStart + blockLength;
+
+              const isFinished = currentIndex >= blockEnd;
+              const isFuture = currentIndex < blockStart;
+
+              if (isFinished) {
+                return (
+                  <span key={blockIndex} data-block-index={blockIndex}>
+                    {renderTextWithMarkers(block.displayString, true)}
+                    {" "}
+                  </span>
+                );
+              }
+
+              if (isFuture) {
+                return (
+                  <span key={blockIndex} data-block-index={blockIndex}>
+                    {renderTextWithMarkers(block.displayString, false)}
+                    {" "}
+                  </span>
+                );
+              }
+
+              const localIndex = currentIndex - blockStart;
+              const currentDisplayIndex = block.mapping[localIndex] || 0;
+
+              const typedSpan = block.displayString.slice(0, currentDisplayIndex);
+              const targetSpan = block.displayString.slice(currentDisplayIndex, currentDisplayIndex + 1);
+              const untypedSpan = block.displayString.slice(currentDisplayIndex + 1);
+
+              const ZWJ = '\u200D';
+              const typedWithJ = typedSpan ? typedSpan + ZWJ : "";
+              const targetWithJ = ZWJ + targetSpan + ZWJ;
+              const untypedWithJ = untypedSpan ? ZWJ + untypedSpan : "";
+
+              const renderTyped = renderTextWithMarkers(typedWithJ, true);
+              isInActiveAyah = true;
+              const renderUntyped = renderTextWithMarkers(untypedWithJ, false);
+
               return (
-                <span key={blockIndex} data-block-index={blockIndex}>
-                  {renderTextWithMarkers(block.displayString, false)}
-                </span>
-              );
-            }
-
-            const localIndex = currentIndex - blockStart;
-            const currentDisplayIndex = localIndex < block.mapping.length ? block.mapping[localIndex] : block.displayString.length;
-            const nextDisplayIndex = localIndex + 1 < block.mapping.length ? block.mapping[localIndex + 1] : block.displayString.length;
-
-            const typedSpan = block.displayString.slice(0, currentDisplayIndex);
-            let targetSpan = block.displayString.slice(currentDisplayIndex, nextDisplayIndex);
-            let untypedSpan = block.displayString.slice(nextDisplayIndex);
-
-            const markerMatch = targetSpan.match(/(\u06DD[\u0660-\u0669]+)/);
-            if (markerMatch) {
-              const idx = markerMatch.index!;
-              untypedSpan = targetSpan.slice(idx) + untypedSpan;
-              targetSpan = targetSpan.slice(0, idx);
-            }
-
-            const ZWJ = '\u200D';
-
-            // Append ZWJ to maintain cursive connection if the span ends or starts mid-word
-            const typedWithJ = typedSpan ? typedSpan + ZWJ : "";
-            const targetWithJ = ZWJ + targetSpan + ZWJ;
-            const untypedWithJ = ZWJ + untypedSpan;
-
-            const renderTyped = renderTextWithMarkers(typedWithJ, true);
-            isInActiveAyah = true;
-            const renderUntyped = renderTextWithMarkers(untypedWithJ, false);
-
-            return (
                 <span key={blockIndex} data-block-index={blockIndex} className="inline whitespace-normal">
                   {renderTyped}
                   <span ref={targetRef} className="text-transparent pointer-events-none select-none bg-transparent">{targetWithJ}</span>
                   {renderUntyped}
                   {" "}
                 </span>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
         {currentIndex < globalCheckString.length && (
