@@ -263,26 +263,26 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
               </span>
             );
           })}
+
+          {currentIndex < globalCheckString.length && (
+            <div
+              className="absolute pointer-events-none flex items-center justify-center transition-all duration-75 text-[2.5rem] leading-[2.6] z-10"
+              style={{
+                top: cursorPos.top,
+                left: cursorPos.left,
+                width: cursorPos.width,
+                height: cursorPos.height,
+              }}
+            >
+              {wrongChar ? (
+                <span className="text-red-500">{wrongChar}</span>
+              ) : (
+                <span className="absolute bottom-2 left-0 right-0 h-[3px] bg-[#D6C19E] animate-pulse rounded-full" />
+              )}
+            </div>
+          )}
         </div>
       </div>
-
-        {currentIndex < globalCheckString.length && (
-          <div
-            className="absolute pointer-events-none flex items-center justify-center transition-all duration-75 text-[2.5rem] leading-[2.6]"
-            style={{
-              top: cursorPos.top,
-              left: cursorPos.left,
-              width: cursorPos.width,
-              height: cursorPos.height,
-            }}
-          >
-            {wrongChar ? (
-              <span className="text-red-500 z-10">{wrongChar}</span>
-            ) : (
-              <span className="absolute bottom-2 left-0 right-0 h-[3px] bg-[#D6C19E] animate-pulse rounded-full z-10" />
-            )}
-          </div>
-        )}
 
       <div
         className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[800px] h-48 bg-gradient-to-t from-[#FDFBF7] dark:from-[#121212] via-[#FDFBF7]/80 dark:via-[#121212]/80 to-transparent pointer-events-none z-30 transition-opacity duration-700 ease-in-out ${isAtBottom ? 'opacity-0' : 'opacity-100'}`}
