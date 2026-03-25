@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Amiri_Quran } from "next/font/google";
+import { Inter, Scheherazade_New } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -7,9 +7,9 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const amiri = Amiri_Quran({
-  variable: "--font-amiri",
-  weight: ["400"],
+const scheherazade = Scheherazade_New({
+  variable: "--font-quran",
+  weight: ["400", "700"],
   subsets: ["arabic"],
 });
 
@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" translate="no" className={`${inter.variable} ${amiri.variable} h-full antialiased`}>
+    <html lang="ar" translate="no" className={`${inter.variable} ${scheherazade.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-50 font-sans transition-colors duration-300">
         {children}
       </body>

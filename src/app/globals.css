@@ -2,7 +2,7 @@
 
 @theme inline {
   --font-sans: var(--font-inter), sans-serif;
-  --font-arabic: var(--font-amiri), "Amiri", "Amiri Quran", "Traditional Arabic", "KFGQPC Uthman Taha Naskh", serif;
+  --font-quran: var(--font-quran), "Scheherazade New", "KFGQPC Uthman Taha Naskh", "me_quran", "Amiri Quran", "Traditional Arabic", serif;
 }
 
 @custom-variant dark (&:is(.dark *));
@@ -15,6 +15,12 @@
     direction: ltr;
   }
   .quran-text {
-    font-family: var(--font-amiri), "Amiri", "Amiri Quran", "Traditional Arabic", "KFGQPC Uthman Taha Naskh", serif;
+    font-family: var(--font-quran), "Scheherazade New", "KFGQPC Uthman Taha Naskh", "Amiri Quran", "Traditional Arabic", serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    /* Do NOT set font-feature-settings here — it overrides the font's internal
+       OpenType mark/mkmk tables which control diacritic-to-base anchoring in
+       Scheherazade New. Let the font engine use its defaults. */
+    font-variant-ligatures: common-ligatures;
   }
 }

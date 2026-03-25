@@ -179,10 +179,11 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
       <div
         className="relative w-full max-w-[800px] bg-[#FDFBF7] dark:bg-[#121212] shadow-2xl rounded-sm border-[16px] border-[#D6C19E] dark:border-neutral-800 px-8 py-16 rtl quran-text tracking-normal transition-colors duration-500"
         dir="rtl"
+        style={{ WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale" }}
       >
         <div className="absolute inset-2 border-2 border-[#D6C19E] dark:border-neutral-700 opacity-50 pointer-events-none" />
 
-        <div className="w-full text-[2.5rem] leading-[2.6] text-center">
+        <div className="w-full text-[2.2rem] leading-[3.6] text-center">
           {pageData.preBismillah && (
             <div className="w-full text-[#2A2826] dark:text-neutral-100 flex justify-center mb-4 select-none">
               <span>{pageData.preBismillah}</span>
