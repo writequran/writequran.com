@@ -293,7 +293,7 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
       />
 
       {/* ARABIC ON-SCREEN KEYBOARD */}
-      <div
+      <div 
         className={`fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-[700px] bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-800 p-4 pb-6 transition-all duration-300 transform z-40 ${showKeyboard ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0 pointer-events-none'}`}
         dir="rtl"
       >
