@@ -69,6 +69,7 @@ export interface MushafBlock {
 
 export interface SurahTypingData {
   surahNumber: number;
+  preBismillah?: string;
   blocks: MushafBlock[];
   globalCheckString: string;
 }
@@ -91,11 +92,25 @@ export const getSurah = (surahNumber: number): SurahTypingData => {
   const blocksData: MushafBlock[] = [];
   let globalCheckString = "";
   let currentOffset = 0;
+  let preBismillah: string | undefined = undefined;
 
   for (const ayah of surah.ayahs) {
-    // AlquranCloud embeds \n to demarcate Bismillahs functionally in Ayah 1
-    // Replacing it with native organic spacing prevents layout engine snapping loops
-    let rawText = ayah.text.replace(/\n/g, ' ');
+    let rawText = ayah.text;
+    
+    // Explicit Uthmani Basmala sequence prefix explicitly injected by API cloud
+    const bismillah = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ";
+    
+    // Exclude Basmala natively for non-Fatihah non-Tawbah Surahs
+    if (surah.number !== 1 && surah.number !== 9 && ayah.numberInSurah === 1) {
+      if (rawText.startsWith(bismillah)) {
+        preBismillah = bismillah;
+        // By slicing rawText BEFORE compile, we mathematically guarantee that the resulting
+        // displayString, checkString, and mapping indices omit the display-only Basmala outright.
+        rawText = rawText.slice(bismillah.length).trim();
+      }
+    } else {
+      rawText = rawText.replace(/\n/g, ' ');
+    }
     
     // Explicitly pair standard verses manually with official Ayah markers 
     rawText += ` \u06DD${toArabicDigits(ayah.numberInSurah)}`;
@@ -118,6 +133,7 @@ export const getSurah = (surahNumber: number): SurahTypingData => {
 
   return {
     surahNumber,
+    preBismillah,
     blocks: blocksData,
     globalCheckString,
   };

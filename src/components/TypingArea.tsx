@@ -139,7 +139,13 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
         if (!isTyped) {
           isInActiveAyah = false;
         }
-        return <span key={i} className="text-[#C1A063] mx-1 transition-colors duration-300">{part}</span>;
+        const digits = part.slice(1);
+        return (
+          <span key={i} className="inline-grid place-items-center mx-1 text-[#C1A063] transition-colors duration-300 select-none">
+            <span className="col-start-1 row-start-1 leading-none">{'\u06DD'}</span>
+            <span className="col-start-1 row-start-1 text-[0.45em] pt-[0.15em]">{digits}</span>
+          </span>
+        );
       }
       
       let show = isTyped || visibilityMode === "all" || (visibilityMode === "ayah" && isInActiveAyah);
@@ -170,6 +176,11 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
         <div className="absolute inset-2 border-2 border-[#D6C19E] dark:border-neutral-700 opacity-50 pointer-events-none" />
 
         <div className="w-full text-[2.5rem] leading-[2.6] text-center">
+          {pageData.preBismillah && (
+            <div className="w-full text-[#2A2826] dark:text-neutral-100 flex justify-center mb-4 select-none">
+              <span>{pageData.preBismillah}</span>
+            </div>
+          )}
           {pageData.blocks.map((block, blockIndex) => {
              const blockStart = block.globalCheckOffset;
              const blockLength = block.checkString.length;
