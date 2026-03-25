@@ -20,27 +20,35 @@ export interface NormalizedData {
 }
 
 export const prepareTypingData = (rawText: string): NormalizedData => {
+  let cleanDisplay = "";
   let checkString = "";
   const mapping: number[] = [];
   
   for (let i = 0; i < rawText.length; i++) {
     const char = rawText[i];
+    
+    // Ignore invisible control characters, BOM, and zero-width markers that interfere with typing
+    if (/[\uFEFF\u200B-\u200F]/.test(char)) {
+      continue;
+    }
+
+    cleanDisplay += char;
     const isDiacriticOrMarker = /[\u064B-\u065F\u0670\u06D6-\u06ED\u06DD\u0660-\u0669]/.test(char);
     
     if (!isDiacriticOrMarker) {
       if (char === " " || char === "\u200C") {
         checkString += char;
-        mapping.push(i);
+        mapping.push(cleanDisplay.length - 1);
       } else {
         const normalizedChar = normalizeArabicBase(char);
         checkString += normalizedChar;
-        mapping.push(i);
+        mapping.push(cleanDisplay.length - 1);
       }
     }
   }
   
   return {
-    displayString: rawText,
+    displayString: cleanDisplay,
     checkString,
     mapping,
   };

@@ -72,7 +72,7 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
   }, [currentIndex, globalCheckString.length]);
 
   useEffect(() => {
-    const timeoutId = setTimeout(updateCursorPos, 150);
+    const timeoutId = setTimeout(updateCursorPos, 50);
     window.addEventListener("resize", updateCursorPos);
     return () => {
       clearTimeout(timeoutId);
@@ -112,6 +112,12 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // SURGICAL GUARD: Only ignore keyboard events if the focus is inside a real text input field.
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
+        return;
+      }
+
       if (e.key === " ") e.preventDefault();
 
       if (e.ctrlKey || e.metaKey || e.altKey || e.key.length > 1) {
