@@ -18,6 +18,7 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
   const [visibilityMode, setVisibilityMode] = useState<VisibilityMode>("hidden");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
+  const [showKeyboard, setShowKeyboard] = useState(false);
 
   const [cursorPos, setCursorPos] = useState({ top: 0, left: 0, width: 0, height: 0 });
   const targetRef = useRef<HTMLSpanElement>(null);
@@ -85,40 +86,47 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
     }
   }, [currentIndex]);
 
+  const handleInput = useCallback((char: string) => {
+    if (char === "Backspace") {
+      if (wrongChar) {
+        setWrongChar(null);
+      } else {
+        setCurrentIndex((prev) => Math.max(0, prev - 1));
+        setWrongChar(null);
+      }
+      return;
+    }
+
+    if (wrongChar) return;
+
+    const expectedChar = globalCheckString[currentIndex];
+    if (!expectedChar) return;
+
+    if (char === expectedChar) {
+      setCurrentIndex((prev) => prev + 1);
+      setWrongChar(null);
+    } else {
+      setWrongChar(char);
+    }
+  }, [currentIndex, globalCheckString, wrongChar]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === " ") e.preventDefault();
 
       if (e.ctrlKey || e.metaKey || e.altKey || e.key.length > 1) {
         if (e.key === "Backspace") {
-          if (wrongChar) {
-            setWrongChar(null);
-          } else {
-            setCurrentIndex((prev) => Math.max(0, prev - 1));
-            setWrongChar(null);
-          }
+          handleInput("Backspace");
         }
         return;
       }
 
-      if (wrongChar) return;
-
-      const expectedChar = globalCheckString[currentIndex];
-      if (!expectedChar) return;
-
-      const typedChar = e.key;
-
-      if (typedChar === expectedChar) {
-        setCurrentIndex((prev) => prev + 1);
-        setWrongChar(null);
-      } else {
-        setWrongChar(typedChar);
-      }
+      handleInput(e.key);
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentIndex, globalCheckString, wrongChar]);
+  }, [handleInput]);
 
   const handleRestart = () => {
     setCurrentIndex(0);
@@ -280,9 +288,50 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
       </div>
 
       <div
-        className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[800px] h-48 bg-gradient-to-t from-[#FDFBF7] dark:from-[#121212] via-[#FDFBF7]/80 dark:via-[#121212]/80 to-transparent pointer-events-none z-30 transition-opacity duration-700 ease-in-out ${isAtBottom ? 'opacity-0' : 'opacity-100'}`}
+        className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[800px] h-48 bg-gradient-to-t from-[#FDFBF7] dark:from-[#121212] via-[#FDFBF7]/80 dark:via-[#121212]/80 to-transparent pointer-events-none z-30 transition-opacity duration-700 ease-in-out ${isAtBottom || showKeyboard ? 'opacity-0' : 'opacity-100'}`}
         aria-hidden="true"
       />
+
+      {/* ARABIC ON-SCREEN KEYBOARD */}
+      <div 
+        className={`fixed bottom-[84px] left-1/2 -translate-x-1/2 w-full max-w-[700px] bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-800 p-4 pb-6 transition-all duration-300 transform z-40 ${showKeyboard ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0 pointer-events-none'}`}
+        dir="rtl"
+      >
+        <div className="flex flex-col gap-2">
+          {[
+            ["ض", "ص", "ث", "ق", "ف", "غ", "ع", "ه", "خ", "ح", "ج", "د"],
+            ["ش", "س", "ي", "ب", "ل", "ا", "ت", "ن", "م", "ك", "ط", "ذ"],
+            ["ئ", "ء", "ؤ", "ر", "ى", "ة", "و", "ز", "ظ", "أ", "إ", "آ"]
+          ].map((row, rowIndex) => (
+            <div key={rowIndex} className="flex justify-center gap-1 sm:gap-1.5">
+              {row.map((letter) => (
+                <button
+                  key={letter}
+                  onClick={() => handleInput(letter)}
+                  className="flex-1 min-w-[32px] sm:min-w-[42px] h-10 sm:h-12 bg-neutral-100/50 dark:bg-neutral-800/50 hover:bg-[#D6C19E]/30 dark:hover:bg-[#D6C19E]/20 text-[#2A2826] dark:text-neutral-100 text-lg sm:text-xl rounded-lg transition-all border border-neutral-200 dark:border-neutral-700 active:scale-95"
+                >
+                  {letter}
+                </button>
+              ))}
+            </div>
+          ))}
+          <div className="flex justify-center gap-1 sm:gap-1.5 mt-1">
+            <button
+              onClick={() => handleInput("Backspace")}
+              className="px-6 h-10 sm:h-12 bg-red-50/50 dark:bg-red-900/20 hover:bg-red-100/50 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 text-sm font-medium rounded-lg transition-all border border-red-100 dark:border-red-900/30 active:scale-95 flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+              <span>Backspace</span>
+            </button>
+            <button
+              onClick={() => handleInput(" ")}
+              className="flex-[3] h-10 sm:h-12 bg-neutral-100/50 dark:bg-neutral-800/50 hover:bg-[#D6C19E]/30 dark:hover:bg-[#D6C19E]/20 text-[#2A2826] dark:text-neutral-100 rounded-lg transition-all border border-neutral-200 dark:border-neutral-700 active:scale-95 text-sm font-medium"
+            >
+              SPACE
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/90 dark:bg-neutral-800/90 backdrop-blur-md rounded-full shadow-xl border border-neutral-200 dark:border-neutral-700 px-6 py-3 z-50 transition-colors duration-300">
         <button
@@ -313,6 +362,16 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
         </button>
 
         <div className="w-[1px] h-6 bg-neutral-300 dark:bg-neutral-600 mx-2" />
+
+        <button
+          onClick={() => setShowKeyboard(!showKeyboard)}
+          className={`flex items-center justify-center p-2 rounded-full transition-all focus:outline-none ${showKeyboard ? 'bg-[#D6C19E] text-white dark:text-neutral-900' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
+          title="On-Screen Keyboard"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
+        </button>
+
+        <div className="w-[1px] h-6 bg-neutral-300 dark:bg-neutral-600 mx-1" />
 
         <button
           onClick={handleRestart}
