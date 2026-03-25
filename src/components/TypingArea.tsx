@@ -138,11 +138,6 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
       const showHint = visibilityMode === "all" || (visibilityMode === "ayah" && isBlockActive);
 
       if (isMarker) {
-        // Only show markers if they have been reached/typed to keep the background clean
-        if (!isTyped) {
-          return null;
-        }
-
         const digits = part.slice(1);
         const markerMaskBackground = "bg-[#FDFBF7] dark:bg-[#121212]";
         const markerColor = "text-[#C1A063]";
