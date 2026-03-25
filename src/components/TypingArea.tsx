@@ -141,7 +141,7 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
 
     return parts.map((part, i) => {
       const isMarker = part.startsWith('\u06DD');
-      
+
       // Hint mode visibility check (for this specific block)
       const showHint = visibilityMode === "all" || (visibilityMode === "ayah" && isBlockActive);
 
@@ -149,7 +149,7 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
         const digits = part.slice(1);
         const markerMaskBackground = "bg-[#FDFBF7] dark:bg-[#121212]";
         const markerColor = "text-[#C1A063]";
-        
+
         return (
           <span key={i} className={`relative inline-flex items-center justify-center mx-1 ${markerColor} transition-all duration-300 select-none ${markerMaskBackground}`}>
             <span className="leading-none quran-text">{'\u06DD'}</span>
@@ -162,7 +162,7 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
 
       let colorClass = "";
       let maskClass = "";
-      
+
       if (isTyped) {
         // FOREGROUND: Strong Black + Page Mask (to hide guide lines beneath typed text)
         colorClass = "text-[#2A2826] dark:text-neutral-100 font-medium";
@@ -288,13 +288,13 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
       </div>
 
       <div
-        className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[800px] h-48 bg-gradient-to-t from-[#FDFBF7] dark:from-[#121212] via-[#FDFBF7]/80 dark:via-[#121212]/80 to-transparent pointer-events-none z-30 transition-opacity duration-700 ease-in-out ${isAtBottom || showKeyboard ? 'opacity-0' : 'opacity-100'}`}
+        className={`fixed bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#FDFBF7] dark:from-[#121212] via-[#FDFBF7]/80 dark:via-[#121212]/80 to-transparent pointer-events-none z-30 transition-opacity duration-700 ease-in-out ${isAtBottom || showKeyboard ? 'opacity-0' : 'opacity-100'}`}
         aria-hidden="true"
       />
 
       {/* ARABIC ON-SCREEN KEYBOARD */}
-      <div 
-        className={`fixed bottom-[84px] left-1/2 -translate-x-1/2 w-full max-w-[700px] bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-800 p-4 pb-6 transition-all duration-300 transform z-40 ${showKeyboard ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0 pointer-events-none'}`}
+      <div
+        className={`fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-[700px] bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-800 p-4 pb-6 transition-all duration-300 transform z-40 ${showKeyboard ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0 pointer-events-none'}`}
         dir="rtl"
       >
         <div className="flex flex-col gap-2">
@@ -320,7 +320,7 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
               onClick={() => handleInput("Backspace")}
               className="px-6 h-10 sm:h-12 bg-red-50/50 dark:bg-red-900/20 hover:bg-red-100/50 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 text-sm font-medium rounded-lg transition-all border border-red-100 dark:border-red-900/30 active:scale-95 flex items-center gap-2"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
               <span>Backspace</span>
             </button>
             <button
@@ -333,63 +333,60 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
         </div>
       </div>
 
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/90 dark:bg-neutral-800/90 backdrop-blur-md rounded-full shadow-xl border border-neutral-200 dark:border-neutral-700 px-6 py-3 z-50 transition-colors duration-300">
+      <div className="fixed right-6 top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 bg-white/90 dark:bg-neutral-800/90 backdrop-blur-md rounded-full shadow-xl border border-neutral-200 dark:border-neutral-700 p-2.5 z-50 transition-colors duration-300">
         <button
           onClick={() => setVisibilityMode('hidden')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${visibilityMode === 'hidden' ? 'bg-[#D6C19E] text-white dark:text-neutral-900' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
+          className={`flex items-center justify-center w-12 h-12 rounded-full transition-all ${visibilityMode === 'hidden' ? 'bg-[#D6C19E] text-white dark:text-neutral-900' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
           title="Hidden"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" y1="2" x2="22" y2="22" /></svg>
-          <span className="hidden sm:inline">Hidden</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" y1="2" x2="22" y2="22" /></svg>
         </button>
 
         <button
           onClick={() => setVisibilityMode('ayah')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${visibilityMode === 'ayah' ? 'bg-[#D6C19E] text-white dark:text-neutral-900' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
-          title="Show Current Ayah"
+          className={`flex items-center justify-center w-12 h-12 rounded-full transition-all ${visibilityMode === 'ayah' ? 'bg-[#D6C19E] text-white dark:text-neutral-900' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
+          title="Active Ayah"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
-          <span className="hidden sm:inline">Active Ayah</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
         </button>
 
         <button
           onClick={() => setVisibilityMode('all')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${visibilityMode === 'all' ? 'bg-[#D6C19E] text-white dark:text-neutral-900' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
+          className={`flex items-center justify-center w-12 h-12 rounded-full transition-all ${visibilityMode === 'all' ? 'bg-[#D6C19E] text-white dark:text-neutral-900' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
           title="Show All"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
-          <span className="hidden sm:inline">Show All</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
         </button>
 
-        <div className="w-[1px] h-6 bg-neutral-300 dark:bg-neutral-600 mx-2" />
+        <div className="w-8 h-[1px] bg-neutral-300 dark:bg-neutral-600 my-1" />
 
         <button
           onClick={() => setShowKeyboard(!showKeyboard)}
-          className={`flex items-center justify-center p-2 rounded-full transition-all focus:outline-none ${showKeyboard ? 'bg-[#D6C19E] text-white dark:text-neutral-900' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
+          className={`flex items-center justify-center w-12 h-12 rounded-full transition-all focus:outline-none ${showKeyboard ? 'bg-[#D6C19E] text-white dark:text-neutral-900' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
           title="On-Screen Keyboard"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
         </button>
 
-        <div className="w-[1px] h-6 bg-neutral-300 dark:bg-neutral-600 mx-1" />
+        <div className="w-8 h-[1px] bg-neutral-300 dark:bg-neutral-600 my-1" />
 
         <button
           onClick={handleRestart}
-          className="flex items-center justify-center p-2 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-all focus:outline-none"
+          className="flex items-center justify-center w-12 h-12 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-all focus:outline-none"
           title="Rewrite Surah"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
         </button>
 
         <button
           onClick={toggleTheme}
-          className="flex items-center justify-center p-2 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-all focus:outline-none"
+          className="flex items-center justify-center w-12 h-12 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-all focus:outline-none"
           title="Toggle Night/Day Mode"
         >
           {isDarkMode ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>
           )}
         </button>
       </div>
