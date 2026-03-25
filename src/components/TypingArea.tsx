@@ -17,6 +17,7 @@ export function TypingArea({ pageNumber }: TypingAreaProps) {
   const [wrongChar, setWrongChar] = useState<string | null>(null);
   const [visibilityMode, setVisibilityMode] = useState<VisibilityMode>("hidden");
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isAtBottom, setIsAtBottom] = useState(false);
   
   const [cursorPos, setCursorPos] = useState({ top: 0, left: 0, width: 0, height: 0 });
   const targetRef = useRef<HTMLSpanElement>(null);
@@ -43,6 +44,23 @@ export function TypingArea({ pageNumber }: TypingAreaProps) {
     // Update cursor pos because scrollbar changes might slightly shift layout bounds
     setTimeout(updateCursorPos, 50);
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Small 100px threshold to hide the fade just before hitting the exact absolute bottom
+      const scrolledToBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100;
+      setIsAtBottom(scrolledToBottom);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("resize", handleScroll);
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, []);
 
   const updateCursorPos = useCallback(() => {
     if (targetRef.current && currentIndex < globalCheckString.length) {
@@ -233,6 +251,13 @@ export function TypingArea({ pageNumber }: TypingAreaProps) {
           </div>
         )}
       </div>
+
+      {/* CONTINUATION FADE OVERLAY */}
+      {/* Precisely bounds to the max-w-[800px] Mushaf card securely fading out text passing underneath */}
+      <div 
+        className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[800px] h-48 bg-gradient-to-t from-[#FDFBF7] dark:from-[#121212] via-[#FDFBF7]/80 dark:via-[#121212]/80 to-transparent pointer-events-none z-30 transition-opacity duration-700 ease-in-out ${isAtBottom ? 'opacity-0' : 'opacity-100'}`}
+        aria-hidden="true"
+      />
 
       {/* FIXED BOTTOM CONTROL DOCK */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/90 dark:bg-neutral-800/90 backdrop-blur-md rounded-full shadow-xl border border-neutral-200 dark:border-neutral-700 px-6 py-3 z-50 transition-colors duration-300">
