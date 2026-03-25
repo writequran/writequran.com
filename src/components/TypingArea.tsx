@@ -1,16 +1,16 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getMushafPage } from "@/lib/quran-data";
+import { getSurah } from "@/lib/quran-data";
 
 interface TypingAreaProps {
-  pageNumber: number;
+  surahNumber: number;
 }
 
 type VisibilityMode = "hidden" | "ayah" | "all";
 
-export function TypingArea({ pageNumber }: TypingAreaProps) {
-  const pageData = getMushafPage(pageNumber);
+export function TypingArea({ surahNumber }: TypingAreaProps) {
+  const pageData = getSurah(surahNumber);
   const { globalCheckString } = pageData;
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -22,7 +22,6 @@ export function TypingArea({ pageNumber }: TypingAreaProps) {
   const [cursorPos, setCursorPos] = useState({ top: 0, left: 0, width: 0, height: 0 });
   const targetRef = useRef<HTMLSpanElement>(null);
 
-  // Initialize theme securely natively checking classlist or OS prefs
   useEffect(() => {
     if (document.documentElement.classList.contains('dark') || window.matchMedia('(prefers-color-scheme: dark)').matches) {
       setIsDarkMode(true);
@@ -41,13 +40,11 @@ export function TypingArea({ pageNumber }: TypingAreaProps) {
     } else {
       document.documentElement.classList.remove('dark');
     }
-    // Update cursor pos because scrollbar changes might slightly shift layout bounds
     setTimeout(updateCursorPos, 50);
   };
 
   useEffect(() => {
     const handleScroll = () => {
-      // Small 100px threshold to hide the fade just before hitting the exact absolute bottom
       const scrolledToBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100;
       setIsAtBottom(scrolledToBottom);
     };
@@ -84,8 +81,6 @@ export function TypingArea({ pageNumber }: TypingAreaProps) {
 
   useEffect(() => {
     if (targetRef.current) {
-      // Use smooth scroll to keep target centered. 
-      // Offset by bottom dock size happens organically due to center block logic.
       targetRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [currentIndex]);
@@ -132,7 +127,6 @@ export function TypingArea({ pageNumber }: TypingAreaProps) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // State tracker used sequentially inside map() to accurately highlight the active working ayah bounds
   let isInActiveAyah = false;
 
   const renderTextWithMarkers = (text: string, isTyped: boolean) => {
@@ -143,7 +137,7 @@ export function TypingArea({ pageNumber }: TypingAreaProps) {
       const isMarker = part.startsWith('\u06DD');
       if (isMarker) {
         if (!isTyped) {
-          isInActiveAyah = false; // The active targeted ayah cleanly finishes here
+          isInActiveAyah = false;
         }
         return <span key={i} className="text-[#C1A063] mx-1 transition-colors duration-300">{part}</span>;
       }
@@ -160,90 +154,77 @@ export function TypingArea({ pageNumber }: TypingAreaProps) {
 
   return (
     <div className="w-full flex flex-col items-center pb-36 px-4">
-      {/* FINAL COMPLETION INDICATOR (In-Page) */}
+      
       {currentIndex === globalCheckString.length && globalCheckString.length > 0 && (
         <div className="my-8 flex flex-col items-center animate-in fade-in duration-500">
-          <p className="text-3xl font-medium text-green-700 dark:text-green-500 font-arabic tracking-normal border-b-2 border-green-500/30 pb-4">
+          <p className="text-3xl font-medium text-green-700 dark:text-green-500 quran-text tracking-normal border-b-2 border-green-500/30 pb-4">
             صَدَقَ اللّٰهُ الْعَظِيمُ
           </p>
         </div>
       )}
 
-      {/* MUSHAF PAGE FRAME */}
       <div 
-        className="relative w-full max-w-[800px] bg-[#FDFBF7] dark:bg-[#121212] shadow-2xl rounded-sm border-[16px] border-[#D6C19E] dark:border-neutral-800 px-8 py-16 rtl font-arabic tracking-normal transition-colors duration-500"
+        className="relative w-full max-w-[800px] bg-[#FDFBF7] dark:bg-[#121212] shadow-2xl rounded-sm border-[16px] border-[#D6C19E] dark:border-neutral-800 px-8 py-16 rtl quran-text tracking-normal transition-colors duration-500"
         dir="rtl"
       >
         <div className="absolute inset-2 border-2 border-[#D6C19E] dark:border-neutral-700 opacity-50 pointer-events-none" />
 
-        <div className="flex flex-col w-full h-full justify-between items-stretch gap-y-6 text-center">
-          {pageData.lines.map((line, lineIndex) => {
-             const lineStart = line.globalCheckOffset;
-             const lineLength = line.checkString.length;
-             const lineEnd = lineStart + lineLength;
+        <div className="w-full text-[2.5rem] leading-[2.6] text-center">
+          {pageData.blocks.map((block, blockIndex) => {
+             const blockStart = block.globalCheckOffset;
+             const blockLength = block.checkString.length;
+             const blockEnd = blockStart + blockLength;
 
-             const isFinished = currentIndex >= lineEnd;
-             const isFuture = currentIndex < lineStart;
+             const isFinished = currentIndex >= blockEnd;
+             const isFuture = currentIndex < blockStart;
              const isActive = !isFinished && !isFuture;
-
-             const baseClasses = "w-full text-[2.5rem] leading-[2.6] text-center flex justify-center flex-wrap";
 
              if (isFinished) {
                return (
-                 <div key={lineIndex} className={baseClasses}>
-                   {renderTextWithMarkers(line.displayString, true)}
-                 </div>
+                 <span key={blockIndex}>
+                   {renderTextWithMarkers(block.displayString, true)}
+                 </span>
                );
              }
 
              if (isFuture) {
                return (
-                 <div key={lineIndex} className={baseClasses}>
-                   {renderTextWithMarkers(line.displayString, false)}
-                 </div>
+                 <span key={blockIndex}>
+                   {renderTextWithMarkers(block.displayString, false)}
+                 </span>
                );
              }
 
-             // Active Line Tracking
-             const localIndex = currentIndex - lineStart;
-             const currentDisplayIndex = localIndex < line.mapping.length ? line.mapping[localIndex] : line.displayString.length;
-             const nextDisplayIndex = localIndex + 1 < line.mapping.length ? line.mapping[localIndex + 1] : line.displayString.length;
+             const localIndex = currentIndex - blockStart;
+             const currentDisplayIndex = localIndex < block.mapping.length ? block.mapping[localIndex] : block.displayString.length;
+             const nextDisplayIndex = localIndex + 1 < block.mapping.length ? block.mapping[localIndex + 1] : block.displayString.length;
 
-             const typedSpan = line.displayString.slice(0, currentDisplayIndex);
-             let targetSpan = line.displayString.slice(currentDisplayIndex, nextDisplayIndex);
-             let untypedSpan = line.displayString.slice(nextDisplayIndex);
+             const typedSpan = block.displayString.slice(0, currentDisplayIndex);
+             let targetSpan = block.displayString.slice(currentDisplayIndex, nextDisplayIndex);
+             let untypedSpan = block.displayString.slice(nextDisplayIndex);
 
-             // Forcefully strip End of Ayah layout markers (and their Arabic digits) completely 
-             // out of the active target span so the CSS bounding box bounds ONLY the raw letter.
              const markerMatch = targetSpan.match(/(\u06DD[\u0660-\u0669]+)/);
              if (markerMatch) {
                const idx = markerMatch.index!;
-               // Dump the extracted marker down into the untyped span so it remains 
-               // perpetually visible natively and isn't caught in the opacity-0 target layer.
                untypedSpan = targetSpan.slice(idx) + untypedSpan;
                targetSpan = targetSpan.slice(0, idx);
              }
 
-             // Evaluate typed portion
              const renderTyped = renderTextWithMarkers(typedSpan, true);
-             
-             // Core anchoring moment: Once we reach targetSpan, we are inside the active Ayah natively
              isInActiveAyah = true;
-             
-             // Evaluate untyped portion (which inherits the newly validated active Ayah state)
              const renderUntyped = renderTextWithMarkers(untypedSpan, false);
 
              return (
-               <div key={lineIndex} className={baseClasses}>
+               <span key={blockIndex}>
                  {renderTyped}
                  <span ref={targetRef} className="opacity-0">{targetSpan}</span>
                  {renderUntyped}
-               </div>
+                 {" "}
+               </span>
              );
           })}
         </div>
 
-        {/* BOUNDING BOX ABSOLUTE OVERLAY */}
         {currentIndex < globalCheckString.length && (
           <div 
             className="absolute pointer-events-none flex items-center justify-center transition-all duration-75 text-[2.5rem] leading-[2.6]"
@@ -263,17 +244,13 @@ export function TypingArea({ pageNumber }: TypingAreaProps) {
         )}
       </div>
 
-      {/* CONTINUATION FADE OVERLAY */}
-      {/* Precisely bounds to the max-w-[800px] Mushaf card securely fading out text passing underneath */}
       <div 
         className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[800px] h-48 bg-gradient-to-t from-[#FDFBF7] dark:from-[#121212] via-[#FDFBF7]/80 dark:via-[#121212]/80 to-transparent pointer-events-none z-30 transition-opacity duration-700 ease-in-out ${isAtBottom ? 'opacity-0' : 'opacity-100'}`}
         aria-hidden="true"
       />
 
-      {/* FIXED BOTTOM CONTROL DOCK */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/90 dark:bg-neutral-800/90 backdrop-blur-md rounded-full shadow-xl border border-neutral-200 dark:border-neutral-700 px-6 py-3 z-50 transition-colors duration-300">
         
-        {/* State 1: Hidden */}
         <button 
           onClick={() => setVisibilityMode('hidden')} 
           className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${visibilityMode === 'hidden' ? 'bg-[#D6C19E] text-white dark:text-neutral-900' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
@@ -283,7 +260,6 @@ export function TypingArea({ pageNumber }: TypingAreaProps) {
           <span className="hidden sm:inline">Hidden</span>
         </button>
 
-        {/* State 2: Active Ayah */}
         <button 
           onClick={() => setVisibilityMode('ayah')} 
           className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${visibilityMode === 'ayah' ? 'bg-[#D6C19E] text-white dark:text-neutral-900' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
@@ -293,7 +269,6 @@ export function TypingArea({ pageNumber }: TypingAreaProps) {
           <span className="hidden sm:inline">Active Ayah</span>
         </button>
 
-        {/* State 3: Show All */}
         <button 
           onClick={() => setVisibilityMode('all')} 
           className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${visibilityMode === 'all' ? 'bg-[#D6C19E] text-white dark:text-neutral-900' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
@@ -303,19 +278,16 @@ export function TypingArea({ pageNumber }: TypingAreaProps) {
           <span className="hidden sm:inline">Show All</span>
         </button>
         
-        {/* Divider */}
         <div className="w-[1px] h-6 bg-neutral-300 dark:bg-neutral-600 mx-2" />
 
-        {/* Action: Rewrite Page */}
         <button 
           onClick={handleRestart}
           className="flex items-center justify-center p-2 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-all focus:outline-none"
-          title="Rewrite Page"
+          title="Rewrite Surah"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
         </button>
 
-        {/* Action: Toggle Theme */}
         <button 
           onClick={toggleTheme}
           className="flex items-center justify-center p-2 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-all focus:outline-none"
@@ -327,7 +299,6 @@ export function TypingArea({ pageNumber }: TypingAreaProps) {
              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
           )}
         </button>
-
       </div>
     </div>
   );

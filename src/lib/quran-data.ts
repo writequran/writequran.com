@@ -1,24 +1,11 @@
-/**
- * Normalizes Arabic text by reducing alefs, removing tatweels, 
- * and transforming similar character variants to a singular baseline for easy typing.
- */
 export const normalizeArabicBase = (text: string) => {
   return text
-    .replace(/[\u0622\u0623\u0625\u0671]/g, '\u0627') // Normalize all Alefs
-    .replace(/\u0640/g, '') // Remove Tatweel/Kashida
-    .replace(/\u06CC/g, '\u064A'); // Map Farsi Yaa to Arabic Yaa safely
+    .replace(/[\u0622\u0623\u0625\u0671]/g, '\u0627')
+    .replace(/\u0640/g, '')
+    .replace(/\u06CC/g, '\u064A');
 };
 
-/**
- * Strips all harakat (diacritics), quranic stops/marks, and ayah markers 
- * for checking bare user keystrokes.
- */
 export const stripDiacritics = (text: string) => {
-  // \u064B-\u065F basic Tashkeel
-  // \u0670 Superscript Alef
-  // \u06D6-\u06ED Quranic stops/symbols
-  // \u06DD End of Ayah marker
-  // \u0660-\u0669 Arabic-Indic Digits
   return text.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u06DD\u0660-\u0669]/g, '');
 };
 
@@ -38,13 +25,17 @@ export const prepareTypingData = (rawText: string): NormalizedData => {
   
   for (let i = 0; i < rawText.length; i++) {
     const char = rawText[i];
-    // We strictly ignore all decorative markers, diacritics, and digits for typing
     const isDiacriticOrMarker = /[\u064B-\u065F\u0670\u06D6-\u06ED\u06DD\u0660-\u0669]/.test(char);
     
     if (!isDiacriticOrMarker) {
-      const normalizedChar = normalizeArabicBase(char);
-      checkString += normalizedChar;
-      mapping.push(i);
+      if (char === " " || char === "\u200C") {
+        checkString += char;
+        mapping.push(i);
+      } else {
+        const normalizedChar = normalizeArabicBase(char);
+        checkString += normalizedChar;
+        mapping.push(i);
+      }
     }
   }
   
@@ -55,48 +46,70 @@ export const prepareTypingData = (rawText: string): NormalizedData => {
   };
 };
 
-export interface MushafLine {
+import quranDataRaw from '../data/quran-uthmani.json';
+
+// Bypass TS index checks for the rapid integration of the cloud dataset
+const quranJson = quranDataRaw as any;
+
+export interface QuranSurahMeta {
+  number: number;
+  name: string;
+  englishName: string;
+}
+
+export interface MushafBlock {
   displayString: string;
   checkString: string;
   mapping: number[];
   globalCheckOffset: number;
+  surahNumber: number;
+  ayahNumber: number;
+  page: number;
 }
 
-export interface MushafPageData {
-  pageNumber: number;
-  lines: MushafLine[];
+export interface SurahTypingData {
+  surahNumber: number;
+  blocks: MushafBlock[];
   globalCheckString: string;
 }
 
-// Simulated Fatiha Madinah Mushaf Page 1
-// \u06DD is the official Unicode End Of Ayah marker. 
-// \u0661-\u0667 are Arabic-Indic numerals 1-7.
-const page1Lines = [
-  "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ \u06DD\u0661",
-  "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ \u06DD\u0662",
-  "الرَّحْمَٰنِ الرَّحِيمِ \u06DD\u0663",
-  "مَالِكِ يَوْمِ الدِّينِ \u06DD\u0664",
-  "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ \u06DD\u0665",
-  "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ \u06DD\u0666",
-  "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ",
-  "غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ \u06DD\u0667"
-];
+const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+const toArabicDigits = (num: number): string => {
+  return num.toString().split('').map(d => arabicDigits[parseInt(d)]).join('');
+};
 
-export const getMushafPage = (pageNumber: number): MushafPageData => {
-  const linesData: MushafLine[] = [];
+export const getAllSurahsMeta = (): QuranSurahMeta[] => {
+  return quranJson.data.surahs.map((s: any) => ({
+    number: s.number,
+    name: s.name,
+    englishName: s.englishName,
+  }));
+};
+
+export const getSurah = (surahNumber: number): SurahTypingData => {
+  const surah = quranJson.data.surahs.find((s: any) => s.number === surahNumber);
+  const blocksData: MushafBlock[] = [];
   let globalCheckString = "";
   let currentOffset = 0;
 
-  const rawLines = pageNumber === 1 ? page1Lines : [];
-
-  for (const rawLine of rawLines) {
-    const { displayString, checkString, mapping } = prepareTypingData(rawLine);
+  for (const ayah of surah.ayahs) {
+    // AlquranCloud embeds \n to demarcate Bismillahs functionally in Ayah 1
+    // Replacing it with native organic spacing prevents layout engine snapping loops
+    let rawText = ayah.text.replace(/\n/g, ' ');
     
-    linesData.push({
+    // Explicitly pair standard verses manually with official Ayah markers 
+    rawText += ` \u06DD${toArabicDigits(ayah.numberInSurah)}`;
+
+    const { displayString, checkString, mapping } = prepareTypingData(rawText);
+    
+    blocksData.push({
       displayString,
       checkString,
       mapping,
       globalCheckOffset: currentOffset,
+      surahNumber: surah.number,
+      ayahNumber: ayah.numberInSurah,
+      page: ayah.page,
     });
     
     globalCheckString += checkString;
@@ -104,8 +117,8 @@ export const getMushafPage = (pageNumber: number): MushafPageData => {
   }
 
   return {
-    pageNumber,
-    lines: linesData,
+    surahNumber,
+    blocks: blocksData,
     globalCheckString,
   };
 };
