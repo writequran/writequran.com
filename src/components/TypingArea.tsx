@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getSurah } from "@/lib/quran-data";
+import { getSurah, findCheckIndexByDisplayOffset } from "@/lib/quran-data";
 
 interface TypingAreaProps {
   surahNumber: number;
@@ -127,6 +127,59 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleTextClick = useCallback((e: React.MouseEvent) => {
+    // Only handle clicks on the main text area
+    const target = e.target as HTMLElement;
+    const blockEl = target.closest('[data-block-index]');
+    if (!blockEl) return;
+
+    const blockIndex = parseInt(blockEl.getAttribute('data-block-index') || '-1');
+    if (blockIndex === -1) return;
+
+    const block = pageData.blocks[blockIndex];
+    if (!block) return;
+
+    // Use the native Range API to find character offset at click position
+    let range: Range | undefined;
+    if ((document as any).caretPositionFromPoint) {
+      const pos = (document as any).caretPositionFromPoint(e.clientX, e.clientY);
+      if (pos) {
+        range = document.createRange();
+        range.setStart(pos.offsetNode, pos.offset);
+      }
+    } else if (document.caretRangeFromPoint) {
+      const r = document.caretRangeFromPoint(e.clientX, e.clientY);
+      if (r) range = r;
+    }
+
+    if (!range || !range.startContainer) return;
+
+    // We need to find the offset relative to the block's displayString.
+    // Since we split by markers, the text might be in different spans.
+    const textNode = range.startContainer;
+    const offsetInNode = range.startOffset;
+
+    // Find all text nodes within the block element and sum up lengths until we hit ours
+    const walker = document.createTreeWalker(blockEl, NodeFilter.SHOW_TEXT);
+    let totalDisplayOffset = 0;
+    let currentNode = walker.nextNode();
+    while (currentNode) {
+      if (currentNode === textNode) {
+        totalDisplayOffset += offsetInNode;
+        break;
+      }
+      totalDisplayOffset += currentNode.textContent?.length || 0;
+      currentNode = walker.nextNode();
+    }
+
+    // Map display offset to check index
+    const checkIndexInBlock = findCheckIndexByDisplayOffset(block, totalDisplayOffset);
+    const newGlobalIndex = block.globalCheckOffset + checkIndexInBlock;
+
+    setCurrentIndex(newGlobalIndex);
+    setWrongChar(null);
+  }, [pageData.blocks]);
+
   let isInActiveAyah = false;
 
   const renderTextWithMarkers = (text: string, isTyped: boolean) => {
@@ -185,8 +238,9 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
       )}
 
       <div
-        className="relative w-full max-w-[800px] bg-[#FDFBF7] dark:bg-[#121212] shadow-2xl rounded-sm border-[16px] border-[#D6C19E] dark:border-neutral-800 px-8 py-16 rtl quran-text tracking-normal transition-colors duration-500"
+        className="relative w-full max-w-[800px] bg-[#FDFBF7] dark:bg-[#121212] shadow-2xl rounded-sm border-[16px] border-[#D6C19E] dark:border-neutral-800 px-8 py-16 rtl quran-text tracking-normal transition-colors duration-500 cursor-text select-text"
         dir="rtl"
+        onClick={handleTextClick}
         style={{ WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale" }}
       >
         <div className="absolute inset-2 border-2 border-[#D6C19E] dark:border-neutral-700 opacity-50 pointer-events-none" />
@@ -208,7 +262,7 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
 
             if (isFinished) {
               return (
-                <span key={blockIndex}>
+                <span key={blockIndex} data-block-index={blockIndex}>
                   {renderTextWithMarkers(block.displayString, true)}
                 </span>
               );
@@ -216,7 +270,7 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
 
             if (isFuture) {
               return (
-                <span key={blockIndex}>
+                <span key={blockIndex} data-block-index={blockIndex}>
                   {renderTextWithMarkers(block.displayString, false)}
                 </span>
               );
@@ -249,7 +303,7 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
             const renderUntyped = renderTextWithMarkers(untypedWithJ, false);
 
             return (
-              <span key={blockIndex} className="inline whitespace-normal">
+              <span key={blockIndex} data-block-index={blockIndex} className="inline whitespace-normal">
                 {renderTyped}
                 <span ref={targetRef} className="text-transparent pointer-events-none select-none">{targetWithJ}</span>
                 {renderUntyped}
