@@ -14,4 +14,7 @@
   .ltr {
     direction: ltr;
   }
+  .quran-text {
+    font-family: var(--font-amiri), "Amiri", "Amiri Quran", "Traditional Arabic", "KFGQPC Uthman Taha Naskh", serif;
+  }
 }
