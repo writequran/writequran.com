@@ -210,8 +210,19 @@ export function TypingArea({ pageNumber }: TypingAreaProps) {
              const nextDisplayIndex = localIndex + 1 < line.mapping.length ? line.mapping[localIndex + 1] : line.displayString.length;
 
              const typedSpan = line.displayString.slice(0, currentDisplayIndex);
-             const targetSpan = line.displayString.slice(currentDisplayIndex, nextDisplayIndex);
-             const untypedSpan = line.displayString.slice(nextDisplayIndex);
+             let targetSpan = line.displayString.slice(currentDisplayIndex, nextDisplayIndex);
+             let untypedSpan = line.displayString.slice(nextDisplayIndex);
+
+             // Forcefully strip End of Ayah layout markers (and their Arabic digits) completely 
+             // out of the active target span so the CSS bounding box bounds ONLY the raw letter.
+             const markerMatch = targetSpan.match(/(\u06DD[\u0660-\u0669]+)/);
+             if (markerMatch) {
+               const idx = markerMatch.index!;
+               // Dump the extracted marker down into the untyped span so it remains 
+               // perpetually visible natively and isn't caught in the opacity-0 target layer.
+               untypedSpan = targetSpan.slice(idx) + untypedSpan;
+               targetSpan = targetSpan.slice(0, idx);
+             }
 
              // Evaluate typed portion
              const renderTyped = renderTextWithMarkers(typedSpan, true);
