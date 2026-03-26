@@ -3,6 +3,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { getSurah } from "@/lib/quran-data";
 
+// Helper to prevent verse markers from breaking to the next line
+const preserveMarkerSpacing = (str: string) => {
+  return str.replace(/ \u06DD/g, '\u00A0\u06DD');
+};
+
 interface TypingAreaProps {
   surahNumber: number;
 }
@@ -147,21 +152,23 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const renderTextWithMarkers = (text: string, isTyped: boolean, isBlockActive: boolean, isHint: boolean = false) => {
+  type TextMode = "typed" | "hint" | "hidden";
+
+  const renderTextWithMarkers = (text: string, mode: TextMode) => {
     if (!text) return null;
-    const parts = text.split(/(\u06DD[\u0660-\u0669]+)/g);
+    const cleanText = preserveMarkerSpacing(text);
+    const parts = cleanText.split(/(\u06DD[\u0660-\u0669]+)/g);
 
     return parts.map((part, i) => {
       const isMarker = part.startsWith('\u06DD');
 
       if (isMarker) {
-        // Markers are always gold and masked in both layers for perfect visual continuity
+        // Markers are always visible and always gold
         const digits = part.slice(1);
-        const markerMaskBackground = "bg-[#FDFBF7] dark:bg-[#121212]";
         const markerColor = "text-[#C1A063]";
 
         return (
-          <span key={i} className={`relative inline-flex items-center justify-center mx-1 ${markerColor} transition-all duration-300 select-none ${markerMaskBackground}`}>
+          <span key={i} className={`relative inline-flex items-center justify-center mx-1 ${markerColor} transition-all duration-300 select-none`}>
             <span className="leading-none quran-text">{'\u06DD'}</span>
             <span className="absolute inset-0 flex items-center justify-center text-[0.45em] quran-text leading-none z-10 translate-y-[0em]">
               {digits}
@@ -171,24 +178,16 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
       }
 
       let colorClass = "";
-      let maskClass = "";
-
-      if (isHint) {
-        // HINT LAYER: Stable grey, no mask, intact shaping
+      if (mode === "typed") {
+        colorClass = "text-[#2A2826] dark:text-neutral-100";
+      } else if (mode === "hint") {
         colorClass = "text-neutral-400/60 dark:text-neutral-600/50";
-        maskClass = "bg-transparent";
-      } else if (isTyped) {
-        // FOREGROUND REVEALED: Strong black + Page Mask
-        colorClass = "text-[#2A2826] dark:text-neutral-100 font-medium";
-        maskClass = "bg-[#FDFBF7] dark:bg-[#121212]";
-      } else {
-        // FOREGROUND HIDDEN/TARGET: Transparent (lets hint layer show through)
+      } else if (mode === "hidden") {
         colorClass = "text-transparent";
-        maskClass = "bg-transparent transition-none";
       }
 
       return (
-        <span key={i} className={`${colorClass} ${maskClass} transition-all duration-300`}>
+        <span key={i} className={`${colorClass} transition-colors duration-300`}>
           {part}
         </span>
       );
@@ -215,10 +214,10 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
 
         <div 
           ref={containerRef}
-          className="w-full text-[2.2rem] leading-[2.8] text-center mushaf-rules relative"
+          className="w-full text-[2.2rem] leading-[2.8] text-justify mushaf-rules relative" style={{ textAlignLast: 'center' }}
         >
           {pageData.preBismillah && (
-            <div className="w-full text-[#2A2826] dark:text-neutral-100 flex justify-center mb-4 select-none">
+            <div className="w-full text-[#2A2826] dark:text-neutral-100 flex justify-center mb-4 select-none" style={{ textAlignLast: 'auto' }}>
               <span>{pageData.preBismillah}</span>
             </div>
           )}
@@ -235,150 +234,117 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
             const showHint = visibilityMode === "all" || (visibilityMode === "ayah" && isActiveAyah);
 
             return (
-              <span key={blockIndex} className="inline-grid grid-cols-1 grid-rows-1 align-baseline relative">
-                {/* LAYER 1: STABLE HINT (Background) - Always rendered to provide a stable layout scaffold */}
-                <span className={`col-start-1 row-start-1 pointer-events-none select-none h-fit transition-opacity duration-500 ${showHint ? 'opacity-100' : 'opacity-0'}`}>
-                  {renderTextWithMarkers(block.displayString, false, true, true)}
-                </span>
+              <span key={blockIndex}>
+                {isFinished ? (
+                  renderTextWithMarkers(block.displayString, "typed")
+                ) : isFuture ? (
+                  renderTextWithMarkers(block.displayString, showHint ? "hint" : "hidden")
+                ) : (
+                  <>
+                    {(() => {
+                      const localIndex = currentIndex - blockStart;
+                      const currentDisplayIndex = block.mapping[localIndex] || 0;
 
-                {/* LAYER 2: INTERACTION (Foreground) - Overlay with transparent current parts */}
-                <span className="col-start-1 row-start-1 z-10 h-fit">
-                  {isFinished ? (
-                    renderTextWithMarkers(block.displayString, true, isActiveAyah, false)
-                  ) : isFuture ? (
-                    renderTextWithMarkers(block.displayString, false, isActiveAyah, false)
-                  ) : (
-                    <>
-                      {(() => {
-                        const localIndex = currentIndex - blockStart;
-                        const currentDisplayIndex = block.mapping[localIndex] || 0;
+                      const typedSpan = block.displayString.slice(0, currentDisplayIndex);
+                      const targetChar = block.displayString[currentDisplayIndex] || "";
+                      const untypedSpan = block.displayString.slice(currentDisplayIndex + 1);
 
-                        const typedSpan = block.displayString.slice(0, currentDisplayIndex);
-                        const targetChar = block.displayString[currentDisplayIndex] || "";
-                        const untypedSpan = block.displayString.slice(currentDisplayIndex + 1);
-
-                        const ZWJ = '\u200D';
-                        const typedWithJ = typedSpan ? typedSpan + ZWJ : "";
-                        const targetWithJ = ZWJ + targetChar + ZWJ;
-                        const untypedWithJ = untypedSpan ? ZWJ + untypedSpan : "";
-
-                        return (
-                          <span className="inline">
-                            {renderTextWithMarkers(typedWithJ, true, isActiveAyah, false)}
-                            <span 
-                              ref={targetRef} 
-                              className="relative text-transparent select-none pointer-events-none inline"
-                            >
-                              {targetWithJ}
-                            </span>
-                            {renderTextWithMarkers(untypedWithJ, false, isActiveAyah, false)}
+                      return (
+                        <span className="inline">
+                          {renderTextWithMarkers(typedSpan, "typed")}
+                          <span 
+                            ref={targetRef} 
+                            className="relative inline"
+                          >
+                            {renderTextWithMarkers(targetChar, showHint ? "hint" : "hidden")}
                           </span>
-                        );
-                      })()}
-                    </>
-                  )}
-                </span>
+                          {renderTextWithMarkers(untypedSpan, showHint ? "hint" : "hidden")}
+                        </span>
+                      );
+                    })()}
+                  </>
+                )}
                 {" "}
               </span>
             );
           })}
 
-          {currentIndex < globalCheckString.length && (
-            <div
-              className="absolute pointer-events-none flex items-center justify-center transition-all duration-75 text-[2.5rem] leading-[2.6] z-10"
-              /* clean cursor alignment matching targetRef box exactly */
-              style={{
-                top: cursorPos.top,
-                left: cursorPos.left,
-                width: cursorPos.width,
-                height: cursorPos.height,
-              }}
-            /* fixed cursor width 
-            style={{
-              top: cursorPos.top,
-              left: cursorPos.left + cursorPos.width / 2 - 15,
-              width: 30,
-              height: cursorPos.height,
-            }}*/
-            >
-              {wrongChar ? (
-                <>
-                  {/* LEFT PILLAR — error state (stronger red) */}
-                  <span
-                    className="absolute top-[10%] bottom-[10%] left-[2px] w-[2px] rounded-full animate-flicker"
-                    style={{
-                      background: "linear-gradient(to bottom, transparent, #ff2d2d, #ff4d4d, transparent)",
-                      boxShadow: "0 0 8px rgba(255,45,45,0.45)"
-                    }}
-                  />
-
-                  {/* RIGHT PILLAR — error state (stronger red) */}
-                  <span
-                    className="absolute top-[10%] bottom-[10%] right-[2px] w-[2px] rounded-full animate-flicker"
-                    style={{
-                      background: "linear-gradient(to bottom, transparent, #ff2d2d, #ff4d4d, transparent)",
-                      boxShadow: "0 0 8px rgba(255,45,45,0.45)"
-                    }}
-                  />
-
-                  {/* BOTTOM BAR / FLOOR — error state (stronger red) */}
-                  <span
-                    className="absolute -bottom-1 left-0 right-0 h-[5px] rounded-full"
-                    style={{
-                      background: "#ff3b3b",
-                      boxShadow: "0 0 12px 3px rgba(255,59,59,0.50)"
-                    }}
-                  />
-
-                  {/* WRONG LETTER — shown above the cursor */}
-                  <span className="relative z-10 text-red-600 dark:text-red-400 font-medium">
-                    {wrongChar}
-                  </span>
-                </>
-              ) : (
-                <>
-                  {/* LEFT PILLAR — normal state */}
-                  <span
-                    className="absolute top-[10%] bottom-[10%] left-[2px] w-[2px] rounded-full animate-flicker"
-                    style={{
-                      background: isDarkMode
-                        ? "linear-gradient(to bottom, transparent, #F4D58D, transparent)"
-                        : "linear-gradient(to bottom, transparent, #D8BA72, transparent)",
-                      boxShadow: isDarkMode
-                        ? "0 0 6px rgba(244,213,141,0.42)"
-                        : "0 0 5px rgba(216,186,114,0.30)"
-                    }}
-                  />
-
-                  {/* RIGHT PILLAR — normal state */}
-                  <span
-                    className="absolute top-[10%] bottom-[10%] right-[2px] w-[2px] rounded-full animate-flicker"
-                    style={{
-                      background: isDarkMode
-                        ? "linear-gradient(to bottom, transparent, #F4D58D, transparent)"
-                        : "linear-gradient(to bottom, transparent, #D8BA72, transparent)",
-                      boxShadow: isDarkMode
-                        ? "0 0 6px rgba(244,213,141,0.42)"
-                        : "0 0 5px rgba(216,186,114,0.30)"
-                    }}
-                  />
-
-                  {/* BOTTOM BAR / FLOOR — normal state */}
-                  <span
-                    className="absolute -bottom-1 left-0 right-0 h-[5px] rounded-full"
-                    style={{
-                      background: isDarkMode ? "#FFD98A" : "#E3C57A",
-                      boxShadow: isDarkMode
-                        ? "inset 0 0 0 1px rgba(255,255,255,0.75), 0 0 12px 2px rgba(255,217,138,0.50)"
-                        : "inset 0 0 0 1px rgba(255,255,255,0.95), 0 2px 7px rgba(55,42,14,0.34)"
-                    }}
-                  />
-                </>
-              )}
-            </div>
-          )}
+            {currentIndex < globalCheckString.length && (
+              <div
+                className="absolute pointer-events-none flex items-center justify-center transition-all duration-75 text-[2.5rem] leading-[2.6] z-10"
+                style={{
+                  top: cursorPos.top,
+                  left: cursorPos.left,
+                  width: cursorPos.width,
+                  height: cursorPos.height,
+                }}
+              >
+                {wrongChar ? (
+                  <>
+                    <span
+                      className="absolute top-[10%] bottom-[10%] left-[2px] w-[2px] rounded-full animate-flicker"
+                      style={{
+                        background: "linear-gradient(to bottom, transparent, #ff2d2d, #ff4d4d, transparent)",
+                        boxShadow: "0 0 8px rgba(255,45,45,0.45)"
+                      }}
+                    />
+                    <span
+                      className="absolute top-[10%] bottom-[10%] right-[2px] w-[2px] rounded-full animate-flicker"
+                      style={{
+                        background: "linear-gradient(to bottom, transparent, #ff2d2d, #ff4d4d, transparent)",
+                        boxShadow: "0 0 8px rgba(255,45,45,0.45)"
+                      }}
+                    />
+                    <span
+                      className="absolute -bottom-1 left-0 right-0 h-[5px] rounded-full"
+                      style={{
+                        background: "#ff3b3b",
+                        boxShadow: "0 0 12px 3px rgba(255,59,59,0.50)"
+                      }}
+                    />
+                    <span className="relative z-10 text-red-600 dark:text-red-400 font-medium">
+                      {wrongChar}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span
+                      className="absolute top-[10%] bottom-[10%] left-[2px] w-[2px] rounded-full animate-flicker"
+                      style={{
+                        background: isDarkMode
+                          ? "linear-gradient(to bottom, transparent, #F4D58D, transparent)"
+                          : "linear-gradient(to bottom, transparent, #D8BA72, transparent)",
+                        boxShadow: isDarkMode
+                          ? "0 0 6px rgba(244,213,141,0.42)"
+                          : "0 0 5px rgba(216,186,114,0.30)"
+                      }}
+                    />
+                    <span
+                      className="absolute top-[10%] bottom-[10%] right-[2px] w-[2px] rounded-full animate-flicker"
+                      style={{
+                        background: isDarkMode
+                          ? "linear-gradient(to bottom, transparent, #F4D58D, transparent)"
+                          : "linear-gradient(to bottom, transparent, #D8BA72, transparent)",
+                        boxShadow: isDarkMode
+                          ? "0 0 6px rgba(244,213,141,0.42)"
+                          : "0 0 5px rgba(216,186,114,0.30)"
+                      }}
+                    />
+                    <span
+                      className="absolute -bottom-1 left-0 right-0 h-[5px] rounded-full"
+                      style={{
+                        background: isDarkMode ? "#FFD98A" : "#E3C57A",
+                        boxShadow: isDarkMode
+                          ? "inset 0 0 0 1px rgba(255,255,255,0.75), 0 0 12px 2px rgba(255,217,138,0.50)"
+                          : "inset 0 0 0 1px rgba(255,255,255,0.95), 0 2px 7px rgba(55,42,14,0.34)"
+                      }}
+                    />
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
 
       <div
         className={`fixed bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#FDFBF7] dark:from-[#121212] via-[#FDFBF7]/80 dark:via-[#121212]/80 to-transparent pointer-events-none z-30 transition-opacity duration-700 ease-in-out ${isAtBottom || showKeyboard ? 'opacity-0' : 'opacity-100'}`}
