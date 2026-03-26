@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { getSurah } from "@/lib/quran-data";
+import { loadMistakeStats, saveMistakeStats, loadProgressStats, saveProgressStats, MistakeRecord, ProgressStats } from "@/lib/stats";
 
 // Helper to prevent verse markers from breaking to the next line
 const preserveMarkerSpacing = (str: string) => {
@@ -17,7 +18,7 @@ type VisibilityMode = "hidden" | "ayah" | "all";
 
 export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
   const pageData = getSurah(surahNumber);
-  const { globalCheckString } = pageData;
+  const { globalCheckString, blocks } = pageData;
 
   const [currentIndex, setCurrentIndex] = useState(() => {
     if (typeof window === "undefined") return 0;
@@ -47,9 +48,25 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
     return localStorage.getItem('quran_typing_keyboard') === 'true';
   });
 
+  const [sessionMistakes, setSessionMistakes] = useState(0);
+  const [sessionAttempts, setSessionAttempts] = useState(0);
+
+  const globalMistakesRef = useRef<Record<string, MistakeRecord>>({});
+  const globalProgressRef = useRef<Record<number, ProgressStats>>({});
+
   const [cursorPos, setCursorPos] = useState({ top: 0, left: 0, width: 0, height: 0 });
   const targetRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    globalMistakesRef.current = loadMistakeStats();
+    globalProgressRef.current = loadProgressStats();
+  }, []);
+
+  const currentBlock = blocks.find(b => 
+    currentIndex >= b.globalCheckOffset && 
+    currentIndex < b.globalCheckOffset + b.checkString.length
+  ) || blocks[blocks.length - 1];
 
   useEffect(() => {
     if (jumpTarget) {
@@ -153,12 +170,65 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
     if (!expectedChar) return;
 
     if (char === expectedChar) {
-      setCurrentIndex((prev) => prev + 1);
+      setCurrentIndex((prev) => {
+        const next = prev + 1;
+        const progressStats = globalProgressRef.current;
+        const p = progressStats[surahNumber] || {
+          surahNumber,
+          highestIndexReached: 0,
+          totalMistakeEvents: 0,
+          totalWrongAttempts: 0,
+          lastPracticed: Date.now()
+        };
+        
+        if (next > p.highestIndexReached) {
+          p.highestIndexReached = next;
+        }
+        p.lastPracticed = Date.now();
+        
+        progressStats[surahNumber] = p;
+        saveProgressStats(progressStats);
+        
+        return next;
+      });
       setWrongChar(null);
     } else {
       setWrongChar(char);
+      
+      const mistakes = globalMistakesRef.current;
+      const progress = globalProgressRef.current;
+      const mistakeKey = `${surahNumber}-${currentIndex}`;
+      
+      const p = progress[surahNumber] || {
+        surahNumber, highestIndexReached: currentIndex, totalMistakeEvents: 0, totalWrongAttempts: 0, lastPracticed: Date.now()
+      };
+
+      if (mistakes[mistakeKey]) {
+         mistakes[mistakeKey].wrongAttempts += 1;
+         mistakes[mistakeKey].timestamp = Date.now();
+         p.totalWrongAttempts += 1;
+         setSessionAttempts(s => s + 1);
+      } else {
+         mistakes[mistakeKey] = {
+           surahNumber,
+           ayahNumber: currentBlock?.ayahNumber || 0,
+           globalIndex: currentIndex,
+           expectedChar,
+           wrongAttempts: 1,
+           timestamp: Date.now()
+         };
+         p.totalMistakeEvents += 1;
+         p.totalWrongAttempts += 1;
+         setSessionMistakes(s => s + 1);
+         setSessionAttempts(s => s + 1);
+      }
+      p.lastPracticed = Date.now();
+      
+      progress[surahNumber] = p;
+      saveMistakeStats(mistakes);
+      saveProgressStats(progress);
     }
-  }, [currentIndex, globalCheckString, wrongChar]);
+  }, [currentIndex, globalCheckString, wrongChar, surahNumber, currentBlock]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -235,6 +305,30 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
 
   return (
     <div className="w-full flex flex-col items-center pb-36 px-4">
+      {/* STATS PANEL */}
+      <div className="w-full max-w-[800px] mb-6 flex flex-wrap items-center justify-between bg-white dark:bg-[#121212] border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 shadow-sm select-none text-sm text-neutral-600 dark:text-neutral-400 z-10 transition-colors">
+        <div className="flex items-center gap-6">
+          <div className="flex flex-col">
+            <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Current</span>
+            <span className="font-medium text-neutral-800 dark:text-neutral-200">Ayah {currentBlock?.ayahNumber || '?'}</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Progress</span>
+            <span className="font-medium text-neutral-800 dark:text-neutral-200">
+              {((currentIndex / (globalCheckString.length || 1)) * 100).toFixed(1)}%
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-6">
+          <div className="flex flex-col text-right">
+            <span className="text-[10px] uppercase font-bold text-red-400/80 tracking-wider">Session Mistakes</span>
+            <span className="font-medium text-red-600 dark:text-red-400">
+              {sessionMistakes} <span className="text-xs opacity-60">({sessionAttempts} tries)</span>
+            </span>
+          </div>
+        </div>
+      </div>
 
       {currentIndex === globalCheckString.length && globalCheckString.length > 0 && (
         <div className="my-8 flex flex-col items-center animate-in fade-in duration-500">
