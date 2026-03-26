@@ -26,30 +26,47 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
     const saved = localStorage.getItem(`quran_typing_progress_${surahNumber}`);
     return saved ? parseInt(saved, 10) || 0 : 0;
   });
-  
+
   const [wrongChar, setWrongChar] = useState<string | null>(null);
-  
+
   const [visibilityMode, setVisibilityMode] = useState<VisibilityMode>(() => {
     if (typeof window === "undefined") return "hidden";
     return (localStorage.getItem('quran_typing_visibility') as VisibilityMode) || "hidden";
   });
-  
+
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window === "undefined") return false;
     const saved = localStorage.getItem('quran_typing_theme');
     if (saved) return saved === 'dark';
     return document.documentElement.classList.contains('dark') || window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
-  
+
   const [isAtBottom, setIsAtBottom] = useState(false);
-  
+
   const [showKeyboard, setShowKeyboard] = useState(() => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem('quran_typing_keyboard') === 'true';
   });
 
-  const [sessionMistakes, setSessionMistakes] = useState(0);
-  const [sessionAttempts, setSessionAttempts] = useState(0);
+  const [sessionMistakes, setSessionMistakes] = useState(() => {
+    if (typeof window === "undefined") return 0;
+    const saved = localStorage.getItem(`quran_typing_session_mistakes_${surahNumber}`);
+    return saved ? parseInt(saved, 10) || 0 : 0;
+  });
+
+  const [sessionAttempts, setSessionAttempts] = useState(() => {
+    if (typeof window === "undefined") return 0;
+    const saved = localStorage.getItem(`quran_typing_session_attempts_${surahNumber}`);
+    return saved ? parseInt(saved, 10) || 0 : 0;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(`quran_typing_session_mistakes_${surahNumber}`, sessionMistakes.toString());
+  }, [sessionMistakes, surahNumber]);
+
+  useEffect(() => {
+    localStorage.setItem(`quran_typing_session_attempts_${surahNumber}`, sessionAttempts.toString());
+  }, [sessionAttempts, surahNumber]);
 
   const globalMistakesRef = useRef<Record<string, MistakeRecord>>({});
   const globalProgressRef = useRef<Record<number, ProgressStats>>({});
@@ -63,8 +80,8 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
     globalProgressRef.current = loadProgressStats();
   }, []);
 
-  const currentBlock = blocks.find(b => 
-    currentIndex >= b.globalCheckOffset && 
+  const currentBlock = blocks.find(b =>
+    currentIndex >= b.globalCheckOffset &&
     currentIndex < b.globalCheckOffset + b.checkString.length
   ) || blocks[blocks.length - 1];
 
@@ -153,6 +170,13 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
     }
   }, [currentIndex]);
 
+  const handleResetSessionStats = () => {
+    if (confirm("Reset mistake counter for this Surah?")) {
+      setSessionMistakes(0);
+      setSessionAttempts(0);
+    }
+  };
+
   const handleInput = useCallback((char: string) => {
     if (char === "Backspace") {
       if (wrongChar) {
@@ -180,50 +204,50 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
           totalWrongAttempts: 0,
           lastPracticed: Date.now()
         };
-        
+
         if (next > p.highestIndexReached) {
           p.highestIndexReached = next;
         }
         p.lastPracticed = Date.now();
-        
+
         progressStats[surahNumber] = p;
         saveProgressStats(progressStats);
-        
+
         return next;
       });
       setWrongChar(null);
     } else {
       setWrongChar(char);
-      
+
       const mistakes = globalMistakesRef.current;
       const progress = globalProgressRef.current;
       const mistakeKey = `${surahNumber}-${currentIndex}`;
-      
+
       const p = progress[surahNumber] || {
         surahNumber, highestIndexReached: currentIndex, totalMistakeEvents: 0, totalWrongAttempts: 0, lastPracticed: Date.now()
       };
 
       if (mistakes[mistakeKey]) {
-         mistakes[mistakeKey].wrongAttempts += 1;
-         mistakes[mistakeKey].timestamp = Date.now();
-         p.totalWrongAttempts += 1;
-         setSessionAttempts(s => s + 1);
+        mistakes[mistakeKey].wrongAttempts += 1;
+        mistakes[mistakeKey].timestamp = Date.now();
+        p.totalWrongAttempts += 1;
+        setSessionAttempts(s => s + 1);
       } else {
-         mistakes[mistakeKey] = {
-           surahNumber,
-           ayahNumber: currentBlock?.ayahNumber || 0,
-           globalIndex: currentIndex,
-           expectedChar,
-           wrongAttempts: 1,
-           timestamp: Date.now()
-         };
-         p.totalMistakeEvents += 1;
-         p.totalWrongAttempts += 1;
-         setSessionMistakes(s => s + 1);
-         setSessionAttempts(s => s + 1);
+        mistakes[mistakeKey] = {
+          surahNumber,
+          ayahNumber: currentBlock?.ayahNumber || 0,
+          globalIndex: currentIndex,
+          expectedChar,
+          wrongAttempts: 1,
+          timestamp: Date.now()
+        };
+        p.totalMistakeEvents += 1;
+        p.totalWrongAttempts += 1;
+        setSessionMistakes(s => s + 1);
+        setSessionAttempts(s => s + 1);
       }
       p.lastPracticed = Date.now();
-      
+
       progress[surahNumber] = p;
       saveMistakeStats(mistakes);
       saveProgressStats(progress);
@@ -305,28 +329,38 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
 
   return (
     <div className="w-full flex flex-col items-center pb-36 px-4">
-      {/* STATS PANEL */}
-      <div className="w-full max-w-[800px] mb-6 flex flex-wrap items-center justify-between bg-white dark:bg-[#121212] border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 shadow-sm select-none text-sm text-neutral-600 dark:text-neutral-400 z-10 transition-colors">
-        <div className="flex items-center gap-6">
-          <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Current</span>
-            <span className="font-medium text-neutral-800 dark:text-neutral-200">Ayah {currentBlock?.ayahNumber || '?'}</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Progress</span>
-            <span className="font-medium text-neutral-800 dark:text-neutral-200">
-              {((currentIndex / (globalCheckString.length || 1)) * 100).toFixed(1)}%
-            </span>
-          </div>
+      {/* LEFT STATS DOCK */}
+      <div className="fixed left-6 top-1/2 -translate-y-1/2 hidden sm:flex flex-col items-center gap-6 bg-white/90 dark:bg-neutral-800/90 backdrop-blur-md rounded-4xl shadow-xl border border-neutral-200 dark:border-neutral-700 py-6 px-4 z-50 transition-colors duration-300 min-w-[70px]">
+        <div className="flex flex-col items-center gap-1 text-center">
+          <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Ayah</span>
+          <span className="text-xl font-bold text-neutral-800 dark:text-neutral-200">{currentBlock?.ayahNumber || '?'}</span>
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="flex flex-col text-right">
-            <span className="text-[10px] uppercase font-bold text-red-400/80 tracking-wider">Session Mistakes</span>
-            <span className="font-medium text-red-600 dark:text-red-400">
-              {sessionMistakes} <span className="text-xs opacity-60">({sessionAttempts} tries)</span>
-            </span>
-          </div>
+        <div className="w-full h-[1px] bg-neutral-200 dark:bg-neutral-700/50" />
+
+        <div className="flex flex-col items-center gap-1 text-center">
+          <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Done</span>
+          <span className="text-lg font-bold text-neutral-800 dark:text-neutral-200">
+            {((currentIndex / (globalCheckString.length || 1)) * 100).toFixed(1)}%
+          </span>
+        </div>
+
+        <div className="w-full h-[1px] bg-neutral-200 dark:bg-neutral-700/50" />
+
+        <div className="flex flex-col items-center gap-1 text-center relative group">
+          <span className="text-[10px] uppercase font-bold text-red-500/80 tracking-wider">Errors</span>
+          <span className="text-2xl font-bold text-red-600 dark:text-red-400">
+            {sessionMistakes}
+          </span>
+          <span className="text-xs font-medium text-red-400/60 mt-0.5" title="Total attempts">({sessionAttempts})</span>
+
+          <button
+            onClick={handleResetSessionStats}
+            className="absolute -bottom-8 opacity-0 group-hover:opacity-100 flex items-center justify-center w-7 h-7 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-full shadow-sm text-neutral-500 hover:text-red-500 transition-all z-10 duration-200"
+            title="Reset Session Mistakes"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+          </button>
         </div>
       </div>
 
