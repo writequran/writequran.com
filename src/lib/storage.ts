@@ -32,3 +32,76 @@ export function setActiveUserId(id: string | null) {
     localStorage.removeItem('quran_typing_active_user_id');
   }
 }
+
+export function migrateLegacyLocalStorage() {
+  if (typeof window === 'undefined') return;
+  
+  if (localStorage.getItem('quran_typing_migration_v2') === 'completed') {
+    return; // Migration already successfully ran
+  }
+  
+  console.log("Quran Typing MVP Migration: Scanning for Legacy Keys...");
+  let migratedCount = 0;
+
+  // 1. Primitive Preferences
+  const migratePrimitive = (key: string, storedKey: string = key) => {
+    const legacyVal = localStorage.getItem(key);
+    if (legacyVal) {
+      if (!getStorage(storedKey)) setStorage(storedKey, legacyVal);
+      migratedCount++;
+    }
+  };
+  migratePrimitive('surah');
+  migratePrimitive('visibility_mode');
+  migratePrimitive('theme');
+  migratePrimitive('keyboard');
+  
+  // 2. Typing Indices
+  for (let i = 1; i <= 114; i++) {
+    migratePrimitive(`quran_typing_progress_${i}`);
+    migratePrimitive(`session_attempts_${i}`);
+    migratePrimitive(`session_mistake_indices_${i}`);
+  }
+
+  // 3. Merging Progress Stats JSON safely
+  const legacyProgress = localStorage.getItem('progress_stats');
+  if (legacyProgress) {
+    try {
+      const oldStats = JSON.parse(legacyProgress);
+      const newStats = JSON.parse(getStorage('progress_stats') || '{}');
+      Object.keys(oldStats).forEach(surah => {
+        if (!newStats[surah]) {
+          newStats[surah] = oldStats[surah];
+        } else {
+          newStats[surah].highestIndexReached = Math.max(newStats[surah].highestIndexReached || 0, oldStats[surah].highestIndexReached || 0);
+          newStats[surah].totalMistakeEvents = Math.max(newStats[surah].totalMistakeEvents || 0, oldStats[surah].totalMistakeEvents || 0);
+          newStats[surah].totalWrongAttempts = Math.max(newStats[surah].totalWrongAttempts || 0, oldStats[surah].totalWrongAttempts || 0);
+        }
+      });
+      setStorage('progress_stats', JSON.stringify(newStats));
+      migratedCount++;
+    } catch (e) {}
+  }
+
+  // 4. Merging Mistake Stats JSON safely
+  const legacyMistakes = localStorage.getItem('mistake_stats');
+  if (legacyMistakes) {
+    try {
+      const oldStats = JSON.parse(legacyMistakes);
+      const newStats = JSON.parse(getStorage('mistake_stats') || '{}');
+      Object.keys(oldStats).forEach(key => {
+        if (!newStats[key]) {
+          newStats[key] = oldStats[key];
+        } else {
+          newStats[key].wrongAttempts = Math.max(newStats[key].wrongAttempts || 0, oldStats[key].wrongAttempts || 0);
+        }
+      });
+      setStorage('mistake_stats', JSON.stringify(newStats));
+      migratedCount++;
+    } catch (e) {}
+  }
+
+  // Lock the vault
+  localStorage.setItem('quran_typing_migration_v2', 'completed');
+  console.log(`Quran Typing MVP Migration: Finished. Scanned & Migrated ${migratedCount} object structures cleanly.`);
+}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { fetchCurrentUser, loginWithEmail, registerWithEmail, logoutUser } from '@/lib/cloud';
 import { syncCloudToLocal, syncLocalToCloud } from '@/lib/sync-manager';
 import { setActiveUserId } from '@/lib/storage';
+import { createClient } from '@/utils/supabase/client';
 
 export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
   const [user, setUser] = useState<{ id: string, email: string } | null>(null);
@@ -12,9 +12,11 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
+  const supabase = createClient();
+
   useEffect(() => {
-    fetchCurrentUser().then(u => {
-      setUser(u);
+    supabase.auth.getUser().then(({ data: { user: u } }) => {
+      setUser(u ? { id: u.id, email: u.email || '' } : null);
       if (u) {
         setActiveUserId(u.id);
         setSyncing(true);
@@ -24,6 +26,18 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
         });
       }
     });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        setActiveUserId(null);
+        setUser(null);
+        onAuthChange();
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -31,11 +45,17 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
     setLoading(true);
     try {
       let res;
-      if (isLogin) res = await loginWithEmail(email, password);
-      else res = await registerWithEmail(email, password);
+      if (isLogin) {
+        res = await supabase.auth.signInWithPassword({ email, password });
+      } else {
+        res = await supabase.auth.signUp({ email, password });
+      }
       
-      setActiveUserId(res.user.id);
-      setUser(res.user);
+      if (res.error) throw res.error;
+      if (!res.data.user) throw new Error("Authentication failed");
+      
+      setActiveUserId(res.data.user.id);
+      setUser({ id: res.data.user.id, email: res.data.user.email || '' });
       setIsOpen(false);
       
       setSyncing(true);
@@ -52,7 +72,7 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
   const handleLogout = async () => {
     if (!confirm("Sign out? Your progress will remain locally but won't sync until you sign back in.")) return;
     setLoading(true);
-    await logoutUser();
+    await supabase.auth.signOut();
     setActiveUserId(null);
     setUser(null);
     setLoading(false);

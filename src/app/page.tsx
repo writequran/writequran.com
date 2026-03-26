@@ -5,7 +5,7 @@ import { TypingArea } from "@/components/TypingArea";
 import { AuthWidget } from "@/components/AuthWidget";
 import { getAllSurahsMeta, getSurah, getLocationByPage, getLocationByJuz } from "@/lib/quran-data";
 import { WeakSpot, getWeakSpots } from "@/lib/stats";
-import { getStorage, setStorage, getScopedKey } from "@/lib/storage";
+import { getStorage, setStorage, getScopedKey, migrateLegacyLocalStorage } from "@/lib/storage";
 
 export default function Page() {
   const [surahNumber, setSurahNumber] = useState(1);
@@ -14,6 +14,8 @@ export default function Page() {
   const surahs = getAllSurahsMeta();
 
   useEffect(() => {
+    migrateLegacyLocalStorage(); // Safely scrapes unprotected older JSON if applicable
+    
     const savedSurah = getStorage('surah');
     if (savedSurah) {
       setSurahNumber(parseInt(savedSurah, 10));

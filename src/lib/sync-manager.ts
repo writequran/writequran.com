@@ -1,100 +1,78 @@
-import { SyncPayload, pushSyncPayload, pullSyncPayload } from './cloud';
+import { createClient } from '@/utils/supabase/client';
 import { getStorage, setStorage } from './storage';
-
-/**
- * Sweeps all localStorage quran_typing items and packages them into a strict SyncPayload.
- */
-export function buildLocalPayload(): SyncPayload {
-  const progressStats = JSON.parse(getStorage('progress_stats') || '{}');
-  const mistakeStats = JSON.parse(getStorage('mistake_stats') || '{}');
-  
-  const sessionAttempts: Record<string, number> = {};
-  const sessionMistakesIndices: Record<string, number[]> = {};
-
-  for (let i = 1; i <= 114; i++) {
-    const attempts = getStorage(`session_attempts_${i}`);
-    if (attempts) sessionAttempts[i] = parseInt(attempts, 10);
-
-    const indices = getStorage(`session_mistake_indices_${i}`);
-    if (indices) sessionMistakesIndices[i] = JSON.parse(indices);
-  }
-
-  return {
-    version: 1,
-    updated_at: Date.now(),
-    preferences: {
-      surahNumber: parseInt(getStorage('surah') || '1', 10),
-      visibilityMode: getStorage('visibility_mode') || 'hidden',
-      showKeyboard: getStorage('keyboard') === 'true',
-      theme: getStorage('theme') || 'light',
-    },
-    progressStats,
-    mistakeStats,
-    sessionAttempts,
-    sessionMistakesIndices
-  };
-}
-
-/**
- * Deep merges the Remote Payload into the user's Local Storage, resolving conflicts safely.
- * - Progress highestIndexReached takes Math.max()
- * - Mistakes takes the highest wrongAttempts and newest timestamp
- */
-export function applyRemotePayloadToLocal(remote: SyncPayload) {
-  // 1. Preferences Setup
-  setStorage('surah', remote.preferences.surahNumber.toString());
-  setStorage('visibility_mode', remote.preferences.visibilityMode);
-  setStorage('keyboard', remote.preferences.showKeyboard.toString());
-  setStorage('theme', remote.preferences.theme);
-  
-  // 2. Safely merge Progress
-  const localProgress = JSON.parse(getStorage('progress_stats') || '{}');
-  const mergedProgress = { ...remote.progressStats };
-  Object.keys(localProgress).forEach(surah => {
-    if (!mergedProgress[surah]) {
-      mergedProgress[surah] = localProgress[surah];
-    } else {
-      mergedProgress[surah].highestIndexReached = Math.max(mergedProgress[surah].highestIndexReached || 0, localProgress[surah].highestIndexReached || 0);
-      mergedProgress[surah].totalMistakeEvents = Math.max(mergedProgress[surah].totalMistakeEvents || 0, localProgress[surah].totalMistakeEvents || 0);
-    }
-  });
-  setStorage('progress_stats', JSON.stringify(mergedProgress));
-
-  // 3. Safely merge Mistakes
-  const localMistakes = JSON.parse(getStorage('mistake_stats') || '{}');
-  const mergedMistakes = { ...remote.mistakeStats };
-  Object.keys(localMistakes).forEach(key => {
-    if (!mergedMistakes[key]) {
-      mergedMistakes[key] = localMistakes[key];
-    } else {
-      mergedMistakes[key].wrongAttempts = Math.max(mergedMistakes[key].wrongAttempts || 0, localMistakes[key].wrongAttempts || 0);
-      mergedMistakes[key].timestamp = Math.max(mergedMistakes[key].timestamp || 0, localMistakes[key].timestamp || 0);
-    }
-  });
-  setStorage('mistake_stats', JSON.stringify(mergedMistakes));
-
-  // 4. Overwrite Sessions mapping
-  Object.keys(remote.sessionAttempts).forEach(surah => {
-    setStorage(`session_attempts_${surah}`, remote.sessionAttempts[surah].toString());
-  });
-  Object.keys(remote.sessionMistakesIndices).forEach(surah => {
-    setStorage(`session_mistake_indices_${surah}`, JSON.stringify(remote.sessionMistakesIndices[surah]));
-  });
-}
+import { MistakeRecord, ProgressStats } from './stats';
 
 /**
  * Top-level Orchestrator: Pushes Local to Cloud.
  */
 export async function syncLocalToCloud() {
-  const payload = buildLocalPayload();
-  await pushSyncPayload(payload);
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return; // Keep offline isolated!
+
+  const now = new Date().toISOString();
+  
+  // 1. Current Progress State
+  const surahNumber = parseInt(getStorage('surah') || '1', 10);
+  const globalIndex = parseInt(getStorage(`quran_typing_progress_${surahNumber}`) || '0', 10);
+  
+  await supabase.from('current_progress_state').upsert({
+    user_id: user.id,
+    surah_number: surahNumber,
+    global_index: globalIndex,
+    updated_at: now
+  });
+
+  // 2. User Preferences
+  const visibilityMode = getStorage('visibility_mode') || 'hidden';
+  const showKeyboard = getStorage('keyboard') === 'true';
+  const theme = getStorage('theme') || 'light';
+
+  await supabase.from('user_preferences').upsert({
+    user_id: user.id,
+    theme,
+    visibility_mode: visibilityMode,
+    show_keyboard: showKeyboard,
+    updated_at: now
+  });
+
+  // 3. Surah Progress
+  const progressStats: Record<string, ProgressStats> = JSON.parse(getStorage('progress_stats') || '{}');
+  const progressUpserts = Object.keys(progressStats).map(surah => ({
+    user_id: user.id,
+    surah_number: parseInt(surah, 10),
+    highest_index_reached: progressStats[surah].highestIndexReached,
+    total_mistake_events: progressStats[surah].totalMistakeEvents,
+    total_wrong_attempts: progressStats[surah].totalWrongAttempts,
+    last_practiced: new Date(progressStats[surah].lastPracticed).toISOString()
+  }));
+
+  if (progressUpserts.length > 0) {
+    await supabase.from('surah_progress').upsert(progressUpserts, { onConflict: 'user_id,surah_number' });
+  }
+
+  // 4. Mistake Stats (Additive Upsert handled securely via Postgres Unique Constraint)
+  const mistakeStats: Record<string, MistakeRecord> = JSON.parse(getStorage('mistake_stats') || '{}');
+  const mistakeUpserts = Object.values(mistakeStats).map(m => ({
+    user_id: user.id,
+    surah_number: m.surahNumber,
+    ayah_number: m.ayahNumber,
+    global_index: m.globalIndex,
+    expected_char: m.expectedChar,
+    wrong_attempts: m.wrongAttempts,
+    timestamp: new Date(m.timestamp || Date.now()).toISOString()
+  }));
+
+  if (mistakeUpserts.length > 0) {
+    await supabase.from('mistake_stats').upsert(mistakeUpserts, { onConflict: 'user_id,surah_number,ayah_number,global_index,expected_char' });
+  }
 }
 
 let syncTimer: any = null;
 export function debouncedSyncLocalToCloud() {
   if (syncTimer) clearTimeout(syncTimer);
   syncTimer = setTimeout(() => {
-    syncLocalToCloud().catch(() => {});
+    syncLocalToCloud().catch(err => console.error("Background Sync Failed:", err));
   }, 3000);
 }
 
@@ -102,16 +80,84 @@ export function debouncedSyncLocalToCloud() {
  * Top-level Orchestrator: Pulls Cloud to Local, merges securely, and pushes the merged result back.
  */
 export async function syncCloudToLocal() {
-  const remote = await pullSyncPayload();
-  if (remote.empty || !remote.payload) {
-    // Brand new account, no cloud data. Push our local data to cloud immediately!
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  // 1. Pull Data
+  const [prefRes, progStateRes, surahRes, mistakeRes] = await Promise.all([
+    supabase.from('user_preferences').select('*').eq('user_id', user.id).single(),
+    supabase.from('current_progress_state').select('*').eq('user_id', user.id).single(),
+    supabase.from('surah_progress').select('*').eq('user_id', user.id),
+    supabase.from('mistake_stats').select('*').eq('user_id', user.id)
+  ]);
+
+  if (!prefRes.data && !progStateRes.data && (!surahRes.data || surahRes.data.length === 0)) {
+    // Brand new cloud account. Push our local dataset up fully!
     await syncLocalToCloud();
     return;
   }
-  
-  // Merge remote into local safely
-  applyRemotePayloadToLocal(remote.payload);
-  
-  // Immediately push the newly unified highest-index records back to Cloud
+
+  // 2. Safely merge Preferences (Time-Priority not strictly necessary as client init usually lacks it natively unless they modified offline)
+  if (prefRes.data) {
+    setStorage('theme', prefRes.data.theme);
+    setStorage('visibility_mode', prefRes.data.visibility_mode);
+    setStorage('keyboard', prefRes.data.show_keyboard.toString());
+  }
+
+  // 3. Current Progress State (Resume pointer)
+  if (progStateRes.data) {
+    // We update the Surah and the explicit local progress pointer
+    setStorage('surah', progStateRes.data.surah_number.toString());
+    setStorage(`quran_typing_progress_${progStateRes.data.surah_number}`, progStateRes.data.global_index.toString());
+  }
+
+  // 4. Safely merge historical Surah Progress (Max wins)
+  const localProgress = JSON.parse(getStorage('progress_stats') || '{}');
+  if (surahRes.data) {
+    surahRes.data.forEach(row => {
+      const s = row.surah_number.toString();
+      if (!localProgress[s]) {
+        localProgress[s] = {
+          surahNumber: row.surah_number,
+          highestIndexReached: row.highest_index_reached,
+          totalMistakeEvents: row.total_mistake_events,
+          totalWrongAttempts: row.total_wrong_attempts,
+          lastPracticed: new Date(row.last_practiced).getTime()
+        };
+      } else {
+        localProgress[s].highestIndexReached = Math.max(localProgress[s].highestIndexReached, row.highest_index_reached);
+        localProgress[s].totalMistakeEvents = Math.max(localProgress[s].totalMistakeEvents, row.total_mistake_events);
+        localProgress[s].totalWrongAttempts = Math.max(localProgress[s].totalWrongAttempts, row.total_wrong_attempts);
+        localProgress[s].lastPracticed = Math.max(localProgress[s].lastPracticed, new Date(row.last_practiced).getTime());
+      }
+    });
+    setStorage('progress_stats', JSON.stringify(localProgress));
+  }
+
+  // 5. Safely merge Mistake Stats (Logical Key based, Additive logic)
+  const localMistakes = JSON.parse(getStorage('mistake_stats') || '{}');
+  if (mistakeRes.data) {
+    mistakeRes.data.forEach(row => {
+      const key = `${row.surah_number}-${row.ayah_number}-${row.global_index}`;
+      if (!localMistakes[key]) {
+        localMistakes[key] = {
+          surahNumber: row.surah_number,
+          ayahNumber: row.ayah_number,
+          globalIndex: row.global_index,
+          expectedChar: row.expected_char,
+          wrongAttempts: row.wrong_attempts,
+          timestamp: new Date(row.timestamp).getTime()
+        };
+      } else {
+        // Sum the attempts if they somehow diverged, maintaining the oldest initial record as the baseline or capturing highest
+        localMistakes[key].wrongAttempts = Math.max(localMistakes[key].wrongAttempts, row.wrong_attempts);
+        localMistakes[key].timestamp = Math.max(localMistakes[key].timestamp, new Date(row.timestamp).getTime());
+      }
+    });
+    setStorage('mistake_stats', JSON.stringify(localMistakes));
+  }
+
+  // 6. Push unified results back up to Cloud guaranteeing synchronization max bounds
   await syncLocalToCloud();
 }
