@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { getSurah } from "@/lib/quran-data";
-import { loadMistakeStats, saveMistakeStats, loadProgressStats, saveProgressStats, MistakeRecord, ProgressStats } from "@/lib/stats";
+import { MistakeRecord, ProgressStats, loadMistakeStats, loadProgressStats, saveMistakeStats, saveProgressStats } from "@/lib/stats";
+import { getStorage, setStorage } from "@/lib/storage";
 
 // Helper to prevent verse markers from breaking to the next line
 const preserveMarkerSpacing = (str: string) => {
@@ -23,7 +24,7 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
   const [currentIndex, setCurrentIndex] = useState(() => {
     if (typeof window === "undefined") return 0;
     if (jumpTarget) return jumpTarget.index;
-    const saved = localStorage.getItem(`quran_typing_progress_${surahNumber}`);
+    const saved = getStorage(`quran_typing_progress_${surahNumber}`);
     return saved ? parseInt(saved, 10) || 0 : 0;
   });
 
@@ -31,12 +32,12 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
 
   const [visibilityMode, setVisibilityMode] = useState<VisibilityMode>(() => {
     if (typeof window === "undefined") return "hidden";
-    return (localStorage.getItem('quran_typing_visibility') as VisibilityMode) || "hidden";
+    return (getStorage('visibility_mode') as VisibilityMode) || "hidden";
   });
 
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window === "undefined") return false;
-    const saved = localStorage.getItem('quran_typing_theme');
+    const saved = getStorage('theme');
     if (saved) return saved === 'dark';
     return document.documentElement.classList.contains('dark') || window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
@@ -45,19 +46,19 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
 
   const [showKeyboard, setShowKeyboard] = useState(() => {
     if (typeof window === "undefined") return false;
-    return localStorage.getItem('quran_typing_keyboard') === 'true';
+    return getStorage('keyboard') === 'true';
   });
 
   const [sessionAttempts, setSessionAttempts] = useState(() => {
     if (typeof window === "undefined") return 0;
-    const saved = localStorage.getItem(`quran_typing_session_attempts_${surahNumber}`);
+    const saved = getStorage(`session_attempts_${surahNumber}`);
     return saved ? parseInt(saved, 10) || 0 : 0;
   });
 
   const [sessionMistakeIndices, setSessionMistakeIndices] = useState<Set<number>>(() => {
     if (typeof window === "undefined") return new Set();
     try {
-      const saved = localStorage.getItem(`quran_typing_session_mistake_indices_${surahNumber}`);
+      const saved = getStorage(`session_mistake_indices_${surahNumber}`);
       return saved ? new Set<number>(JSON.parse(saved)) : new Set<number>();
     } catch {
       return new Set<number>();
@@ -67,11 +68,11 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
   const sessionMistakes = sessionMistakeIndices.size;
 
   useEffect(() => {
-    localStorage.setItem(`quran_typing_session_attempts_${surahNumber}`, sessionAttempts.toString());
+    setStorage(`session_attempts_${surahNumber}`, sessionAttempts.toString());
   }, [sessionAttempts, surahNumber]);
 
   useEffect(() => {
-    localStorage.setItem(`quran_typing_session_mistake_indices_${surahNumber}`, JSON.stringify(Array.from(sessionMistakeIndices)));
+    setStorage(`session_mistake_indices_${surahNumber}`, JSON.stringify(Array.from(sessionMistakeIndices)));
   }, [sessionMistakeIndices, surahNumber]);
 
   const globalMistakesRef = useRef<Record<string, MistakeRecord>>({});
@@ -98,19 +99,19 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
   }, [jumpTarget]);
 
   useEffect(() => {
-    localStorage.setItem(`quran_typing_progress_${surahNumber}`, currentIndex.toString());
+    setStorage(`quran_typing_progress_${surahNumber}`, currentIndex.toString());
   }, [currentIndex, surahNumber]);
 
   useEffect(() => {
-    localStorage.setItem('quran_typing_visibility', visibilityMode);
+    setStorage('visibility_mode', visibilityMode);
   }, [visibilityMode]);
 
   useEffect(() => {
-    localStorage.setItem('quran_typing_keyboard', showKeyboard.toString());
+    setStorage('keyboard', showKeyboard.toString());
   }, [showKeyboard]);
 
   useEffect(() => {
-    localStorage.setItem('quran_typing_theme', isDarkMode ? 'dark' : 'light');
+    setStorage('theme', isDarkMode ? 'dark' : 'light');
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
     } else {

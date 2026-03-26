@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { TypingArea } from "@/components/TypingArea";
+import { AuthWidget } from "@/components/AuthWidget";
 import { getAllSurahsMeta, getSurah, getLocationByPage, getLocationByJuz } from "@/lib/quran-data";
 import { WeakSpot, getWeakSpots } from "@/lib/stats";
+import { getStorage, setStorage, getScopedKey } from "@/lib/storage";
 
 export default function Page() {
   const [surahNumber, setSurahNumber] = useState(1);
@@ -12,12 +14,15 @@ export default function Page() {
   const surahs = getAllSurahsMeta();
 
   useEffect(() => {
-    const savedSurah = localStorage.getItem('quran_typing_surah');
+    const savedSurah = getStorage('surah');
     if (savedSurah) {
       setSurahNumber(parseInt(savedSurah, 10));
+      setJumpTarget(null); // Clear any active jump targeting when switching contexts
+    } else {
+      setSurahNumber(1);
     }
     setIsMounted(true);
-  }, []);
+  }, [resetKey]);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,7 +48,7 @@ export default function Page() {
     const block = sData.blocks.find(b => b.ayahNumber === first.ayahNumber);
 
     setSurahNumber(first.surahNumber);
-    localStorage.setItem('quran_typing_surah', first.surahNumber.toString());
+    setStorage('surah', first.surahNumber.toString());
     setJumpTarget({ index: block ? block.globalCheckOffset : 0, ts: Date.now() });
     setIsMounted(true);
     setIsDropdownOpen(false);
@@ -58,7 +63,7 @@ export default function Page() {
       const block = sData.blocks.find(b => b.ayahNumber === spot.ayahNumber);
 
       setSurahNumber(spot.surahNumber);
-      localStorage.setItem('quran_typing_surah', spot.surahNumber.toString());
+      setStorage('surah', spot.surahNumber.toString());
       setJumpTarget({ index: block ? block.globalCheckOffset : 0, ts: Date.now() });
     } else {
       alert("Review complete! MashAllah.");
@@ -73,12 +78,12 @@ export default function Page() {
   };
 
   const clearAllMistakes = () => {
-    if (confirm("Are you sure you want to clear ALL mistake history across all Surahs? This cannot be undone.")) {
-      localStorage.removeItem('quran_typing_mistake_stats');
+    if (confirm("Are you sure you want to clear ALL mistake history for this account? This cannot be undone.")) {
+      localStorage.removeItem(getScopedKey('mistake_stats'));
       for (let i = 1; i <= 114; i++) {
-        localStorage.removeItem(`quran_typing_session_mistakes_${i}`);
-        localStorage.removeItem(`quran_typing_session_attempts_${i}`);
-        localStorage.removeItem(`quran_typing_session_mistake_indices_${i}`);
+        localStorage.removeItem(getScopedKey(`session_mistakes_${i}`));
+        localStorage.removeItem(getScopedKey(`session_attempts_${i}`));
+        localStorage.removeItem(getScopedKey(`session_mistake_indices_${i}`));
       }
       setReviewQueue([]);
       setCurrentReviewIndex(-1);
@@ -105,7 +110,7 @@ export default function Page() {
       const loc = getLocationByPage(val);
       if (loc) {
         setSurahNumber(loc.surahNumber);
-        localStorage.setItem('quran_typing_surah', loc.surahNumber.toString());
+        setStorage('surah', loc.surahNumber.toString());
         const sData = getSurah(loc.surahNumber);
         const block = sData.blocks.find(b => b.ayahNumber === loc.ayahNumber);
         if (block) setJumpTarget({ index: block.globalCheckOffset, ts: Date.now() });
@@ -117,7 +122,7 @@ export default function Page() {
       const loc = getLocationByJuz(val);
       if (loc) {
         setSurahNumber(loc.surahNumber);
-        localStorage.setItem('quran_typing_surah', loc.surahNumber.toString());
+        setStorage('surah', loc.surahNumber.toString());
         const sData = getSurah(loc.surahNumber);
         const block = sData.blocks.find(b => b.ayahNumber === loc.ayahNumber);
         if (block) setJumpTarget({ index: block.globalCheckOffset, ts: Date.now() });
@@ -192,7 +197,7 @@ export default function Page() {
                         onClick={() => {
                           setSurahNumber(s.number);
                           setJumpTarget(null);
-                          localStorage.setItem('quran_typing_surah', s.number.toString());
+                          setStorage('surah', s.number.toString());
                           setIsDropdownOpen(false);
                           setSearchQuery("");
                         }}
@@ -218,7 +223,8 @@ export default function Page() {
         </div>
 
         <div className="flex-1 flex justify-end items-center gap-3 pr-4">
-          
+          <AuthWidget onAuthChange={() => setResetKey(prev => prev + 1)} />
+
           {reviewQueue.length > 0 ? (
             <div className="flex items-center gap-3 bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/30 rounded-full pl-4 pr-1 py-1 shadow-sm shrink-0">
               <span className="text-xs font-bold text-orange-600 dark:text-orange-400 hidden sm:inline">

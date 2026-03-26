@@ -1,3 +1,5 @@
+import { getStorage, setStorage } from './storage';
+
 export interface MistakeRecord {
   surahNumber: number;
   ayahNumber: number;
@@ -18,7 +20,7 @@ export interface ProgressStats {
 export const loadMistakeStats = (): Record<string, MistakeRecord> => {
   if (typeof window === 'undefined') return {};
   try {
-    const data = localStorage.getItem('quran_typing_mistake_stats');
+    const data = getStorage('mistake_stats');
     return data ? JSON.parse(data) : {};
   } catch (e) {
     return {};
@@ -26,13 +28,14 @@ export const loadMistakeStats = (): Record<string, MistakeRecord> => {
 };
 
 export const saveMistakeStats = (stats: Record<string, MistakeRecord>) => {
-  localStorage.setItem('quran_typing_mistake_stats', JSON.stringify(stats));
+  setStorage('mistake_stats', JSON.stringify(stats));
+  if (typeof window !== "undefined") import('./sync-manager').then(m => m.debouncedSyncLocalToCloud());
 };
 
 export const loadProgressStats = (): Record<number, ProgressStats> => {
   if (typeof window === 'undefined') return {};
   try {
-    const data = localStorage.getItem('quran_typing_progress_stats');
+    const data = getStorage('progress_stats');
     return data ? JSON.parse(data) : {};
   } catch (e) {
     return {};
@@ -40,7 +43,8 @@ export const loadProgressStats = (): Record<number, ProgressStats> => {
 };
 
 export const saveProgressStats = (stats: Record<number, ProgressStats>) => {
-  localStorage.setItem('quran_typing_progress_stats', JSON.stringify(stats));
+  setStorage('progress_stats', JSON.stringify(stats));
+  if (typeof window !== "undefined") import('./sync-manager').then(m => m.debouncedSyncLocalToCloud());
 };
 
 export interface WeakSpot {
