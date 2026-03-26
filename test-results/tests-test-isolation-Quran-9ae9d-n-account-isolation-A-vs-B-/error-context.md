@@ -1,7 +1,7 @@
 # Page snapshot
 
 ```yaml
-- generic [ref=e1]:
+- generic [active] [ref=e1]:
   - generic [ref=e2]:
     - banner [ref=e3]:
       - heading "Qur'an Typing" [level=1] [ref=e5]
@@ -10,78 +10,81 @@
         - img [ref=e9]
       - generic [ref=e11]:
         - generic [ref=e12]:
-          - generic [ref=e13]:
-            - generic [ref=e14]: u2
-            - button "Synced" [ref=e15]: Synced
-          - button "Sign Out" [ref=e17]:
-            - img [ref=e18]
-        - generic [ref=e21]:
-          - button "Review Weak Spots" [ref=e22]:
-            - img [ref=e23]
-            - generic [ref=e26]: Review Weak Spots
-          - button "Clear All Mistake History" [ref=e27]:
-            - img [ref=e28]
-        - generic [ref=e32]:
-          - combobox [ref=e33] [cursor=pointer]:
+          - button "Sign In" [ref=e13]
+          - generic [ref=e15]:
+            - heading "Create Account" [level=3] [ref=e16]
+            - generic [ref=e17]:
+              - textbox "Email" [ref=e18]: u1@test.com
+              - textbox "Password (min 6)" [ref=e19]: password
+              - button "Sign Up" [ref=e20]
+            - button "Have an account? Sign in" [ref=e21]
+        - generic [ref=e22]:
+          - button "Review Weak Spots" [ref=e23]:
+            - img [ref=e24]
+            - generic [ref=e27]: Review Weak Spots
+          - button "Clear All Mistake History" [ref=e28]:
+            - img [ref=e29]
+        - generic [ref=e33]:
+          - combobox [ref=e34] [cursor=pointer]:
             - option "Ayah" [selected]
             - option "Page"
             - option "Juz"
-          - generic [ref=e34]:
-            - spinbutton [ref=e35]
-            - button "Jump" [active] [ref=e36]:
-              - img [ref=e37]
-    - main [ref=e39]:
-      - generic [ref=e41]:
-        - generic [ref=e42]:
-          - generic [ref=e43]:
-            - generic [ref=e44]: Ayah
-            - generic [ref=e45]: "1"
-          - generic [ref=e47]:
-            - generic [ref=e48]: Done
-            - generic [ref=e49]: 0.0%
-          - generic [ref=e51]:
-            - generic [ref=e52]: Errors
-            - generic [ref=e53]: "0"
-            - generic "Total attempts" [ref=e54]: (0)
-            - button "Reset Session Mistakes" [ref=e55]:
-              - img [ref=e56]
-        - generic [ref=e60]:
-          - generic [ref=e62]:
-            - generic [ref=e63]: ب
+          - generic [ref=e35]:
+            - spinbutton [ref=e36]
+            - button "Jump" [ref=e37]:
+              - img [ref=e38]
+    - main [ref=e40]:
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]:
+            - generic [ref=e45]: Ayah
+            - generic [ref=e46]: "1"
+          - generic [ref=e48]:
+            - generic [ref=e49]: Done
+            - generic [ref=e50]: 0.0%
+          - generic [ref=e52]:
+            - generic [ref=e53]: Errors
+            - generic [ref=e54]: "0"
+            - generic "Total attempts" [ref=e55]: (0)
+            - button "Reset Session Mistakes" [ref=e56]:
+              - img [ref=e57]
+        - generic [ref=e61]:
+          - generic [ref=e63]:
+            - generic [ref=e64]: ب
             - text: ِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
-            - generic [ref=e64]:
-              - generic [ref=e65]: ۝
-              - generic [ref=e66]: ١
-          - generic [ref=e67]:
+            - generic [ref=e65]:
+              - generic [ref=e66]: ۝
+              - generic [ref=e67]: ١
+          - generic [ref=e68]:
             - text: ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ
-            - generic [ref=e68]:
-              - generic [ref=e69]: ۝
-              - generic [ref=e70]: ٢
-          - generic [ref=e71]:
+            - generic [ref=e69]:
+              - generic [ref=e70]: ۝
+              - generic [ref=e71]: ٢
+          - generic [ref=e72]:
             - text: ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
-            - generic [ref=e72]:
-              - generic [ref=e73]: ۝
-              - generic [ref=e74]: ٣
-          - generic [ref=e75]:
+            - generic [ref=e73]:
+              - generic [ref=e74]: ۝
+              - generic [ref=e75]: ٣
+          - generic [ref=e76]:
             - text: مَٰلِكِ يَوْمِ ٱلدِّينِ
-            - generic [ref=e76]:
-              - generic [ref=e77]: ۝
-              - generic [ref=e78]: ٤
-          - generic [ref=e79]:
+            - generic [ref=e77]:
+              - generic [ref=e78]: ۝
+              - generic [ref=e79]: ٤
+          - generic [ref=e80]:
             - text: إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ
-            - generic [ref=e80]:
-              - generic [ref=e81]: ۝
-              - generic [ref=e82]: ٥
-          - generic [ref=e83]:
+            - generic [ref=e81]:
+              - generic [ref=e82]: ۝
+              - generic [ref=e83]: ٥
+          - generic [ref=e84]:
             - text: ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ
-            - generic [ref=e84]:
-              - generic [ref=e85]: ۝
-              - generic [ref=e86]: ٦
-          - generic [ref=e87]:
+            - generic [ref=e85]:
+              - generic [ref=e86]: ۝
+              - generic [ref=e87]: ٦
+          - generic [ref=e88]:
             - text: صِرَٰطَ ٱلَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ ٱلْمَغْضُوبِ عَلَيْهِمْ وَلَا ٱلضَّآلِّينَ
-            - generic [ref=e88]:
-              - generic [ref=e89]: ۝
-              - generic [ref=e90]: ٧
+            - generic [ref=e89]:
+              - generic [ref=e90]: ۝
+              - generic [ref=e91]: ٧
         - generic:
           - generic:
             - generic:
@@ -128,20 +131,20 @@
                 - img
                 - generic: Backspace
               - button "SPACE"
-        - generic [ref=e91]:
-          - button "Hidden" [ref=e92]:
-            - img [ref=e93]
-          - button "Active Ayah" [ref=e97]:
-            - img [ref=e98]
-          - button "Show All" [ref=e101]:
-            - img [ref=e102]
-          - button "On-Screen Keyboard" [ref=e106]:
-            - img [ref=e107]
-          - button "Rewrite Surah" [ref=e110]:
-            - img [ref=e111]
-          - button "Toggle Night/Day Mode" [ref=e114]:
-            - img [ref=e115]
-  - button "Open Next.js Dev Tools" [ref=e122] [cursor=pointer]:
-    - img [ref=e123]
-  - alert [ref=e126]
+        - generic [ref=e92]:
+          - button "Hidden" [ref=e93]:
+            - img [ref=e94]
+          - button "Active Ayah" [ref=e98]:
+            - img [ref=e99]
+          - button "Show All" [ref=e102]:
+            - img [ref=e103]
+          - button "On-Screen Keyboard" [ref=e107]:
+            - img [ref=e108]
+          - button "Rewrite Surah" [ref=e111]:
+            - img [ref=e112]
+          - button "Toggle Night/Day Mode" [ref=e115]:
+            - img [ref=e116]
+  - button "Open Next.js Dev Tools" [ref=e123] [cursor=pointer]:
+    - img [ref=e124]
+  - alert [ref=e127]
 ```
