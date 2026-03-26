@@ -1,15 +1,70 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TypingArea } from "@/components/TypingArea";
-import { getAllSurahsMeta } from "@/lib/quran-data";
+import { getAllSurahsMeta, getSurah, getLocationByPage, getLocationByJuz } from "@/lib/quran-data";
 
 export default function Page() {
   const [surahNumber, setSurahNumber] = useState(1);
+  const [isMounted, setIsMounted] = useState(false);
   const surahs = getAllSurahsMeta();
+
+  useEffect(() => {
+    const savedSurah = localStorage.getItem('quran_typing_surah');
+    if (savedSurah) {
+      setSurahNumber(parseInt(savedSurah, 10));
+    }
+    setIsMounted(true);
+  }, []);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  
+  const [jumpTarget, setJumpTarget] = useState<{index: number, ts: number} | null>(null);
+  const [jumpMode, setJumpMode] = useState<'ayah' | 'page' | 'juz'>('ayah');
+  const [jumpValue, setJumpValue] = useState("");
+
+  const handleJump = (e: React.FormEvent) => {
+    e.preventDefault();
+    const val = parseInt(jumpValue);
+    if (!val || val < 1) return;
+
+    if (jumpMode === 'ayah') {
+      const sData = getSurah(surahNumber);
+      const block = sData.blocks.find(b => b.ayahNumber === val);
+      if (block) {
+        setJumpTarget({ index: block.globalCheckOffset, ts: Date.now() });
+        setJumpValue("");
+        setIsMounted(true); // ensure it's rendered
+      } else {
+        alert("Ayah not found in this Surah");
+      }
+    } else if (jumpMode === 'page') {
+      const loc = getLocationByPage(val);
+      if (loc) {
+        setSurahNumber(loc.surahNumber);
+        localStorage.setItem('quran_typing_surah', loc.surahNumber.toString());
+        const sData = getSurah(loc.surahNumber);
+        const block = sData.blocks.find(b => b.ayahNumber === loc.ayahNumber);
+        if (block) setJumpTarget({ index: block.globalCheckOffset, ts: Date.now() });
+        setJumpValue("");
+      } else {
+        alert("Page not found");
+      }
+    } else if (jumpMode === 'juz') {
+      const loc = getLocationByJuz(val);
+      if (loc) {
+        setSurahNumber(loc.surahNumber);
+        localStorage.setItem('quran_typing_surah', loc.surahNumber.toString());
+        const sData = getSurah(loc.surahNumber);
+        const block = sData.blocks.find(b => b.ayahNumber === loc.ayahNumber);
+        if (block) setJumpTarget({ index: block.globalCheckOffset, ts: Date.now() });
+        setJumpValue("");
+      } else {
+        alert("Juz not found");
+      }
+    }
+  };
 
   const filteredSurahs = surahs.filter(s => 
     s.englishName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -74,6 +129,8 @@ export default function Page() {
                         key={s.number}
                         onClick={() => {
                           setSurahNumber(s.number);
+                          setJumpTarget(null);
+                          localStorage.setItem('quran_typing_surah', s.number.toString());
                           setIsDropdownOpen(false);
                           setSearchQuery("");
                         }}
@@ -98,15 +155,49 @@ export default function Page() {
           )}
         </div>
 
-        <div className="flex-1 flex justify-end">
-          {/* PH: Right-side header controls if needed */}
+        <div className="flex-1 flex justify-end items-center pr-4">
+          {/* COMPACT JUMP CONTROL */}
+          <div className="flex items-center">
+            <div className="flex bg-neutral-50 dark:bg-neutral-800 rounded-full border border-neutral-200 dark:border-neutral-700 overflow-hidden shadow-sm h-10 w-fit">
+              <select 
+                className="bg-transparent pl-4 pr-1 text-xs font-medium text-neutral-700 dark:text-neutral-200 focus:outline-none border-r border-neutral-200 dark:border-neutral-700 cursor-pointer appearance-none"
+                value={jumpMode}
+                onChange={(e) => {
+                  setJumpMode(e.target.value as any);
+                  setJumpValue("");
+                }}
+              >
+                <option value="ayah">Ayah</option>
+                <option value="page">Page</option>
+                <option value="juz">Juz</option>
+              </select>
+              
+              <form onSubmit={handleJump} className="flex items-center">
+                <input 
+                  type="number"
+                  min="1"
+                  placeholder={jumpMode === 'ayah' ? 'No.' : jumpMode === 'page' ? '1-604' : '1-30'}
+                  className="w-14 sm:w-20 bg-transparent px-3 text-xs font-mono text-neutral-700 dark:text-neutral-200 focus:outline-none placeholder-neutral-400"
+                  value={jumpValue}
+                  onChange={(e) => setJumpValue(e.target.value)}
+                />
+                <button 
+                  type="submit"
+                  title="Jump"
+                  className="px-3 text-[#D6C19E] hover:text-[#C1A063] transition-colors focus:outline-none"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
       </header>
 
       {/* MAIN CONTENT AREA */}
       <main className="flex-1 flex flex-col items-center justify-start min-h-screen relative pt-16">
         <div className="w-full flex-1 flex flex-col items-center pb-12 pt-12 md:pt-16">
-          <TypingArea key={surahNumber} surahNumber={surahNumber} />
+          {isMounted && <TypingArea key={surahNumber} surahNumber={surahNumber} jumpTarget={jumpTarget} />}
         </div>
       </main>
 

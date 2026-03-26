@@ -10,34 +10,73 @@ const preserveMarkerSpacing = (str: string) => {
 
 interface TypingAreaProps {
   surahNumber: number;
+  jumpTarget?: { index: number; ts: number } | null;
 }
 
 type VisibilityMode = "hidden" | "ayah" | "all";
 
-export function TypingArea({ surahNumber }: TypingAreaProps) {
+export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
   const pageData = getSurah(surahNumber);
   const { globalCheckString } = pageData;
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    if (typeof window === "undefined") return 0;
+    if (jumpTarget) return jumpTarget.index;
+    const saved = localStorage.getItem(`quran_typing_progress_${surahNumber}`);
+    return saved ? parseInt(saved, 10) || 0 : 0;
+  });
+  
   const [wrongChar, setWrongChar] = useState<string | null>(null);
-  const [visibilityMode, setVisibilityMode] = useState<VisibilityMode>("hidden");
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  
+  const [visibilityMode, setVisibilityMode] = useState<VisibilityMode>(() => {
+    if (typeof window === "undefined") return "hidden";
+    return (localStorage.getItem('quran_typing_visibility') as VisibilityMode) || "hidden";
+  });
+  
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const saved = localStorage.getItem('quran_typing_theme');
+    if (saved) return saved === 'dark';
+    return document.documentElement.classList.contains('dark') || window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+  
   const [isAtBottom, setIsAtBottom] = useState(false);
-  const [showKeyboard, setShowKeyboard] = useState(false);
+  
+  const [showKeyboard, setShowKeyboard] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem('quran_typing_keyboard') === 'true';
+  });
 
   const [cursorPos, setCursorPos] = useState({ top: 0, left: 0, width: 0, height: 0 });
   const targetRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (document.documentElement.classList.contains('dark') || window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setIsDarkMode(true);
+    if (jumpTarget) {
+      setCurrentIndex(jumpTarget.index);
+    }
+  }, [jumpTarget]);
+
+  useEffect(() => {
+    localStorage.setItem(`quran_typing_progress_${surahNumber}`, currentIndex.toString());
+  }, [currentIndex, surahNumber]);
+
+  useEffect(() => {
+    localStorage.setItem('quran_typing_visibility', visibilityMode);
+  }, [visibilityMode]);
+
+  useEffect(() => {
+    localStorage.setItem('quran_typing_keyboard', showKeyboard.toString());
+  }, [showKeyboard]);
+
+  useEffect(() => {
+    localStorage.setItem('quran_typing_theme', isDarkMode ? 'dark' : 'light');
+    if (isDarkMode) {
       document.documentElement.classList.add('dark');
     } else {
-      setIsDarkMode(false);
       document.documentElement.classList.remove('dark');
     }
-  }, []);
+  }, [isDarkMode]);
 
   const toggleTheme = () => {
     const nextMode = !isDarkMode;

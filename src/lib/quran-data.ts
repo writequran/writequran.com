@@ -115,6 +115,28 @@ export const getAllSurahsMeta = (): QuranSurahMeta[] => {
   }));
 };
 
+export const getLocationByPage = (pageNumber: number) => {
+  for (const surah of quranJson.data.surahs) {
+    for (const ayah of surah.ayahs) {
+      if (ayah.page === pageNumber) {
+        return { surahNumber: surah.number, ayahNumber: ayah.numberInSurah };
+      }
+    }
+  }
+  return null;
+};
+
+export const getLocationByJuz = (juzNumber: number) => {
+  for (const surah of quranJson.data.surahs) {
+    for (const ayah of surah.ayahs) {
+      if (ayah.juz === juzNumber) {
+        return { surahNumber: surah.number, ayahNumber: ayah.numberInSurah };
+      }
+    }
+  }
+  return null;
+};
+
 export const getSurah = (surahNumber: number): SurahTypingData => {
   const surah = quranJson.data.surahs.find((s: any) => s.number === surahNumber);
   const blocksData: MushafBlock[] = [];
