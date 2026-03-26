@@ -75,8 +75,8 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
       // This is more robust than offsetTop when nested in grids/relative containers.
       setCursorPos({
         top: targetRect.top - containerRect.top,
-        left: targetRect.left - containerRect.left,
-        width: targetRect.width,
+        left: targetRect.left - containerRect.left - 5,
+        width: targetRect.width + 10,
         height: targetRect.height,
       });
     }
@@ -212,7 +212,7 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
       >
         <div className="absolute inset-2 border-2 border-[#D6C19E] dark:border-neutral-700 opacity-50 pointer-events-none" />
 
-        <div 
+        <div
           ref={containerRef}
           className="w-full text-[2.2rem] leading-[2.8] text-justify mushaf-rules relative" style={{ textAlignLast: 'center' }}
         >
@@ -252,8 +252,8 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
                       return (
                         <span className="inline">
                           {renderTextWithMarkers(typedSpan, "typed")}
-                          <span 
-                            ref={targetRef} 
+                          <span
+                            ref={targetRef}
                             className="relative inline"
                           >
                             {renderTextWithMarkers(targetChar, showHint ? "hint" : "hidden")}
@@ -269,82 +269,82 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
             );
           })}
 
-            {currentIndex < globalCheckString.length && (
-              <div
-                className="absolute pointer-events-none flex items-center justify-center transition-all duration-75 text-[2.5rem] leading-[2.6] z-10"
-                style={{
-                  top: cursorPos.top,
-                  left: cursorPos.left,
-                  width: cursorPos.width,
-                  height: cursorPos.height,
-                }}
-              >
-                {wrongChar ? (
-                  <>
-                    <span
-                      className="absolute top-[10%] bottom-[10%] left-[2px] w-[2px] rounded-full animate-flicker"
-                      style={{
-                        background: "linear-gradient(to bottom, transparent, #ff2d2d, #ff4d4d, transparent)",
-                        boxShadow: "0 0 8px rgba(255,45,45,0.45)"
-                      }}
-                    />
-                    <span
-                      className="absolute top-[10%] bottom-[10%] right-[2px] w-[2px] rounded-full animate-flicker"
-                      style={{
-                        background: "linear-gradient(to bottom, transparent, #ff2d2d, #ff4d4d, transparent)",
-                        boxShadow: "0 0 8px rgba(255,45,45,0.45)"
-                      }}
-                    />
-                    <span
-                      className="absolute -bottom-1 left-0 right-0 h-[5px] rounded-full"
-                      style={{
-                        background: "#ff3b3b",
-                        boxShadow: "0 0 12px 3px rgba(255,59,59,0.50)"
-                      }}
-                    />
-                    <span className="relative z-10 text-red-600 dark:text-red-400 font-medium">
-                      {wrongChar}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <span
-                      className="absolute top-[10%] bottom-[10%] left-[2px] w-[2px] rounded-full animate-flicker"
-                      style={{
-                        background: isDarkMode
-                          ? "linear-gradient(to bottom, transparent, #F4D58D, transparent)"
-                          : "linear-gradient(to bottom, transparent, #D8BA72, transparent)",
-                        boxShadow: isDarkMode
-                          ? "0 0 6px rgba(244,213,141,0.42)"
-                          : "0 0 5px rgba(216,186,114,0.30)"
-                      }}
-                    />
-                    <span
-                      className="absolute top-[10%] bottom-[10%] right-[2px] w-[2px] rounded-full animate-flicker"
-                      style={{
-                        background: isDarkMode
-                          ? "linear-gradient(to bottom, transparent, #F4D58D, transparent)"
-                          : "linear-gradient(to bottom, transparent, #D8BA72, transparent)",
-                        boxShadow: isDarkMode
-                          ? "0 0 6px rgba(244,213,141,0.42)"
-                          : "0 0 5px rgba(216,186,114,0.30)"
-                      }}
-                    />
-                    <span
-                      className="absolute -bottom-1 left-0 right-0 h-[5px] rounded-full"
-                      style={{
-                        background: isDarkMode ? "#FFD98A" : "#E3C57A",
-                        boxShadow: isDarkMode
-                          ? "inset 0 0 0 1px rgba(255,255,255,0.75), 0 0 12px 2px rgba(255,217,138,0.50)"
-                          : "inset 0 0 0 1px rgba(255,255,255,0.95), 0 2px 7px rgba(55,42,14,0.34)"
-                      }}
-                    />
-                  </>
-                )}
-              </div>
-            )}
-          </div>
+          {currentIndex < globalCheckString.length && (
+            <div
+              className="absolute pointer-events-none flex items-center justify-center transition-all duration-75 text-[2.5rem] leading-[2.6] z-10"
+              style={{
+                top: cursorPos.top,
+                left: cursorPos.left,
+                width: cursorPos.width,
+                height: cursorPos.height,
+              }}
+            >
+              {wrongChar ? (
+                <>
+                  <span
+                    className="absolute top-[10%] bottom-[10%] left-[2px] w-[2px] rounded-full animate-flicker"
+                    style={{
+                      background: "linear-gradient(to bottom, transparent, #ff2d2d, #ff4d4d, transparent)",
+                      boxShadow: "0 0 8px rgba(255,45,45,0.45)"
+                    }}
+                  />
+                  <span
+                    className="absolute top-[10%] bottom-[10%] right-[2px] w-[2px] rounded-full animate-flicker"
+                    style={{
+                      background: "linear-gradient(to bottom, transparent, #ff2d2d, #ff4d4d, transparent)",
+                      boxShadow: "0 0 8px rgba(255,45,45,0.45)"
+                    }}
+                  />
+                  <span
+                    className="absolute -bottom-1 left-0 right-0 h-[5px] rounded-full"
+                    style={{
+                      background: "#ff3b3b",
+                      boxShadow: "0 0 12px 3px rgba(255,59,59,0.50)"
+                    }}
+                  />
+                  <span className="relative z-10 text-red-600 dark:text-red-400 font-medium">
+                    {wrongChar}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span
+                    className="absolute top-[10%] bottom-[10%] left-[2px] w-[2px] rounded-full animate-flicker"
+                    style={{
+                      background: isDarkMode
+                        ? "linear-gradient(to bottom, transparent, #F4D58D, transparent)"
+                        : "linear-gradient(to bottom, transparent, #D8BA72, transparent)",
+                      boxShadow: isDarkMode
+                        ? "0 0 6px rgba(244,213,141,0.42)"
+                        : "0 0 5px rgba(216,186,114,0.30)"
+                    }}
+                  />
+                  <span
+                    className="absolute top-[10%] bottom-[10%] right-[2px] w-[2px] rounded-full animate-flicker"
+                    style={{
+                      background: isDarkMode
+                        ? "linear-gradient(to bottom, transparent, #F4D58D, transparent)"
+                        : "linear-gradient(to bottom, transparent, #D8BA72, transparent)",
+                      boxShadow: isDarkMode
+                        ? "0 0 6px rgba(244,213,141,0.42)"
+                        : "0 0 5px rgba(216,186,114,0.30)"
+                    }}
+                  />
+                  <span
+                    className="absolute -bottom-1 left-0 right-0 h-[5px] rounded-full"
+                    style={{
+                      background: isDarkMode ? "#FFD98A" : "#E3C57A",
+                      boxShadow: isDarkMode
+                        ? "inset 0 0 0 1px rgba(255,255,255,0.75), 0 0 12px 2px rgba(255,217,138,0.50)"
+                        : "inset 0 0 0 1px rgba(255,255,255,0.95), 0 2px 7px rgba(55,42,14,0.34)"
+                    }}
+                  />
+                </>
+              )}
+            </div>
+          )}
         </div>
+      </div>
 
       <div
         className={`fixed bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#FDFBF7] dark:from-[#121212] via-[#FDFBF7]/80 dark:via-[#121212]/80 to-transparent pointer-events-none z-30 transition-opacity duration-700 ease-in-out ${isAtBottom || showKeyboard ? 'opacity-0' : 'opacity-100'}`}
