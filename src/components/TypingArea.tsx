@@ -334,7 +334,7 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
       } else if (mode === "hidden") {
         colorClass = "text-transparent";
       } else if (mode === "mistake") {
-        colorClass = "text-[#f97316] dark:text-[#fb923c]";
+        colorClass = "text-[#faac23] dark:text-[#faac23]";
       }
 
       return (
@@ -349,14 +349,14 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
     const clusters = [];
     for (let i = 0; i < localIndexLimit; i++) {
       const start = block.mapping[i];
-      const end = (i + 1 === block.mapping.length) 
-          ? block.displayString.length 
-          : block.mapping[i + 1];
-      
+      const end = (i + 1 === block.mapping.length)
+        ? block.displayString.length
+        : block.mapping[i + 1];
+
       const cluster = block.displayString.slice(start, end);
       const globalIdx = blockStart + i;
       const isMistake = sessionMistakeIndices.has(globalIdx);
-      
+
       clusters.push(
         <span key={globalIdx} className="inline">
           {renderTextWithMarkers(cluster, isMistake ? "mistake" : "typed")}
