@@ -3,10 +3,12 @@
 import { useState, useEffect } from "react";
 import { TypingArea } from "@/components/TypingArea";
 import { getAllSurahsMeta, getSurah, getLocationByPage, getLocationByJuz } from "@/lib/quran-data";
+import { WeakSpot, getWeakSpots } from "@/lib/stats";
 
 export default function Page() {
   const [surahNumber, setSurahNumber] = useState(1);
   const [isMounted, setIsMounted] = useState(false);
+  const [resetKey, setResetKey] = useState(0);
   const surahs = getAllSurahsMeta();
 
   useEffect(() => {
@@ -23,6 +25,66 @@ export default function Page() {
   const [jumpTarget, setJumpTarget] = useState<{index: number, ts: number} | null>(null);
   const [jumpMode, setJumpMode] = useState<'ayah' | 'page' | 'juz'>('ayah');
   const [jumpValue, setJumpValue] = useState("");
+
+  const [reviewQueue, setReviewQueue] = useState<WeakSpot[]>([]);
+  const [currentReviewIndex, setCurrentReviewIndex] = useState(-1);
+
+  const startReview = () => {
+    const spots = getWeakSpots();
+    if (spots.length === 0) {
+      alert("No mistakes logged yet! Keep practicing to build your stats.");
+      return;
+    }
+    setReviewQueue(spots);
+    setCurrentReviewIndex(0);
+    
+    const first = spots[0];
+    const sData = getSurah(first.surahNumber);
+    const block = sData.blocks.find(b => b.ayahNumber === first.ayahNumber);
+
+    setSurahNumber(first.surahNumber);
+    localStorage.setItem('quran_typing_surah', first.surahNumber.toString());
+    setJumpTarget({ index: block ? block.globalCheckOffset : 0, ts: Date.now() });
+    setIsMounted(true);
+    setIsDropdownOpen(false);
+  };
+
+  const nextReviewSpot = () => {
+    if (currentReviewIndex + 1 < reviewQueue.length) {
+      const nextIdx = currentReviewIndex + 1;
+      setCurrentReviewIndex(nextIdx);
+      const spot = reviewQueue[nextIdx];
+      const sData = getSurah(spot.surahNumber);
+      const block = sData.blocks.find(b => b.ayahNumber === spot.ayahNumber);
+
+      setSurahNumber(spot.surahNumber);
+      localStorage.setItem('quran_typing_surah', spot.surahNumber.toString());
+      setJumpTarget({ index: block ? block.globalCheckOffset : 0, ts: Date.now() });
+    } else {
+      alert("Review complete! MashAllah.");
+      setReviewQueue([]);
+      setCurrentReviewIndex(-1);
+    }
+  };
+
+  const exitReview = () => {
+    setReviewQueue([]);
+    setCurrentReviewIndex(-1);
+  };
+
+  const clearAllMistakes = () => {
+    if (confirm("Are you sure you want to clear ALL mistake history across all Surahs? This cannot be undone.")) {
+      localStorage.removeItem('quran_typing_mistake_stats');
+      for (let i = 1; i <= 114; i++) {
+        localStorage.removeItem(`quran_typing_session_mistakes_${i}`);
+        localStorage.removeItem(`quran_typing_session_attempts_${i}`);
+        localStorage.removeItem(`quran_typing_session_mistake_indices_${i}`);
+      }
+      setReviewQueue([]);
+      setCurrentReviewIndex(-1);
+      setResetKey(prev => prev + 1);
+    }
+  };
 
   const handleJump = (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,9 +217,53 @@ export default function Page() {
           )}
         </div>
 
-        <div className="flex-1 flex justify-end items-center pr-4">
+        <div className="flex-1 flex justify-end items-center gap-3 pr-4">
+          
+          {reviewQueue.length > 0 ? (
+            <div className="flex items-center gap-3 bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/30 rounded-full pl-4 pr-1 py-1 shadow-sm shrink-0">
+              <span className="text-xs font-bold text-orange-600 dark:text-orange-400 hidden sm:inline">
+                Reviewing {currentReviewIndex + 1}/{reviewQueue.length}
+              </span>
+              <span className="text-xs font-bold text-orange-600 dark:text-orange-400 sm:hidden">
+                {currentReviewIndex + 1}/{reviewQueue.length}
+              </span>
+              <button 
+                onClick={nextReviewSpot} 
+                className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-colors shadow-sm"
+              >
+                Next Spot
+              </button>
+              <button 
+                onClick={exitReview} 
+                className="w-7 h-7 flex items-center justify-center text-orange-500 hover:bg-orange-100 dark:hover:bg-orange-500/20 rounded-full transition-colors ml-1" 
+                title="Exit Review"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={startReview}
+                className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E] dark:hover:border-orange-600 hover:text-orange-500 rounded-full text-xs font-bold text-neutral-600 dark:text-neutral-300 transition-all shadow-sm shrink-0"
+                title="Review Weak Spots"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
+                <span className="hidden sm:inline">Review Weak Spots</span>
+              </button>
+              
+              <button 
+                onClick={clearAllMistakes}
+                className="flex items-center justify-center w-8 h-8 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-red-300 dark:hover:border-red-600 hover:text-red-500 rounded-full text-neutral-400 transition-all shadow-sm shrink-0"
+                title="Clear All Mistake History"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+              </button>
+            </div>
+          )}
+
           {/* COMPACT JUMP CONTROL */}
-          <div className="flex items-center">
+          <div className="hidden md:flex items-center">
             <div className="flex bg-neutral-50 dark:bg-neutral-800 rounded-full border border-neutral-200 dark:border-neutral-700 overflow-hidden shadow-sm h-10 w-fit">
               <select 
                 className="bg-transparent pl-4 pr-1 text-xs font-medium text-neutral-700 dark:text-neutral-200 focus:outline-none border-r border-neutral-200 dark:border-neutral-700 cursor-pointer appearance-none"
@@ -197,7 +303,7 @@ export default function Page() {
       {/* MAIN CONTENT AREA */}
       <main className="flex-1 flex flex-col items-center justify-start min-h-screen relative pt-16">
         <div className="w-full flex-1 flex flex-col items-center pb-12 pt-12 md:pt-16">
-          {isMounted && <TypingArea key={surahNumber} surahNumber={surahNumber} jumpTarget={jumpTarget} />}
+          {isMounted && <TypingArea key={`${surahNumber}-${resetKey}`} surahNumber={surahNumber} jumpTarget={jumpTarget} />}
         </div>
       </main>
 
