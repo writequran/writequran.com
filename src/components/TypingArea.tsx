@@ -48,25 +48,31 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
     return localStorage.getItem('quran_typing_keyboard') === 'true';
   });
 
-  const [sessionMistakes, setSessionMistakes] = useState(() => {
-    if (typeof window === "undefined") return 0;
-    const saved = localStorage.getItem(`quran_typing_session_mistakes_${surahNumber}`);
-    return saved ? parseInt(saved, 10) || 0 : 0;
-  });
-
   const [sessionAttempts, setSessionAttempts] = useState(() => {
     if (typeof window === "undefined") return 0;
     const saved = localStorage.getItem(`quran_typing_session_attempts_${surahNumber}`);
     return saved ? parseInt(saved, 10) || 0 : 0;
   });
 
-  useEffect(() => {
-    localStorage.setItem(`quran_typing_session_mistakes_${surahNumber}`, sessionMistakes.toString());
-  }, [sessionMistakes, surahNumber]);
+  const [sessionMistakeIndices, setSessionMistakeIndices] = useState<Set<number>>(() => {
+    if (typeof window === "undefined") return new Set();
+    try {
+      const saved = localStorage.getItem(`quran_typing_session_mistake_indices_${surahNumber}`);
+      return saved ? new Set<number>(JSON.parse(saved)) : new Set<number>();
+    } catch {
+      return new Set<number>();
+    }
+  });
+
+  const sessionMistakes = sessionMistakeIndices.size;
 
   useEffect(() => {
     localStorage.setItem(`quran_typing_session_attempts_${surahNumber}`, sessionAttempts.toString());
   }, [sessionAttempts, surahNumber]);
+
+  useEffect(() => {
+    localStorage.setItem(`quran_typing_session_mistake_indices_${surahNumber}`, JSON.stringify(Array.from(sessionMistakeIndices)));
+  }, [sessionMistakeIndices, surahNumber]);
 
   const globalMistakesRef = useRef<Record<string, MistakeRecord>>({});
   const globalProgressRef = useRef<Record<number, ProgressStats>>({});
@@ -172,8 +178,8 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
 
   const handleResetSessionStats = () => {
     if (confirm("Reset mistake counter for this Surah?")) {
-      setSessionMistakes(0);
       setSessionAttempts(0);
+      setSessionMistakeIndices(new Set());
     }
   };
 
@@ -243,9 +249,18 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
         };
         p.totalMistakeEvents += 1;
         p.totalWrongAttempts += 1;
-        setSessionMistakes(s => s + 1);
         setSessionAttempts(s => s + 1);
       }
+
+      setSessionMistakeIndices(prev => {
+        if (!prev.has(currentIndex)) {
+          const next = new Set(prev);
+          next.add(currentIndex);
+          return next;
+        }
+        return prev;
+      });
+
       p.lastPracticed = Date.now();
 
       progress[surahNumber] = p;
@@ -285,7 +300,7 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  type TextMode = "typed" | "hint" | "hidden";
+  type TextMode = "typed" | "hint" | "hidden" | "mistake";
 
   const renderTextWithMarkers = (text: string, mode: TextMode) => {
     if (!text) return null;
@@ -311,20 +326,44 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
       }
 
       let colorClass = "";
+      let customStyle = {};
       if (mode === "typed") {
         colorClass = "text-[#2A2826] dark:text-neutral-100";
       } else if (mode === "hint") {
         colorClass = "text-neutral-400/60 dark:text-neutral-600/50";
       } else if (mode === "hidden") {
         colorClass = "text-transparent";
+      } else if (mode === "mistake") {
+        colorClass = "text-[#f97316] dark:text-[#fb923c]";
       }
 
       return (
-        <span key={i} className={`${colorClass} transition-colors duration-300`}>
+        <span key={i} className={`${colorClass} transition-colors duration-300`} style={customStyle}>
           {part}
         </span>
       );
     });
+  };
+
+  const renderTypedSpan = (block: any, blockStart: number, localIndexLimit: number) => {
+    const clusters = [];
+    for (let i = 0; i < localIndexLimit; i++) {
+      const start = block.mapping[i];
+      const end = (i + 1 === block.mapping.length) 
+          ? block.displayString.length 
+          : block.mapping[i + 1];
+      
+      const cluster = block.displayString.slice(start, end);
+      const globalIdx = blockStart + i;
+      const isMistake = sessionMistakeIndices.has(globalIdx);
+      
+      clusters.push(
+        <span key={globalIdx} className="inline">
+          {renderTextWithMarkers(cluster, isMistake ? "mistake" : "typed")}
+        </span>
+      );
+    }
+    return clusters;
   };
 
   return (
@@ -403,7 +442,7 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
             return (
               <span key={blockIndex}>
                 {isFinished ? (
-                  renderTextWithMarkers(block.displayString, "typed")
+                  renderTypedSpan(block, blockStart, block.mapping.length)
                 ) : isFuture ? (
                   renderTextWithMarkers(block.displayString, showHint ? "hint" : "hidden")
                 ) : (
@@ -412,13 +451,12 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
                       const localIndex = currentIndex - blockStart;
                       const currentDisplayIndex = block.mapping[localIndex] || 0;
 
-                      const typedSpan = block.displayString.slice(0, currentDisplayIndex);
                       const targetChar = block.displayString[currentDisplayIndex] || "";
                       const untypedSpan = block.displayString.slice(currentDisplayIndex + 1);
 
                       return (
                         <span className="inline">
-                          {renderTextWithMarkers(typedSpan, "typed")}
+                          {renderTypedSpan(block, blockStart, localIndex)}
                           <span
                             ref={targetRef}
                             className="relative inline"
