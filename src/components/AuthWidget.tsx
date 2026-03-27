@@ -11,6 +11,7 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const supabase = createClient();
 
@@ -43,6 +44,7 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     try {
       let res;
       if (isLogin) {
@@ -52,7 +54,7 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
       }
       
       if (res.error) throw res.error;
-      if (!res.data.user) throw new Error("Authentication failed");
+      if (!res.data.user) throw new Error("Authentication failed. Please try again.");
       
       setActiveUserId(res.data.user.id);
       setUser({ id: res.data.user.id, email: res.data.user.email || '' });
@@ -63,14 +65,13 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
       setSyncing(false);
       onAuthChange();
     } catch (err: any) {
-      alert(err.message);
+      setError(err.message || 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleLogout = async () => {
-    if (!confirm("Sign out? Your progress will remain locally but won't sync until you sign back in.")) return;
     setLoading(true);
     await supabase.auth.signOut();
     setActiveUserId(null);
@@ -82,7 +83,9 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
   const forceSync = async () => {
     if (syncing) return;
     setSyncing(true);
-    await syncLocalToCloud().catch(err => alert("Sync Failed: " + err.message));
+    await syncLocalToCloud().catch(err => {
+      console.error('Sync failed:', err.message);
+    });
     setSyncing(false);
   };
 
@@ -101,6 +104,7 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
               <form onSubmit={handleAuth} className="flex flex-col gap-2">
                 <input required type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
                 <input required type="password" placeholder="Password (min 6)" value={password} onChange={e => setPassword(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
+                {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
                 <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-2 transition-colors">
                   {loading ? 'Processing...' : isLogin ? 'Sign In' : 'Sign Up'}
                 </button>

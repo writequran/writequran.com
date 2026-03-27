@@ -147,7 +147,7 @@ export default function Page() {
       {/* FIXED TOP HEADER */}
       <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 flex items-center px-6 z-[60] shadow-sm">
         <div className="flex-1 flex items-center">
-          <h1 className="text-lg font-bold text-neutral-800 dark:text-neutral-100 tracking-tight">Qur'an Typing</h1>
+          <h1 className="text-lg font-bold text-neutral-800 dark:text-neutral-100 tracking-tight">WriteQuran</h1>
         </div>
 
         <div className="relative flex-1 flex justify-center">

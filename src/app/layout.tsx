@@ -14,8 +14,8 @@ const scheherazade = Scheherazade_New({
 });
 
 export const metadata: Metadata = {
-  title: "Qur'an Typing App",
-  description: "A minimal web app for typing and memorizing the Qur'an.",
+  title: "WriteQuran",
+  description: "Practice writing and memorizing the Qur'an, letter by letter.",
 };
 
 export default function RootLayout({

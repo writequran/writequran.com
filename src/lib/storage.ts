@@ -40,7 +40,6 @@ export function migrateLegacyLocalStorage() {
     return; // Migration already successfully ran
   }
   
-  console.log("Quran Typing MVP Migration: Scanning for Legacy Keys...");
   let migratedCount = 0;
 
   // 1. Primitive Preferences
@@ -101,7 +100,5 @@ export function migrateLegacyLocalStorage() {
     } catch (e) {}
   }
 
-  // Lock the vault
   localStorage.setItem('quran_typing_migration_v2', 'completed');
-  console.log(`Quran Typing MVP Migration: Finished. Scanned & Migrated ${migratedCount} object structures cleanly.`);
 }

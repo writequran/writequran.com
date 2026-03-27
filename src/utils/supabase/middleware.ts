@@ -8,9 +8,19 @@ export async function updateSession(request: NextRequest) {
     },
   })
 
+  // Only activate Supabase session management when credentials are configured.
+  // Without this guard, the app crashes in offline/anonymous mode during development
+  // or when environment variables are not yet set up.
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('placeholder')) {
+    return response; // Graceful passthrough - app works locally without credentials
+  }
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         get(name: string) {
@@ -54,7 +64,7 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // refreshing the auth token
+  // Refresh the auth token
   await supabase.auth.getUser()
 
   return response
