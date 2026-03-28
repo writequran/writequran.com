@@ -315,6 +315,13 @@ export default function Page() {
         </div>
       </main>
 
+      {/* MINIMAL FOOTER */}
+      <footer className="w-full flex justify-center gap-6 py-4 text-[11px] text-neutral-400 dark:text-neutral-600">
+        <a href="/privacy" className="hover:text-neutral-600 dark:hover:text-neutral-400 transition-colors">Privacy</a>
+        <a href="/terms" className="hover:text-neutral-600 dark:hover:text-neutral-400 transition-colors">Terms</a>
+        <a href="/contact" className="hover:text-neutral-600 dark:hover:text-neutral-400 transition-colors">Contact</a>
+      </footer>
+
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
