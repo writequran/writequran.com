@@ -5,7 +5,7 @@ import { setActiveUserId } from '@/lib/storage';
 import { createClient } from '@/utils/supabase/client';
 import { getURL } from '@/lib/get-url';
 
-type AuthView = 'signin' | 'signup' | 'forgot' | 'check_email' | 'reset_sent';
+type AuthView = 'signin' | 'signup' | 'forgot' | 'check_email' | 'reset_sent' | 'set_password';
 
 export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
@@ -40,9 +40,11 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
         onAuthChange();
       }
       if (event === 'PASSWORD_RECOVERY') {
+        // User clicked the reset link and has a valid recovery session.
+        // Show the set-new-password form immediately — do NOT redirect to sign-in.
+        resetForm();
+        setView('set_password');
         setIsOpen(true);
-        setView('signin');
-        setInfo('Your password has been reset. Please sign in with your new password.');
       }
     });
 
@@ -161,6 +163,26 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
     onAuthChange();
   };
 
+  const handleSetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    setLoading(true); setError(null);
+    const { error: err } = await supabase.auth.updateUser({ password });
+    setLoading(false);
+    if (err) {
+      setError(err.message || 'Failed to update password. Please try again.');
+      return;
+    }
+    // Password updated — sign out so the user proves it with a fresh sign-in
+    await supabase.auth.signOut();
+    setActiveUserId(null);
+    setUser(null);
+    resetForm();
+    setView('signin');
+    setInfo('Password updated! Sign in with your new password.');
+    onAuthChange();
+  };
+
   const forceSync = async () => {
     if (syncing) return;
     setSyncing(true);
@@ -216,6 +238,28 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
                 {info && <p className="text-xs text-green-600">{info}</p>}
                 <button onClick={() => switchView('signin')} className="text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 mt-1">Back to sign in</button>
               </div>
+            )}
+
+            {/* ── Set new password (PASSWORD_RECOVERY flow) ── */}
+            {view === 'set_password' && (
+              <>
+                <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-1">Set New Password</h3>
+                <p className="text-xs text-neutral-500 mb-3">Choose a new password for your account.</p>
+                <form onSubmit={handleSetPassword} className="flex flex-col gap-2">
+                  <input
+                    required
+                    type="password"
+                    placeholder="New password (min 6)"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200"
+                  />
+                  {error && <p className="text-xs text-red-500">{error}</p>}
+                  <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
+                    {loading ? 'Updating...' : 'Set New Password'}
+                  </button>
+                </form>
+              </>
             )}
 
             {/* ── Reset email sent ── */}
