@@ -13,11 +13,12 @@ const preserveMarkerSpacing = (str: string) => {
 interface TypingAreaProps {
   surahNumber: number;
   jumpTarget?: { index: number; ts: number } | null;
+  onJump: (type: 'ayah' | 'page' | 'juz', val: number) => void;
 }
 
 type VisibilityMode = "hidden" | "ayah" | "all";
 
-export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
+export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps) {
   const pageData = getSurah(surahNumber);
   const { globalCheckString, blocks } = pageData;
 
@@ -370,29 +371,101 @@ export function TypingArea({ surahNumber, jumpTarget }: TypingAreaProps) {
   return (
     <div className="w-full flex flex-col items-center pb-36 px-4">
       {/* LEFT STATS DOCK */}
-      <div className="fixed left-6 top-1/2 -translate-y-1/2 hidden sm:flex flex-col items-center gap-6 bg-white/90 dark:bg-neutral-800/90 backdrop-blur-md rounded-4xl shadow-xl border border-neutral-200 dark:border-neutral-700 py-6 px-4 z-50 transition-colors duration-300 min-w-[70px]">
+      <div className="fixed left-6 top-1/2 -translate-y-1/2 hidden sm:flex flex-col items-center gap-4 bg-white/90 dark:bg-neutral-800/90 backdrop-blur-md rounded-4xl shadow-xl border border-neutral-200 dark:border-neutral-700 py-6 px-4 z-50 transition-colors duration-300 min-w-[80px]">
+        {/* PAGE CONTROL */}
         <div className="flex flex-col items-center gap-1 text-center">
-          <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Ayah</span>
-          <span className="text-xl font-bold text-neutral-800 dark:text-neutral-200">{currentBlock?.ayahNumber || '?'}</span>
+          <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Page</span>
+          <input 
+            type="number"
+            min="1"
+            max="604"
+            className="w-12 bg-transparent text-center text-lg font-bold text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-1 focus:ring-[#D6C19E] rounded transition-all"
+            defaultValue={currentBlock?.page || 1}
+            key={`page-${currentBlock?.page}`}
+            onBlur={(e) => {
+              const val = parseInt(e.target.value);
+              if (val && val !== currentBlock?.page) onJump('page', val);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const val = parseInt((e.target as HTMLInputElement).value);
+                if (val && val !== currentBlock?.page) onJump('page', val);
+                (e.target as HTMLInputElement).blur();
+              }
+            }}
+          />
         </div>
 
         <div className="w-full h-[1px] bg-neutral-200 dark:bg-neutral-700/50" />
 
+        {/* JUZ CONTROL */}
+        <div className="flex flex-col items-center gap-1 text-center">
+          <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Juz</span>
+          <input 
+            type="number"
+            min="1"
+            max="30"
+            className="w-12 bg-transparent text-center text-lg font-bold text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-1 focus:ring-[#D6C19E] rounded transition-all"
+            defaultValue={currentBlock?.juz || 1}
+            key={`juz-${currentBlock?.juz}`}
+            onBlur={(e) => {
+              const val = parseInt(e.target.value);
+              if (val && val !== currentBlock?.juz) onJump('juz', val);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const val = parseInt((e.target as HTMLInputElement).value);
+                if (val && val !== currentBlock?.juz) onJump('juz', val);
+                (e.target as HTMLInputElement).blur();
+              }
+            }}
+          />
+        </div>
+
+        <div className="w-full h-[1px] bg-neutral-200 dark:bg-neutral-700/50" />
+
+        {/* AYAH CONTROL */}
+        <div className="flex flex-col items-center gap-1 text-center">
+          <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Ayah</span>
+          <input 
+            type="number"
+            min="1"
+            className="w-12 bg-transparent text-center text-lg font-bold text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-1 focus:ring-[#D6C19E] rounded transition-all"
+            defaultValue={currentBlock?.ayahNumber || 1}
+            key={`ayah-${currentBlock?.ayahNumber}`}
+            onBlur={(e) => {
+              const val = parseInt(e.target.value);
+              if (val && val !== currentBlock?.ayahNumber) onJump('ayah', val);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const val = parseInt((e.target as HTMLInputElement).value);
+                if (val && val !== currentBlock?.ayahNumber) onJump('ayah', val);
+                (e.target as HTMLInputElement).blur();
+              }
+            }}
+          />
+        </div>
+
+        <div className="w-full h-[2px] bg-neutral-100 dark:bg-neutral-700/30 my-1" />
+
+        {/* PROGRESS */}
         <div className="flex flex-col items-center gap-1 text-center">
           <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Done</span>
-          <span className="text-lg font-bold text-neutral-800 dark:text-neutral-200">
+          <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">
             {((currentIndex / (globalCheckString.length || 1)) * 100).toFixed(1)}%
           </span>
         </div>
 
         <div className="w-full h-[1px] bg-neutral-200 dark:bg-neutral-700/50" />
 
+        {/* ERRORS */}
         <div className="flex flex-col items-center gap-1 text-center relative group">
           <span className="text-[10px] uppercase font-bold text-red-500/80 tracking-wider">Errors</span>
-          <span className="text-2xl font-bold text-red-600 dark:text-red-400">
+          <span className="text-xl font-bold text-red-600 dark:text-red-400">
             {sessionMistakes}
           </span>
-          <span className="text-xs font-medium text-red-400/60 mt-0.5" title="Total attempts">({sessionAttempts})</span>
+          <span className="text-[10px] font-medium text-red-400/60 mt-0.5" title="Total attempts">({sessionAttempts})</span>
 
           <button
             onClick={handleResetSessionStats}

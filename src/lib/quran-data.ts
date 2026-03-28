@@ -93,6 +93,7 @@ export interface MushafBlock {
   surahNumber: number;
   ayahNumber: number;
   page: number;
+  juz: number;
 }
 
 export interface SurahTypingData {
@@ -173,6 +174,7 @@ export const getSurah = (surahNumber: number): SurahTypingData => {
       surahNumber: surah.number,
       ayahNumber: ayah.numberInSurah,
       page: ayah.page,
+      juz: ayah.juz,
     });
     
     globalCheckString += checkString;
