@@ -130,6 +130,17 @@
   .animate-bloom {
     animation: bloom 1.6s ease-in-out infinite;
   }
+
+  /* Hide number input spinners */
+  .no-spinner::-webkit-inner-spin-button,
+  .no-spinner::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .no-spinner {
+    -moz-appearance: textfield;
+  }
 }
 
 :root {
