@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { TypingArea } from "@/components/TypingArea";
 import { AuthWidget } from "@/components/AuthWidget";
+import Image from "next/image";
 import { getAllSurahsMeta, getSurah, getLocationByPage, getLocationByJuz } from "@/lib/quran-data";
 import { WeakSpot, getWeakSpots } from "@/lib/stats";
 import { getStorage, setStorage, getScopedKey, migrateLegacyLocalStorage } from "@/lib/storage";
@@ -140,7 +141,15 @@ export default function Page() {
     <div className="flex flex-col min-h-screen bg-neutral-100 dark:bg-neutral-950 transition-colors duration-300">
       {/* FIXED TOP HEADER */}
       <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 flex items-center px-6 z-[60] shadow-sm">
-        <div className="flex-1 flex items-center">
+        <div className="flex-1 flex items-center gap-2.5 group cursor-pointer" onClick={() => window.location.reload()}>
+          <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-sm border border-[#D6C19E]/30">
+            <Image 
+              src="/icon.svg" 
+              alt="WriteQuran Logo" 
+              fill
+              className="object-contain"
+            />
+          </div>
           <h1 className="text-lg font-bold text-neutral-800 dark:text-neutral-100 tracking-tight">WriteQuran</h1>
         </div>
 

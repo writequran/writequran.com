@@ -471,7 +471,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
             </span>
             <button
               onClick={handleResetSessionStats}
-              className="absolute -bottom-8 opacity-0 group-hover/err:opacity-100 flex items-center justify-center w-7 h-7 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-full shadow-lg text-neutral-400 hover:text-red-500 transition-all z-10 duration-200 hover:scale-110 active:scale-95"
+              className="absolute -bottom-10 flex items-center justify-center w-7 h-7 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-full shadow-md text-neutral-400 hover:text-red-500 transition-all z-10 duration-200 hover:scale-110 active:scale-95"
               title="Reset Session Mistakes"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
@@ -489,7 +489,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
       )}
 
       <div
-        className="relative w-full max-w-[800px] bg-[#FDFBF7] dark:bg-[#121212] shadow-2xl rounded-sm border-[16px] border-[#D6C19E] dark:border-neutral-800 px-8 py-16 rtl quran-text tracking-normal transition-colors duration-500 cursor-default select-none"
+        className="relative w-full max-w-[800px] bg-[#FDFBF7] dark:bg-[#121212] shadow-2xl rounded-sm border-[16px] border-[#D6C19E] dark:border-neutral-800 px-8 py-24 rtl quran-text tracking-normal transition-colors duration-500 cursor-default select-none"
         dir="rtl"
         style={{ WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale" }}
       >
@@ -613,12 +613,12 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
                     }}
                   />
                   <span
-                    className="absolute -bottom-1 left-0 right-0 h-[5px] rounded-full"
+                    className="absolute bottom-0 left-0 right-0 h-[4px] rounded-full"
                     style={{
                       background: isDarkMode ? "#FFD98A" : "#E3C57A",
                       boxShadow: isDarkMode
-                        ? "inset 0 0 0 1px rgba(255,255,255,0.75), 0 0 12px 2px rgba(255,217,138,0.50)"
-                        : "inset 0 0 0 1px rgba(255,255,255,0.95), 0 2px 7px rgba(55,42,14,0.34)"
+                        ? "0 0 10px 1px rgba(255,217,138,0.40)"
+                        : "0 2px 5px rgba(55,42,14,0.20)"
                     }}
                   />
                 </>
@@ -666,7 +666,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
             </button>
             <button
               onClick={() => handleInput(" ")}
-              className="flex-[3] h-10 sm:h-12 bg-neutral-100/50 dark:bg-neutral-800/50 hover:bg-[#D6C19E]/30 dark:hover:bg-[#D6C19E]/20 text-[#2A2826] dark:text-neutral-100 rounded-lg transition-all border border-neutral-200 dark:border-neutral-700 active:scale-95 text-sm font-medium"
+              className="flex-[3] h-10 sm:h-12 bg-neutral-100/50 dark:bg-neutral-800/50 hover:bg-[#D6C19E]/30 dark:hover:bg-[#D6C19E]/20 text-[#2A2826] dark:text-neutral-100 rounded-lg transition-all border border-neutral-200 dark:border-neutral-700 active:scale-95 text-xs font-bold uppercase tracking-widest"
             >
               SPACE
             </button>
