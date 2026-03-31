@@ -172,7 +172,7 @@ export default function Page() {
     <div className="flex flex-col min-h-screen bg-neutral-100 dark:bg-neutral-900 transition-colors duration-300">
       {/* FIXED TOP HEADER */}
       <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 flex items-center px-3 sm:px-6 z-[100] shadow-sm">
-        <div className="flex-1 flex items-center gap-2.5 group cursor-pointer" onClick={() => window.location.reload()}>
+        <div className="flex-none sm:flex-1 flex items-center gap-2.5 group cursor-pointer" onClick={() => window.location.reload()}>
           <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-sm border border-[#D6C19E]/30">
             <Image 
               src="/icon.svg" 
@@ -184,16 +184,17 @@ export default function Page() {
           <h1 className="text-lg font-bold text-neutral-800 dark:text-neutral-100 tracking-tight hidden sm:block">WriteQuran</h1>
         </div>
 
-        <div className="relative flex-1 flex justify-center">
+        {/* ABSOLUTE CENTERED SURAH SELECTOR */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-20">
           <button 
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-full transition-all border border-neutral-200 dark:border-neutral-700 shadow-sm group"
           >
-            <span className="text-[10px] sm:text-sm font-bold text-neutral-700 dark:text-neutral-200 uppercase tracking-widest truncate max-w-[120px] sm:max-w-none">
+            <span className="text-[10px] sm:text-sm font-bold text-neutral-700 dark:text-neutral-200 uppercase tracking-widest truncate max-w-[100px] sm:max-w-none">
               {currentSurah?.number}. {currentSurah?.englishName}
             </span>
             <svg 
-              className={`w-4 h-4 text-neutral-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
+              className={`w-3.5 h-3.5 text-neutral-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
               xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
             >
               <path d="m6 9 6 6 6-6"/>
@@ -255,27 +256,24 @@ export default function Page() {
           )}
         </div>
 
-        <div className="flex-1 flex justify-end items-center gap-3 pr-4">
-          <AuthWidget onAuthChange={() => setResetKey(prev => prev + 1)} />
-
-
+        <div className="flex-auto sm:flex-1 flex justify-end items-center gap-1 sm:gap-3 pr-2 sm:pr-4">
           {reviewQueue.length > 0 ? (
-            <div className="flex items-center gap-3 bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/30 rounded-full pl-4 pr-1 py-1 shadow-sm shrink-0">
-              <span className="text-xs font-bold text-orange-600 dark:text-orange-400 hidden sm:inline">
+            <div className="flex items-center gap-1 sm:gap-3 bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/30 rounded-full pl-2 sm:pl-4 pr-1 py-1 shadow-sm shrink-0">
+              <span className="text-[10px] sm:text-xs font-bold text-orange-600 dark:text-orange-400 hidden sm:inline">
                 Reviewing {currentReviewIndex + 1}/{reviewQueue.length}
               </span>
-              <span className="text-xs font-bold text-orange-600 dark:text-orange-400 sm:hidden">
+              <span className="text-[10px] sm:text-xs font-bold text-orange-600 dark:text-orange-400 sm:hidden">
                 {currentReviewIndex + 1}/{reviewQueue.length}
               </span>
               <button 
                 onClick={nextReviewSpot} 
-                className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-xs font-bold transition-colors shadow-sm"
+                className="px-1.5 sm:px-3 py-1 sm:py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-[9px] sm:text-xs font-bold transition-colors shadow-sm"
               >
                 Next Spot
               </button>
               <button 
                 onClick={exitReview} 
-                className="w-7 h-7 flex items-center justify-center text-orange-500 hover:bg-orange-100 dark:hover:bg-orange-500/20 rounded-full transition-colors ml-1" 
+                className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-orange-500 hover:bg-orange-100 dark:hover:bg-orange-500/20 rounded-full transition-colors ml-0.5 sm:ml-1" 
                 title="Exit Review"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
@@ -285,7 +283,7 @@ export default function Page() {
             <div className="flex items-center gap-2">
               <button 
                 onClick={startReview}
-                className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E] dark:hover:border-orange-600 hover:text-orange-500 rounded-full text-xs font-bold text-neutral-600 dark:text-neutral-300 transition-all shadow-sm shrink-0"
+                className="flex items-center gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E] dark:hover:border-orange-600 hover:text-orange-500 rounded-full text-xs font-bold text-neutral-600 dark:text-neutral-300 transition-all shadow-sm shrink-0"
                 title="Review Weak Spots"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
@@ -294,7 +292,7 @@ export default function Page() {
               
               <button 
                 onClick={clearAllMistakes}
-                className="flex items-center justify-center w-8 h-8 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-red-300 dark:hover:border-red-600 hover:text-red-500 rounded-full text-neutral-400 transition-all shadow-sm shrink-0"
+                className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-red-300 dark:hover:border-red-600 hover:text-red-500 rounded-full text-neutral-400 transition-all shadow-sm shrink-0"
                 title="Clear All Mistake History"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
@@ -302,6 +300,7 @@ export default function Page() {
             </div>
           )}
 
+          <AuthWidget onAuthChange={() => setResetKey(prev => prev + 1)} />
         </div>
 
       </header>
