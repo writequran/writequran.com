@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getSurah } from "@/lib/quran-data";
+import { getSurah, getAllSurahsMeta } from "@/lib/quran-data";
 import { MistakeRecord, ProgressStats, loadMistakeStats, loadProgressStats, saveMistakeStats, saveProgressStats } from "@/lib/stats";
 import { getStorage, setStorage } from "@/lib/storage";
 import { ConfirmationModal } from "./ConfirmationModal";
@@ -22,6 +22,8 @@ type VisibilityMode = "hidden" | "ayah" | "all";
 
 export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps) {
   const pageData = getSurah(surahNumber);
+  const surahMeta = getAllSurahsMeta().find(s => s.number === surahNumber);
+  const surahName = surahMeta?.name;
   const { globalCheckString, blocks } = pageData;
 
   const [currentIndex, setCurrentIndex] = useState(() => {
@@ -540,6 +542,13 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
           ref={containerRef}
           className="w-full text-[2.2rem] leading-[2.8] text-justify mushaf-rules relative" style={{ textAlignLast: 'center' }}
         >
+          {/* SURAH NAME HEADER (ABSOLUTE) */}
+          <div className="absolute -top-16 left-0 right-0 flex justify-center pointer-events-none select-none">
+            <span className="text-5xl text-neutral-1000 dark:text-neutral-0 opacity-100 font-medium quran-text">
+              {surahName}
+            </span>
+          </div>
+
           {pageData.preBismillah && (
             <div className="w-full text-[#2A2826] dark:text-neutral-100 flex justify-center mb-4 select-none" style={{ textAlignLast: 'auto' }}>
               <span>{pageData.preBismillah}</span>
