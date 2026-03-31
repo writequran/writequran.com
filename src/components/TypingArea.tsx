@@ -371,15 +371,15 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
   return (
     <div className="w-full flex flex-col items-center pb-36 px-4">
       {/* LEFT STATS DOCK */}
-      <div className="fixed left-6 top-1/2 -translate-y-1/2 hidden sm:flex flex-col items-center gap-3 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl rounded-full shadow-2xl border border-neutral-200/50 dark:border-neutral-800/50 py-10 px-3 z-50 transition-all duration-500 w-[84px]">
-        
+      <div className="fixed left-6 top-1/2 -translate-y-1/2 hidden sm:flex flex-col items-center gap-3 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl rounded-full shadow-2xl border border-neutral-200/50 dark:border-neutral-800/50 py-10 px-2 z-50 transition-all duration-500 w-[64px]">
+
         {/* JUMP CONTROLS GROUP */}
         <div className="flex flex-col gap-3 w-full items-center">
           {/* PAGE CONTROL */}
           <div className="flex flex-col items-center gap-1 w-full group/ctrl">
             <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider transition-colors group-hover/ctrl:text-[#D6C19E] select-none">Page</span>
             <div className="relative w-full">
-              <input 
+              <input
                 type="number"
                 min="1"
                 max="604"
@@ -405,7 +405,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
           <div className="flex flex-col items-center gap-1 w-full group/ctrl">
             <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider transition-colors group-hover/ctrl:text-[#D6C19E] select-none">Juz</span>
             <div className="relative w-full">
-              <input 
+              <input
                 type="number"
                 min="1"
                 max="30"
@@ -431,7 +431,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
           <div className="flex flex-col items-center gap-1 w-full group/ctrl">
             <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider transition-colors group-hover/ctrl:text-[#D6C19E] select-none">Ayah</span>
             <div className="relative w-full">
-              <input 
+              <input
                 type="number"
                 min="1"
                 className="no-spinner bg-neutral-50 dark:bg-neutral-800/50 hover:bg-white dark:hover:bg-neutral-800 w-full py-2.5 text-center text-lg font-bold text-neutral-800 dark:text-neutral-100 rounded-2xl border border-neutral-100 dark:border-neutral-800 group-hover/ctrl:border-[#D6C19E]/40 focus:border-[#D6C19E] focus:bg-white dark:focus:bg-neutral-900 focus:outline-none shadow-sm transition-all cursor-pointer"
@@ -635,7 +635,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
 
       {/* ARABIC ON-SCREEN KEYBOARD */}
       <div
-        className={`fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-[700px] bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-800 p-4 pb-6 transition-all duration-300 transform z-40 ${showKeyboard ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0 pointer-events-none'}`}
+        className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[750px] bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t border-neutral-200 dark:border-neutral-800 p-6 pb-8 transition-all duration-500 transform z-40 ${showKeyboard ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}
         dir="rtl"
       >
         <div className="flex flex-col gap-2">
@@ -674,11 +674,11 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
         </div>
       </div>
 
-      <div className="fixed right-6 top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl rounded-full shadow-2xl border border-neutral-200/50 dark:border-neutral-800/50 py-10 px-2 z-50 transition-all duration-500 w-[84px]">
+      <div className="fixed right-6 top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl rounded-full shadow-2xl border border-neutral-200/50 dark:border-neutral-800/50 py-2 px-2 z-50 transition-all duration-500 w-[64px]">
         <div className="flex flex-col items-center gap-1 group/btn">
           <button
             onClick={() => setVisibilityMode('hidden')}
-            className={`flex items-center justify-center w-12 h-12 rounded-full transition-all ${visibilityMode === 'hidden' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+            className={`flex items-center justify-center w-11 h-11 rounded-full transition-all ${visibilityMode === 'hidden' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             title="Hidden"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" y1="2" x2="22" y2="22" /></svg>
@@ -689,7 +689,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
         <div className="flex flex-col items-center gap-1 group/btn">
           <button
             onClick={() => setVisibilityMode('ayah')}
-            className={`flex items-center justify-center w-12 h-12 rounded-full transition-all ${visibilityMode === 'ayah' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+            className={`flex items-center justify-center w-11 h-11 rounded-full transition-all ${visibilityMode === 'ayah' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             title="Active Ayah"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
@@ -700,7 +700,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
         <div className="flex flex-col items-center gap-1 group/btn">
           <button
             onClick={() => setVisibilityMode('all')}
-            className={`flex items-center justify-center w-12 h-12 rounded-full transition-all ${visibilityMode === 'all' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+            className={`flex items-center justify-center w-11 h-11 rounded-full transition-all ${visibilityMode === 'all' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             title="Show All"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
@@ -710,20 +710,20 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
 
         <div className="w-8 h-[1px] bg-neutral-200 dark:bg-neutral-800 my-1" />
 
-          <button
-            onClick={() => setShowKeyboard(!showKeyboard)}
-            className={`flex items-center justify-center w-12 h-12 rounded-full transition-all focus:outline-none ${showKeyboard ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
-            title="On-Screen Keyboard"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
-          </button>
+        <button
+          onClick={() => setShowKeyboard(!showKeyboard)}
+          className={`flex items-center justify-center w-11 h-11 rounded-full transition-all focus:outline-none ${showKeyboard ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+          title="On-Screen Keyboard"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
+        </button>
 
         <div className="w-8 h-[1px] bg-neutral-200 dark:bg-neutral-800 my-1" />
 
         <div className="flex flex-col items-center gap-1 group/btn">
           <button
             onClick={handleRestart}
-            className="flex items-center justify-center w-12 h-12 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all focus:outline-none"
+            className="flex items-center justify-center w-11 h-11 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all focus:outline-none"
             title="Rewrite Surah"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
@@ -733,7 +733,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
 
         <button
           onClick={toggleTheme}
-          className="flex items-center justify-center w-12 h-12 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all focus:outline-none"
+          className="flex items-center justify-center w-11 h-11 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all focus:outline-none"
           title="Toggle Night/Day Mode"
         >
           {isDarkMode ? (
