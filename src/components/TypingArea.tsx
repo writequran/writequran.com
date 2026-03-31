@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { getSurah, getAllSurahsMeta } from "@/lib/quran-data";
 import { MistakeRecord, ProgressStats, loadMistakeStats, loadProgressStats, saveMistakeStats, saveProgressStats } from "@/lib/stats";
 import { getStorage, setStorage } from "@/lib/storage";
@@ -22,8 +22,8 @@ interface TypingAreaProps {
 type VisibilityMode = "hidden" | "ayah" | "all";
 
 export function TypingArea({ surahNumber, jumpTarget, onJump, onBlockChange }: TypingAreaProps) {
-  const pageData = getSurah(surahNumber);
-  const surahMeta = getAllSurahsMeta().find(s => s.number === surahNumber);
+  const pageData = useMemo(() => getSurah(surahNumber), [surahNumber]);
+  const surahMeta = useMemo(() => getAllSurahsMeta().find(s => s.number === surahNumber), [surahNumber]);
   const surahName = surahMeta?.name;
   const { globalCheckString, blocks } = pageData;
 
@@ -96,10 +96,12 @@ export function TypingArea({ surahNumber, jumpTarget, onJump, onBlockChange }: T
     globalProgressRef.current = loadProgressStats();
   }, []);
 
-  const currentBlock = blocks.find(b =>
-    currentIndex >= b.globalCheckOffset &&
-    currentIndex < b.globalCheckOffset + b.checkString.length
-  ) || blocks[blocks.length - 1];
+  const currentBlock = useMemo(() => {
+    return blocks.find((b: any) =>
+      currentIndex >= b.globalCheckOffset &&
+      currentIndex < b.globalCheckOffset + b.checkString.length
+    ) || blocks[blocks.length - 1];
+  }, [currentIndex, blocks]);
 
   useEffect(() => {
     if (currentBlock && onBlockChange) {
@@ -249,7 +251,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump, onBlockChange }: T
     const startIdx = currentBlock.globalCheckOffset;
 
     // Find next block to determine end of current ayah
-    const nextBlock = blocks.find(b => b.ayahNumber === currentBlock.ayahNumber + 1);
+    const nextBlock = blocks.find((b: any) => b.ayahNumber === currentBlock.ayahNumber + 1);
     const limit = nextBlock ? nextBlock.globalCheckOffset : globalCheckString.length;
 
     setCurrentIndex(startIdx);
@@ -590,7 +592,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump, onBlockChange }: T
             </div>
           )}
 
-          {pageData.blocks.map((block, blockIndex) => {
+          {pageData.blocks.map((block: any, blockIndex: number) => {
             const blockStart = block.globalCheckOffset;
             const blockLength = block.checkString.length;
             const blockEnd = blockStart + blockLength;
@@ -726,7 +728,14 @@ export function TypingArea({ surahNumber, jumpTarget, onJump, onBlockChange }: T
       >
         {/* Integrated Mobile Toolbar (Header) */}
         <div className="w-full sm:hidden border-b border-neutral-100 dark:border-neutral-800/50 py-2 px-2 bg-white/50 dark:bg-neutral-800/50">
-          <div className="flex items-center justify-center gap-0.5 sm:gap-1.5">
+          <div className="flex items-center justify-center gap-0.5 sm:gap-1.5 relative">
+            {/* PROGRESS PERCENTAGE (left) */}
+            <div className="absolute left-2 flex items-center justify-center w-9 h-9 rounded-full border border-[#D6C19E]/40 bg-[#D6C19E]/5 shadow-sm">
+              <span className="text-[11px] font-bold text-[#D6C19E]">
+                {Math.round((currentIndex / globalCheckString.length) * 100)}%
+              </span>
+            </div>
+
             {/* JUMP SHIFTERS MOVED TO TOP */}
 
             <button
@@ -795,6 +804,20 @@ export function TypingArea({ surahNumber, jumpTarget, onJump, onBlockChange }: T
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>
               )}
             </button>
+
+            {/* ERROR COUNTER (right) */}
+            {sessionMistakes > 0 && (
+              <div className="absolute right-2 flex items-center gap-1.5 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-full pl-2.5 pr-1 py-1 shadow-sm">
+                <span className="text-[11px] font-bold text-red-600 dark:text-red-400">{sessionMistakes}</span>
+                <button 
+                  onClick={() => setModalType("reset")}
+                  className="w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                  title="Clear Session Mistakes"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { TypingArea } from "@/components/TypingArea";
 import { AuthWidget } from "@/components/AuthWidget";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
@@ -136,6 +136,13 @@ export default function Page() {
     setCurrentReviewIndex(-1);
     setResetKey(prev => prev + 1);
   };
+
+  const handleBlockChange = useCallback((page: number, juz: number, ayah: number) => {
+    setNavInfo(prev => {
+      if (prev.page === page && prev.juz === juz && prev.ayah === ayah) return prev;
+      return { page, juz, ayah };
+    });
+  }, []);
 
   const handleJumpTo = (type: 'ayah' | 'page' | 'juz' | 'surah', val: number) => {
     if (!val || val < 1) return;
@@ -415,7 +422,7 @@ export default function Page() {
               surahNumber={surahNumber} 
               jumpTarget={jumpTarget} 
               onJump={handleJumpTo} 
-              onBlockChange={(page, juz, ayah) => setNavInfo({ page, juz, ayah })}
+              onBlockChange={handleBlockChange}
             />
           )}
 
