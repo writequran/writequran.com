@@ -117,10 +117,16 @@ export default function Page() {
     setResetKey(prev => prev + 1);
   };
 
-  const handleJumpTo = (type: 'ayah' | 'page' | 'juz', val: number) => {
+  const handleJumpTo = (type: 'ayah' | 'page' | 'juz' | 'surah', val: number) => {
     if (!val || val < 1) return;
     
-    if (type === 'ayah') {
+    if (type === 'surah') {
+      if (val >= 1 && val <= 114) {
+        setSurahNumber(val);
+        setStorage('surah', val.toString());
+        setJumpTarget({ index: 0, ts: Date.now() });
+      }
+    } else if (type === 'ayah') {
       const sData = getSurah(surahNumber);
       const block = sData.blocks.find(b => b.ayahNumber === val);
       if (block) {
@@ -165,7 +171,7 @@ export default function Page() {
   return (
     <div className="flex flex-col min-h-screen bg-neutral-100 dark:bg-neutral-900 transition-colors duration-300">
       {/* FIXED TOP HEADER */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 dark:bg-neutral-800/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 flex items-center px-6 z-[60] shadow-sm">
+      <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 flex items-center px-3 sm:px-6 z-[100] shadow-sm">
         <div className="flex-1 flex items-center gap-2.5 group cursor-pointer" onClick={() => window.location.reload()}>
           <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-sm border border-[#D6C19E]/30">
             <Image 
@@ -175,15 +181,15 @@ export default function Page() {
               className="object-contain"
             />
           </div>
-          <h1 className="text-lg font-bold text-neutral-800 dark:text-neutral-100 tracking-tight">WriteQuran</h1>
+          <h1 className="text-lg font-bold text-neutral-800 dark:text-neutral-100 tracking-tight hidden sm:block">WriteQuran</h1>
         </div>
 
         <div className="relative flex-1 flex justify-center">
           <button 
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-2 px-5 py-2 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-full transition-all border border-neutral-200 dark:border-neutral-700 shadow-sm group"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-full transition-all border border-neutral-200 dark:border-neutral-700 shadow-sm group"
           >
-            <span className="text-sm font-bold text-neutral-700 dark:text-neutral-200 uppercase tracking-widest">
+            <span className="text-[10px] sm:text-sm font-bold text-neutral-700 dark:text-neutral-200 uppercase tracking-widest truncate max-w-[120px] sm:max-w-none">
               {currentSurah?.number}. {currentSurah?.englishName}
             </span>
             <svg 
@@ -251,6 +257,7 @@ export default function Page() {
 
         <div className="flex-1 flex justify-end items-center gap-3 pr-4">
           <AuthWidget onAuthChange={() => setResetKey(prev => prev + 1)} />
+
 
           {reviewQueue.length > 0 ? (
             <div className="flex items-center gap-3 bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/30 rounded-full pl-4 pr-1 py-1 shadow-sm shrink-0">

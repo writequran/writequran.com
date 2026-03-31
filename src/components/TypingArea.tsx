@@ -15,7 +15,7 @@ const preserveMarkerSpacing = (str: string) => {
 interface TypingAreaProps {
   surahNumber: number;
   jumpTarget?: { index: number; ts: number } | null;
-  onJump: (type: 'ayah' | 'page' | 'juz', val: number) => void;
+  onJump: (type: 'ayah' | 'page' | 'juz' | 'surah', val: number) => void;
 }
 
 type VisibilityMode = "hidden" | "ayah" | "all";
@@ -88,6 +88,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
   const [cursorPos, setCursorPos] = useState({ top: 0, left: 0, width: 0, height: 0 });
   const targetRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const popConfirmRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     globalMistakesRef.current = loadMistakeStats();
@@ -153,13 +154,24 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
     };
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalType === "rewrite_ayah" && popConfirmRef.current && !popConfirmRef.current.contains(event.target as Node)) {
+        setModalType(null);
+      }
+    };
+
+    if (modalType === "rewrite_ayah") {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [modalType]);
+
   const updateCursorPos = useCallback(() => {
     if (targetRef.current && containerRef.current && currentIndex < globalCheckString.length) {
       const targetRect = targetRef.current.getBoundingClientRect();
       const containerRect = containerRef.current.getBoundingClientRect();
 
-      // We anchor relative to the containerRef.current (which is the Mushaf page container)
-      // This is more robust than offsetTop when nested in grids/relative containers.
       setCursorPos({
         top: targetRect.top - containerRect.top,
         left: targetRect.left - containerRect.left - 5,
@@ -177,6 +189,22 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
       window.removeEventListener("resize", updateCursorPos);
     };
   }, [updateCursorPos]);
+
+  useEffect(() => {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          const isDark = document.documentElement.classList.contains('dark');
+          if (isDark !== isDarkMode) {
+            setIsDarkMode(isDark);
+            setTimeout(updateCursorPos, 50);
+          }
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+    return () => observer.disconnect();
+  }, [isDarkMode, updateCursorPos]);
 
   useEffect(() => {
     if (targetRef.current) {
@@ -532,7 +560,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
       )}
 
       <div
-        className="relative w-full max-w-[800px] bg-[#FDFBF7] dark:bg-neutral-900 shadow-2xl rounded-sm border-[16px] border-[#D6C19E] dark:border-neutral-700 px-8 py-24 rtl quran-text tracking-normal transition-colors duration-500 cursor-default select-none"
+        className="relative w-full max-w-[800px] bg-[#FDFBF7] dark:bg-neutral-900 shadow-2xl rounded-sm border-4 sm:border-[16px] border-[#D6C19E] dark:border-neutral-700 px-4 sm:px-8 py-12 sm:py-24 rtl quran-text tracking-normal transition-colors duration-500 cursor-default select-none"
         dir="rtl"
         style={{ WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale" }}
       >
@@ -540,11 +568,11 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
 
         <div
           ref={containerRef}
-          className="w-full text-[2.2rem] leading-[2.8] text-justify mushaf-rules relative" style={{ textAlignLast: 'center' }}
+          className="w-full text-[1.5rem] sm:text-[2.2rem] leading-[2.5] sm:leading-[2.8] text-justify mushaf-rules relative" style={{ textAlignLast: 'center' }}
         >
           {/* SURAH NAME HEADER (ABSOLUTE) */}
-          <div className="absolute -top-16 left-0 right-0 flex justify-center pointer-events-none select-none">
-            <span className="text-5xl text-neutral-1000 dark:text-neutral-200 opacity-100 font-medium quran-text">
+          <div className="absolute -top-10 sm:-top-16 left-0 right-0 flex justify-center pointer-events-none select-none">
+            <span className="text-[1.5rem] sm:text-5xl text-neutral-1000 dark:text-neutral-200 opacity-100 font-medium quran-text">
               {surahName}
             </span>
           </div>
@@ -683,48 +711,212 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
         aria-hidden="true"
       />
 
-      {/* ARABIC ON-SCREEN KEYBOARD */}
+      {/* ARABIC ON-SCREEN KEYBOARD + MOBILE TOOLBAR */}
       <div
-        className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[750px] bg-white/95 dark:bg-neutral-800/95 backdrop-blur-md rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t border-neutral-200 dark:border-neutral-800 p-6 pb-8 transition-all duration-500 transform z-40 ${showKeyboard ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}
+        className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[750px] bg-white/95 dark:bg-neutral-800/95 backdrop-blur-md rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t border-neutral-200 dark:border-neutral-800 transition-all duration-500 transform z-[60] ${
+          showKeyboard ? 'translate-y-0' : 'translate-y-[calc(100%-68px)] sm:translate-y-full sm:opacity-0 sm:pointer-events-none'
+        }`}
         dir="rtl"
       >
-        <div className="flex flex-col gap-2">
-          {[
-            ["ض", "ص", "ث", "ق", "ف", "غ", "ع", "ه", "خ", "ح", "ج", "د"],
-            ["ش", "س", "ي", "ب", "ل", "ا", "ت", "ن", "م", "ك", "ط", "ذ"],
-            ["ئ", "ء", "ؤ", "ر", "ى", "ة", "و", "ز", "ظ", "أ", "إ", "آ"]
-          ].map((row, rowIndex) => (
-            <div key={rowIndex} className="flex justify-center gap-1 sm:gap-1.5">
-              {row.map((letter) => (
-                <button
-                  key={letter}
-                  onClick={() => handleInput(letter)}
-                  className="flex-1 min-w-[32px] sm:min-w-[42px] h-10 sm:h-12 bg-neutral-100/50 dark:bg-neutral-800/50 hover:bg-[#D6C19E]/30 dark:hover:bg-[#D6C19E]/20 text-[#2A2826] dark:text-neutral-100 text-lg sm:text-xl rounded-lg transition-all border border-neutral-200 dark:border-neutral-700 active:scale-95"
-                >
-                  {letter}
-                </button>
-              ))}
+        {/* Integrated Mobile Toolbar (Header) */}
+        <div className="w-full sm:hidden border-b border-neutral-100 dark:border-neutral-800/50 py-2 px-4 bg-white/50 dark:bg-neutral-800/50">
+          <div className="flex items-center justify-center gap-1.5 ">
+            {/* JUMP SHIFTERS (CIRCULAR) */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex flex-col items-center gap-1">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  dir="ltr"
+                  min="1"
+                  max="604"
+                  className="no-spinner bg-neutral-100/50 dark:bg-neutral-800/80 w-9 h-9 text-center text-[11px] font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-200/50 dark:border-neutral-700/50 focus:border-[#D6C19E] focus:outline-none transition-all shadow-sm p-0"
+                  defaultValue={currentBlock?.page}
+                  key={`m-page-${currentBlock?.page}`}
+                  onFocus={(e) => e.target.select()}
+                  onBlur={(e) => onJump('page', parseInt(e.target.value))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      onJump('page', parseInt((e.target as HTMLInputElement).value));
+                      (e.target as HTMLInputElement).blur();
+                    }
+                  }}
+                />
+                <span className="text-[7px] uppercase font-bold text-neutral-400 tracking-tighter">page</span>
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  dir="ltr"
+                  min="1"
+                  max="30"
+                  className="no-spinner bg-neutral-100/50 dark:bg-neutral-800/80 w-9 h-9 text-center text-[11px] font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-200/50 dark:border-neutral-700/50 focus:border-[#D6C19E] focus:outline-none transition-all shadow-sm p-0"
+                  defaultValue={currentBlock?.juz}
+                  key={`m-juz-${currentBlock?.juz}`}
+                  onFocus={(e) => e.target.select()}
+                  onBlur={(e) => onJump('juz', parseInt(e.target.value))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      onJump('juz', parseInt((e.target as HTMLInputElement).value));
+                      (e.target as HTMLInputElement).blur();
+                    }
+                  }}
+                />
+                <span className="text-[7px] uppercase font-bold text-neutral-400 tracking-tighter">juz</span>
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  dir="ltr"
+                  min="1"
+                  className="no-spinner bg-neutral-100/50 dark:bg-neutral-800/80 w-9 h-9 text-center text-[11px] font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-200/50 dark:border-neutral-700/50 focus:border-[#D6C19E] focus:outline-none transition-all shadow-sm p-0"
+                  defaultValue={currentBlock?.ayahNumber}
+                  key={`m-ayah-${currentBlock?.ayahNumber}`}
+                  onFocus={(e) => e.target.select()}
+                  onBlur={(e) => onJump('ayah', parseInt(e.target.value))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      onJump('ayah', parseInt((e.target as HTMLInputElement).value));
+                      (e.target as HTMLInputElement).blur();
+                    }
+                  }}
+                />
+                <span className="text-[7px] uppercase font-bold text-neutral-400 tracking-tighter">ayah</span>
+              </div>
             </div>
-          ))}
-          <div className="flex justify-center gap-1 sm:gap-1.5 mt-1">
-            <button
-              onClick={() => handleInput("Backspace")}
-              className="px-6 h-10 sm:h-12 bg-red-50/50 dark:bg-red-900/20 hover:bg-red-100/50 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 text-sm font-medium rounded-lg transition-all border border-red-100 dark:border-red-900/30 active:scale-95 flex items-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
-              <span>Backspace</span>
-            </button>
-            <button
-              onClick={() => handleInput(" ")}
-              className="flex-[3] h-10 sm:h-12 bg-neutral-100/50 dark:bg-neutral-800/50 hover:bg-[#D6C19E]/30 dark:hover:bg-[#D6C19E]/20 text-[#2A2826] dark:text-neutral-100 rounded-lg transition-all border border-neutral-200 dark:border-neutral-700 active:scale-95 text-xs font-bold uppercase tracking-widest"
-            >
-              SPACE
-            </button>
+
+            <div className="w-px h-6 bg-neutral-200 dark:bg-neutral-700 mx-0.5 shrink-0" />
+            <div className="flex flex-col items-center group/btn">
+              <button
+                onClick={() => setVisibilityMode('hidden')}
+                className={`flex items-center justify-center w-9 h-9 rounded-full transition-all ${visibilityMode === 'hidden' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" y1="2" x2="22" y2="22" /></svg>
+              </button>
+              <span className={`text-[8px] uppercase font-bold tracking-widest transition-colors ${visibilityMode === 'hidden' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400'}`}>hide</span>
+            </div>
+
+            <div className="flex flex-col items-center group/btn">
+              <button
+                onClick={() => setVisibilityMode('ayah')}
+                className={`flex items-center justify-center w-9 h-9 rounded-full transition-all ${visibilityMode === 'ayah' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
+              </button>
+              <span className={`text-[8px] uppercase font-bold tracking-widest transition-colors ${visibilityMode === 'ayah' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400'}`}>ayah</span>
+            </div>
+
+            <div className="flex flex-col items-center group/btn">
+              <button
+                onClick={() => setVisibilityMode('all')}
+                className={`flex items-center justify-center w-9 h-9 rounded-full transition-all ${visibilityMode === 'all' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /></svg>
+              </button>
+              <span className={`text-[8px] uppercase font-bold tracking-widest transition-colors ${visibilityMode === 'all' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400'}`}>all</span>
+            </div>
+
+            <div className="w-px h-6 bg-neutral-200 dark:bg-neutral-700 mx-1" />
+
+            <div className="flex flex-col items-center group/btn">
+              <button
+                onClick={() => setShowKeyboard(!showKeyboard)}
+                className={`flex items-center justify-center w-9 h-9 rounded-full transition-all ${showKeyboard ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
+              </button>
+              <span className="text-[8px] uppercase font-bold tracking-widest text-neutral-400">key</span>
+            </div>
+
+            <div className="flex flex-col items-center group/btn relative" ref={popConfirmRef}>
+              <button
+                onClick={handleRestartAyah}
+                className="flex items-center justify-center w-9 h-9 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18" /><path d="M12 7v5l3 3" /></svg>
+              </button>
+              <span className="text-[8px] uppercase font-bold tracking-widest text-neutral-400">ayah</span>
+              <PopConfirm
+                isOpen={modalType === "rewrite_ayah"}
+                onClose={() => setModalType(null)}
+                onConfirm={confirmRestartAyah}
+                title="Rewrite Ayah?"
+                confirmLabel="Yes"
+                cancelLabel="No"
+              />
+            </div>
+
+            <div className="flex flex-col items-center group/btn">
+              <button
+                onClick={handleRestart}
+                className="flex items-center justify-center w-9 h-9 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all font-bold"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+              </button>
+              <span className="text-[8px] uppercase font-bold tracking-widest text-neutral-400">reset</span>
+            </div>
+
+            <div className="w-px h-6 bg-neutral-200 dark:bg-neutral-700 mx-1" />
+
+            <div className="flex flex-col items-center group/btn">
+              <button
+                onClick={toggleTheme}
+                className="flex items-center justify-center w-9 h-9 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
+              >
+                {isDarkMode ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>
+                )}
+              </button>
+              <span className="text-[8px] uppercase font-bold tracking-widest text-neutral-400">mode</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Keyboard Content */}
+        <div className="p-6 pb-8">
+          <div className="flex flex-col gap-2">
+            {[
+              ["ض", "ص", "ث", "ق", "ف", "غ", "ع", "ه", "خ", "ح", "ج", "د"],
+              ["ش", "س", "ي", "ب", "ل", "ا", "ت", "ن", "م", "ك", "ط", "ذ"],
+              ["ئ", "ء", "ؤ", "ر", "ى", "ة", "و", "ز", "ظ", "أ", "إ", "آ"]
+            ].map((row, rowIndex) => (
+              <div key={rowIndex} className="flex justify-center gap-1 sm:gap-1.5">
+                {row.map((letter) => (
+                  <button
+                    key={letter}
+                    onClick={() => handleInput(letter)}
+                    className="flex-1 min-w-[28px] sm:min-w-[42px] h-9 sm:h-12 bg-neutral-100/50 dark:bg-neutral-800/50 hover:bg-[#D6C19E]/30 dark:hover:bg-[#D6C19E]/20 text-[#2A2826] dark:text-neutral-100 text-base sm:text-xl rounded-lg transition-all border border-neutral-200 dark:border-neutral-700 active:scale-95"
+                  >
+                    {letter}
+                  </button>
+                ))}
+              </div>
+            ))}
+            <div className="flex justify-center gap-1 sm:gap-1.5 mt-1">
+              <button
+                onClick={() => handleInput("Backspace")}
+                className="px-4 sm:px-6 h-9 sm:h-12 bg-red-50/50 dark:bg-red-900/20 hover:bg-red-100/50 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-medium rounded-lg transition-all border border-red-100 dark:border-red-900/30 active:scale-95 flex items-center gap-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
+                <span className="hidden sm:inline">Backspace</span>
+              </button>
+              <button
+                onClick={() => handleInput(" ")}
+                className="flex-[3] h-9 sm:h-12 bg-neutral-100/50 dark:bg-neutral-800/50 hover:bg-[#D6C19E]/30 dark:hover:bg-[#D6C19E]/20 text-[#2A2826] dark:text-neutral-100 rounded-lg transition-all border border-neutral-200 dark:border-neutral-700 active:scale-95 text-xs font-bold uppercase tracking-widest"
+              >
+                SPACE
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="fixed right-6 top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 bg-white/95 dark:bg-neutral-800/95 backdrop-blur-xl rounded-full shadow-2xl border border-neutral-200/50 dark:border-neutral-800/50 py-2 px-2 z-50 transition-all duration-500 w-[64px]">
+      {/* DESKTOP-ONLY TOOLBAR */}
+      <div className="fixed right-6 top-1/2 -translate-y-1/2 hidden sm:flex flex-col items-center gap-4 bg-white/95 dark:bg-neutral-800/95 backdrop-blur-xl rounded-full shadow-2xl border border-neutral-200/50 dark:border-neutral-800/50 py-2 px-2 z-50 transition-all duration-500 w-[64px]">
         <div className="flex flex-col items-center gap-1 group/btn">
           <button
             onClick={() => setVisibilityMode('hidden')}
@@ -733,7 +925,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" y1="2" x2="22" y2="22" /></svg>
           </button>
-          <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors ${visibilityMode === 'hidden' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>hide</span>
+          <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors block ${visibilityMode === 'hidden' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>hide</span>
         </div>
 
         <div className="flex flex-col items-center gap-1 group/btn">
@@ -744,7 +936,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
           </button>
-          <span className={`text-[9px] uppercase font-bold tracking-widest text-center transition-colors ${visibilityMode === 'ayah' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>ayah</span>
+          <span className={`text-[9px] uppercase font-bold tracking-widest text-center transition-colors block ${visibilityMode === 'ayah' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>ayah</span>
         </div>
 
         <div className="flex flex-col items-center gap-1 group/btn">
@@ -755,10 +947,10 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
           </button>
-          <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors ${visibilityMode === 'all' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>all</span>
+          <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors block ${visibilityMode === 'all' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>all</span>
         </div>
 
-        <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-1" />
+        <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-1 hidden sm:block" />
 
         <button
           onClick={() => setShowKeyboard(!showKeyboard)}
@@ -768,7 +960,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
         </button>
 
-        <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-1" />
+        <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-1 hidden sm:block" />
 
         <div className="flex flex-col items-center gap-1 group/btn relative">
           <button
@@ -778,7 +970,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18" /><path d="M12 7v5l3 3" /></svg>
           </button>
-          <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400 group-hover/btn:text-neutral-600 transition-colors">ayah</span>
+          <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400 group-hover/btn:text-neutral-600 transition-colors block">ayah</span>
 
           <PopConfirm
             isOpen={modalType === "rewrite_ayah"}
@@ -798,13 +990,13 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
           </button>
-          <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400 group-hover/btn:text-neutral-600 transition-colors">rewrite</span>
+          <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400 group-hover/btn:text-neutral-600 transition-colors block">rewrite</span>
         </div>
-        <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-1" />
+        <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-1 hidden sm:block" />
 
         <button
           onClick={toggleTheme}
-          className="flex items-center justify-center w-11 h-11 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all focus:outline-none"
+          className="flex items-center justify-center w-11 h-11 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all focus:outline-none hidden sm:flex"
           title="Toggle Night/Day Mode"
         >
           {isDarkMode ? (

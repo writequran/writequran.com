@@ -119,6 +119,12 @@
     background-repeat: repeat-y;
   }
 
+  @media (max-width: 639px) {
+    .mushaf-rules {
+      background-image: none !important;
+    }
+  }
+
   .animate-flicker {
     animation: flicker 1.8s ease-in-out infinite;
   }
