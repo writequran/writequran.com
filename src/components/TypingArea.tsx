@@ -544,7 +544,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
         >
           {/* SURAH NAME HEADER (ABSOLUTE) */}
           <div className="absolute -top-16 left-0 right-0 flex justify-center pointer-events-none select-none">
-            <span className="text-5xl text-neutral-1000 dark:text-neutral-0 opacity-100 font-medium quran-text">
+            <span className="text-5xl text-neutral-1000 dark:text-neutral-200 opacity-100 font-medium quran-text">
               {surahName}
             </span>
           </div>
