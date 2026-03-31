@@ -5,6 +5,7 @@ import { getSurah } from "@/lib/quran-data";
 import { MistakeRecord, ProgressStats, loadMistakeStats, loadProgressStats, saveMistakeStats, saveProgressStats } from "@/lib/stats";
 import { getStorage, setStorage } from "@/lib/storage";
 import { ConfirmationModal } from "./ConfirmationModal";
+import { PopConfirm } from "./PopConfirm";
 
 // Helper to prevent verse markers from breaking to the next line
 const preserveMarkerSpacing = (str: string) => {
@@ -67,7 +68,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
     }
   });
 
-  const [modalType, setModalType] = useState<"reset" | "rewrite" | null>(null);
+  const [modalType, setModalType] = useState<"reset" | "rewrite" | "rewrite_ayah" | null>(null);
 
   const sessionMistakes = sessionMistakeIndices.size;
 
@@ -189,6 +190,11 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
     setModalType("rewrite");
   };
 
+  const handleRestartAyah = () => {
+    if (!currentBlock) return;
+    setModalType("rewrite_ayah");
+  };
+
   const confirmReset = () => {
     setSessionAttempts(0);
     setSessionMistakeIndices(new Set());
@@ -199,6 +205,31 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
     setWrongChar(null);
     setTimeout(updateCursorPos, 100);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const confirmRestartAyah = () => {
+    if (!currentBlock) return;
+    const startIdx = currentBlock.globalCheckOffset;
+
+    // Find next block to determine end of current ayah
+    const nextBlock = blocks.find(b => b.ayahNumber === currentBlock.ayahNumber + 1);
+    const limit = nextBlock ? nextBlock.globalCheckOffset : globalCheckString.length;
+
+    setCurrentIndex(startIdx);
+    setWrongChar(null);
+
+    // Clear mistakes in the current ayah range
+    setSessionMistakeIndices(prev => {
+      const next = new Set(prev);
+      for (const idx of Array.from(next)) {
+        if (idx >= startIdx && idx < limit) {
+          next.delete(idx);
+        }
+      }
+      return next;
+    });
+
+    setTimeout(updateCursorPos, 100);
   };
 
   const handleInput = useCallback((char: string) => {
@@ -463,14 +494,14 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
           </div>
         </div>
 
-        <div className="w-8 h-[1px] bg-neutral-200 dark:bg-neutral-800 my-4" />
+        <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-4" />
 
         {/* PASSIVE STATS */}
         <div className="flex flex-col gap-6 w-full">
           <div className="flex flex-col items-center gap-1 text-center">
             <span className="text-[9px] uppercase font-bold text-neutral-400 tracking-widest select-none">Done</span>
-            <span className="text-base font-bold text-neutral-800 dark:text-neutral-200 leading-none">
-              {((currentIndex / (globalCheckString.length || 1)) * 100).toFixed(1)}<span className="text-[10px] ml-0.5 opacity-40">%</span>
+            <span className="text-[20px] font-bold text-neutral-800 dark:text-neutral-200 leading-none">
+              {((currentIndex / (globalCheckString.length || 1)) * 100).toFixed(0)}<span className="text-[15px] ml-0.5 opacity-40">%</span>
             </span>
           </div>
 
@@ -718,7 +749,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
           <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors ${visibilityMode === 'all' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>all</span>
         </div>
 
-        <div className="w-8 h-[1px] bg-neutral-200 dark:bg-neutral-800 my-1" />
+        <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-1" />
 
         <button
           onClick={() => setShowKeyboard(!showKeyboard)}
@@ -728,7 +759,27 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
         </button>
 
-        <div className="w-8 h-[1px] bg-neutral-200 dark:bg-neutral-800 my-1" />
+        <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-1" />
+
+        <div className="flex flex-col items-center gap-1 group/btn relative">
+          <button
+            onClick={handleRestartAyah}
+            className="flex items-center justify-center w-11 h-11 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all focus:outline-none"
+            title="Rewrite Ayah"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18" /><path d="M12 7v5l3 3" /></svg>
+          </button>
+          <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400 group-hover/btn:text-neutral-600 transition-colors">ayah</span>
+
+          <PopConfirm
+            isOpen={modalType === "rewrite_ayah"}
+            onClose={() => setModalType(null)}
+            onConfirm={confirmRestartAyah}
+            title="Rewrite current Ayah?"
+            confirmLabel="Yes"
+            cancelLabel="No"
+          />
+        </div>
 
         <div className="flex flex-col items-center gap-1 group/btn">
           <button
@@ -740,6 +791,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
           </button>
           <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400 group-hover/btn:text-neutral-600 transition-colors">rewrite</span>
         </div>
+        <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-1" />
 
         <button
           onClick={toggleTheme}
@@ -754,7 +806,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
         </button>
       </div>
 
-      <ConfirmationModal 
+      <ConfirmationModal
         isOpen={modalType === "reset"}
         onClose={() => setModalType(null)}
         onConfirm={confirmReset}
@@ -762,7 +814,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
         message="This will clear the current session mistake counter for this Surah."
       />
 
-      <ConfirmationModal 
+      <ConfirmationModal
         isOpen={modalType === "rewrite"}
         onClose={() => setModalType(null)}
         onConfirm={confirmRestart}
