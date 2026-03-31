@@ -87,6 +87,25 @@ export function TypingArea({ surahNumber, jumpTarget, onJump, onBlockChange }: T
   const globalProgressRef = useRef<Record<number, ProgressStats>>({});
 
   const [cursorPos, setCursorPos] = useState({ top: 0, left: 0, width: 0, height: 0 });
+  const [showHint, setShowHint] = useState(false);
+  const hintTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    // Reset timer whenever index or wrong char changes
+    setShowHint(false);
+    if (hintTimeoutRef.current) clearTimeout(hintTimeoutRef.current);
+
+    if (currentIndex < globalCheckString.length) {
+      hintTimeoutRef.current = setTimeout(() => {
+        setShowHint(true);
+      }, 5000);
+    }
+
+    return () => {
+      if (hintTimeoutRef.current) clearTimeout(hintTimeoutRef.current);
+    };
+  }, [currentIndex, wrongChar, globalCheckString.length]);
+
   const targetRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const popConfirmRef = useRef<HTMLDivElement>(null);
@@ -648,6 +667,14 @@ export function TypingArea({ surahNumber, jumpTarget, onJump, onBlockChange }: T
                 height: cursorPos.height,
               }}
             >
+              {showHint && (
+                <div className="absolute bottom-full mb-1 sm:mb-2 animate-in fade-in slide-in-from-bottom-1 duration-300">
+                  <div className="bg-[#D6C19E] text-white dark:text-neutral-900 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-base sm:text-lg font-bold shadow-xl flex items-center justify-center min-w-[32px]">
+                    <span className="leading-none quran-text">{globalCheckString[currentIndex]}</span>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-[#D6C19E]" />
+                  </div>
+                </div>
+              )}
               {wrongChar ? (
                 <>
                   <span
@@ -809,12 +836,12 @@ export function TypingArea({ surahNumber, jumpTarget, onJump, onBlockChange }: T
             {sessionMistakes > 0 && (
               <div className="absolute right-2 flex items-center gap-1.5 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-full pl-2.5 pr-1 py-1 shadow-sm">
                 <span className="text-[11px] font-bold text-red-600 dark:text-red-400">{sessionMistakes}</span>
-                <button 
+                <button
                   onClick={() => setModalType("reset")}
                   className="w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
                   title="Clear Session Mistakes"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
                 </button>
               </div>
             )}
