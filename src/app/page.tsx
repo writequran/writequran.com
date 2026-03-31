@@ -216,7 +216,7 @@ export default function Page() {
             }}
             className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-full transition-all border border-neutral-200 dark:border-neutral-700 shadow-sm group"
           >
-            <span className="text-[10px] sm:text-sm font-bold text-neutral-700 dark:text-neutral-200 uppercase tracking-widest truncate max-w-[80px] sm:max-w-none">
+            <span className="text-[10px] sm:text-sm font-bold text-neutral-700 dark:text-neutral-200 uppercase tracking-widest truncate max-w-[150px] sm:max-w-none">
               {currentSurah?.number}. {currentSurah?.englishName}
             </span>
             <svg 
@@ -237,18 +237,18 @@ export default function Page() {
               }}
               className="flex items-center gap-x-2 px-2.5 py-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-800 rounded-full shadow-sm text-[9px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-tighter"
             >
-              <span className="flex items-center gap-0.5">
-                <span className="text-neutral-400 dark:text-neutral-500">P.</span>
+              <span className="flex items-center gap-1">
+                <span className="text-neutral-400 dark:text-neutral-500">Page</span>
                 <span className="text-neutral-700 dark:text-neutral-200">{navInfo.page}</span>
               </span>
               <span className="w-px h-2.5 bg-neutral-100 dark:bg-neutral-700 mx-0.5" />
-              <span className="flex items-center gap-0.5">
-                <span className="text-neutral-400 dark:text-neutral-500">J.</span>
+              <span className="flex items-center gap-1">
+                <span className="text-neutral-400 dark:text-neutral-500">Juz</span>
                 <span className="text-neutral-700 dark:text-neutral-200">{navInfo.juz}</span>
               </span>
               <span className="w-px h-2.5 bg-neutral-100 dark:bg-neutral-700 mx-0.5" />
-              <span className="flex items-center gap-0.5">
-                <span className="text-neutral-400 dark:text-neutral-500">A.</span>
+              <span className="flex items-center gap-1">
+                <span className="text-neutral-400 dark:text-neutral-500">Ayah</span>
                 <span className="text-neutral-700 dark:text-neutral-200">{navInfo.ayah}</span>
               </span>
             </button>
@@ -365,9 +365,12 @@ export default function Page() {
               </span>
               <button 
                 onClick={nextReviewSpot} 
-                className="px-1.5 sm:px-3 py-1 sm:py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-[9px] sm:text-xs font-bold transition-colors shadow-sm"
+                className="w-6 h-6 sm:w-auto sm:px-3 py-1 sm:py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-[9px] sm:text-xs font-bold transition-colors shadow-sm flex items-center justify-center"
+                title="Next Weak Spot"
               >
-                Next Spot
+                <span className="hidden sm:inline">Next Spot</span>
+                <svg className="sm:hidden" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                <svg className="hidden sm:block sm:ml-1" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
               </button>
               <button 
                 onClick={exitReview} 
