@@ -16,11 +16,12 @@ interface TypingAreaProps {
   surahNumber: number;
   jumpTarget?: { index: number; ts: number } | null;
   onJump: (type: 'ayah' | 'page' | 'juz' | 'surah', val: number) => void;
+  onBlockChange?: (page: number, juz: number, ayah: number) => void;
 }
 
 type VisibilityMode = "hidden" | "ayah" | "all";
 
-export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps) {
+export function TypingArea({ surahNumber, jumpTarget, onJump, onBlockChange }: TypingAreaProps) {
   const pageData = getSurah(surahNumber);
   const surahMeta = getAllSurahsMeta().find(s => s.number === surahNumber);
   const surahName = surahMeta?.name;
@@ -99,6 +100,12 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
     currentIndex >= b.globalCheckOffset &&
     currentIndex < b.globalCheckOffset + b.checkString.length
   ) || blocks[blocks.length - 1];
+
+  useEffect(() => {
+    if (currentBlock && onBlockChange) {
+      onBlockChange(currentBlock.page, currentBlock.juz, currentBlock.ayahNumber);
+    }
+  }, [currentBlock, onBlockChange]);
 
   useEffect(() => {
     if (jumpTarget) {
@@ -719,125 +726,47 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
         dir="rtl"
       >
         {/* Integrated Mobile Toolbar (Header) */}
-        <div className="w-full sm:hidden border-b border-neutral-100 dark:border-neutral-800/50 py-2 px-4 bg-white/50 dark:bg-neutral-800/50">
-          <div className="flex items-center justify-center gap-1.5 ">
-            {/* JUMP SHIFTERS (CIRCULAR) */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <div className="flex flex-col items-center gap-1">
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  dir="ltr"
-                  min="1"
-                  max="604"
-                  className="no-spinner bg-neutral-100/50 dark:bg-neutral-800/80 w-9 h-9 text-center text-[11px] font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-200/50 dark:border-neutral-700/50 focus:border-[#D6C19E] focus:outline-none transition-all shadow-sm p-0"
-                  defaultValue={currentBlock?.page}
-                  key={`m-page-${currentBlock?.page}`}
-                  onFocus={(e) => e.target.select()}
-                  onBlur={(e) => onJump('page', parseInt(e.target.value))}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      onJump('page', parseInt((e.target as HTMLInputElement).value));
-                      (e.target as HTMLInputElement).blur();
-                    }
-                  }}
-                />
-                <span className="text-[7px] uppercase font-bold text-neutral-400 tracking-tighter">page</span>
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  dir="ltr"
-                  min="1"
-                  max="30"
-                  className="no-spinner bg-neutral-100/50 dark:bg-neutral-800/80 w-9 h-9 text-center text-[11px] font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-200/50 dark:border-neutral-700/50 focus:border-[#D6C19E] focus:outline-none transition-all shadow-sm p-0"
-                  defaultValue={currentBlock?.juz}
-                  key={`m-juz-${currentBlock?.juz}`}
-                  onFocus={(e) => e.target.select()}
-                  onBlur={(e) => onJump('juz', parseInt(e.target.value))}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      onJump('juz', parseInt((e.target as HTMLInputElement).value));
-                      (e.target as HTMLInputElement).blur();
-                    }
-                  }}
-                />
-                <span className="text-[7px] uppercase font-bold text-neutral-400 tracking-tighter">juz</span>
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  dir="ltr"
-                  min="1"
-                  className="no-spinner bg-neutral-100/50 dark:bg-neutral-800/80 w-9 h-9 text-center text-[11px] font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-200/50 dark:border-neutral-700/50 focus:border-[#D6C19E] focus:outline-none transition-all shadow-sm p-0"
-                  defaultValue={currentBlock?.ayahNumber}
-                  key={`m-ayah-${currentBlock?.ayahNumber}`}
-                  onFocus={(e) => e.target.select()}
-                  onBlur={(e) => onJump('ayah', parseInt(e.target.value))}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      onJump('ayah', parseInt((e.target as HTMLInputElement).value));
-                      (e.target as HTMLInputElement).blur();
-                    }
-                  }}
-                />
-                <span className="text-[7px] uppercase font-bold text-neutral-400 tracking-tighter">ayah</span>
-              </div>
-            </div>
+        <div className="w-full sm:hidden border-b border-neutral-100 dark:border-neutral-800/50 py-2 px-2 bg-white/50 dark:bg-neutral-800/50">
+          <div className="flex items-center justify-center gap-0.5 sm:gap-1.5">
+            {/* JUMP SHIFTERS MOVED TO TOP */}
+
+            <button
+              onClick={() => setVisibilityMode('hidden')}
+              className={`flex items-center justify-center w-9 h-9 rounded-full transition-all shrink-0 ${visibilityMode === 'hidden' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" y1="2" x2="22" y2="22" /></svg>
+            </button>
+
+            <button
+              onClick={() => setVisibilityMode('ayah')}
+              className={`flex items-center justify-center w-9 h-9 rounded-full transition-all shrink-0 ${visibilityMode === 'ayah' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
+            </button>
+
+            <button
+              onClick={() => setVisibilityMode('all')}
+              className={`flex items-center justify-center w-9 h-9 rounded-full transition-all shrink-0 ${visibilityMode === 'all' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /></svg>
+            </button>
 
             <div className="w-px h-6 bg-neutral-200 dark:bg-neutral-700 mx-0.5 shrink-0" />
-            <div className="flex flex-col items-center group/btn">
-              <button
-                onClick={() => setVisibilityMode('hidden')}
-                className={`flex items-center justify-center w-9 h-9 rounded-full transition-all ${visibilityMode === 'hidden' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" y1="2" x2="22" y2="22" /></svg>
-              </button>
-              <span className={`text-[8px] uppercase font-bold tracking-widest transition-colors ${visibilityMode === 'hidden' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400'}`}>hide</span>
-            </div>
 
-            <div className="flex flex-col items-center group/btn">
-              <button
-                onClick={() => setVisibilityMode('ayah')}
-                className={`flex items-center justify-center w-9 h-9 rounded-full transition-all ${visibilityMode === 'ayah' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
-              </button>
-              <span className={`text-[8px] uppercase font-bold tracking-widest transition-colors ${visibilityMode === 'ayah' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400'}`}>ayah</span>
-            </div>
+            <button
+              onClick={() => setShowKeyboard(!showKeyboard)}
+              className={`flex items-center justify-center w-9 h-9 rounded-full transition-all shrink-0 ${showKeyboard ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
+            </button>
 
-            <div className="flex flex-col items-center group/btn">
-              <button
-                onClick={() => setVisibilityMode('all')}
-                className={`flex items-center justify-center w-9 h-9 rounded-full transition-all ${visibilityMode === 'all' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /></svg>
-              </button>
-              <span className={`text-[8px] uppercase font-bold tracking-widest transition-colors ${visibilityMode === 'all' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400'}`}>all</span>
-            </div>
-
-            <div className="w-px h-6 bg-neutral-200 dark:bg-neutral-700 mx-1" />
-
-            <div className="flex flex-col items-center group/btn">
-              <button
-                onClick={() => setShowKeyboard(!showKeyboard)}
-                className={`flex items-center justify-center w-9 h-9 rounded-full transition-all ${showKeyboard ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
-              </button>
-              <span className="text-[8px] uppercase font-bold tracking-widest text-neutral-400">key</span>
-            </div>
-
-            <div className="flex flex-col items-center group/btn relative" ref={popConfirmRef}>
+            <div className="relative shrink-0" ref={popConfirmRef}>
               <button
                 onClick={handleRestartAyah}
-                className="flex items-center justify-center w-9 h-9 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
+                className="flex items-center justify-center w-9 h-9 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all font-bold"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18" /><path d="M12 7v5l3 3" /></svg>
               </button>
-              <span className="text-[8px] uppercase font-bold tracking-widest text-neutral-400">ayah</span>
               <PopConfirm
                 isOpen={modalType === "rewrite_ayah"}
                 onClose={() => setModalType(null)}
@@ -848,31 +777,25 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
               />
             </div>
 
-            <div className="flex flex-col items-center group/btn">
-              <button
-                onClick={handleRestart}
-                className="flex items-center justify-center w-9 h-9 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all font-bold"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
-              </button>
-              <span className="text-[8px] uppercase font-bold tracking-widest text-neutral-400">reset</span>
-            </div>
+            <button
+              onClick={handleRestart}
+              className="flex items-center justify-center w-9 h-9 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all font-bold shrink-0"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+            </button>
 
-            <div className="w-px h-6 bg-neutral-200 dark:bg-neutral-700 mx-1" />
+            <div className="w-px h-6 bg-neutral-200 dark:bg-neutral-700 mx-0.5 shrink-0" />
 
-            <div className="flex flex-col items-center group/btn">
-              <button
-                onClick={toggleTheme}
-                className="flex items-center justify-center w-9 h-9 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
-              >
-                {isDarkMode ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>
-                )}
-              </button>
-              <span className="text-[8px] uppercase font-bold tracking-widest text-neutral-400">mode</span>
-            </div>
+            <button
+              onClick={toggleTheme}
+              className="flex items-center justify-center w-9 h-9 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all shrink-0"
+            >
+              {isDarkMode ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>
+              )}
+            </button>
           </div>
         </div>
 

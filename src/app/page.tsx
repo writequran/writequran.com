@@ -37,7 +37,13 @@ export default function Page() {
   const [currentReviewIndex, setCurrentReviewIndex] = useState(-1);
   const [modalType, setModalType] = useState<"review" | "clear" | "no-mistakes" | "review-complete" | null>(null);
 
+  const [navInfo, setNavInfo] = useState({ page: 1, juz: 1, ayah: 1 });
+  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [jumpInput, setJumpInput] = useState("");
+  const [activeNavTab, setActiveNavTab] = useState<'page' | 'juz' | 'ayah'>('page');
+
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -52,6 +58,20 @@ export default function Page() {
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isDropdownOpen]);
+
+  useEffect(() => {
+    const handleClickOutsideNav = (event: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(event.target as Node)) {
+        setIsNavOpen(false);
+      }
+    };
+    if (isNavOpen) {
+      document.addEventListener("mousedown", handleClickOutsideNav);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutsideNav);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutsideNav);
+  }, [isNavOpen]);
 
   const startReview = () => {
     const spots = getWeakSpots();
@@ -185,29 +205,107 @@ export default function Page() {
         </div>
 
         {/* ABSOLUTE CENTERED SURAH SELECTOR */}
-        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-20">
+        <div 
+          ref={dropdownRef}
+          className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-1 sm:gap-2"
+        >
           <button 
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-full transition-all border border-neutral-200 dark:border-neutral-700 shadow-sm group"
+            onClick={() => {
+              setIsDropdownOpen(!isDropdownOpen);
+              setIsNavOpen(false);
+            }}
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-full transition-all border border-neutral-200 dark:border-neutral-700 shadow-sm group"
           >
-            <span className="text-[10px] sm:text-sm font-bold text-neutral-700 dark:text-neutral-200 uppercase tracking-widest truncate max-w-[100px] sm:max-w-none">
+            <span className="text-[10px] sm:text-sm font-bold text-neutral-700 dark:text-neutral-200 uppercase tracking-widest truncate max-w-[80px] sm:max-w-none">
               {currentSurah?.number}. {currentSurah?.englishName}
             </span>
             <svg 
-              className={`w-3.5 h-3.5 text-neutral-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
+              className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-neutral-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
               xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
             >
               <path d="m6 9 6 6 6-6"/>
             </svg>
           </button>
 
+          {/* MOBILE-ONLY NAV BOX */}
+          <div className="sm:hidden -mt-0.5" ref={navRef}>
+            <button 
+              onClick={() => {
+                setIsNavOpen(!isNavOpen);
+                setIsDropdownOpen(false);
+                setJumpInput("");
+              }}
+              className="flex items-center gap-x-2 px-2.5 py-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-800 rounded-full shadow-sm text-[9px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-tighter"
+            >
+              <span className="flex items-center gap-0.5">
+                <span className="text-neutral-400 dark:text-neutral-500">P.</span>
+                <span className="text-neutral-700 dark:text-neutral-200">{navInfo.page}</span>
+              </span>
+              <span className="w-px h-2.5 bg-neutral-100 dark:bg-neutral-700 mx-0.5" />
+              <span className="flex items-center gap-0.5">
+                <span className="text-neutral-400 dark:text-neutral-500">J.</span>
+                <span className="text-neutral-700 dark:text-neutral-200">{navInfo.juz}</span>
+              </span>
+              <span className="w-px h-2.5 bg-neutral-100 dark:bg-neutral-700 mx-0.5" />
+              <span className="flex items-center gap-0.5">
+                <span className="text-neutral-400 dark:text-neutral-500">A.</span>
+                <span className="text-neutral-700 dark:text-neutral-200">{navInfo.ayah}</span>
+              </span>
+            </button>
+
+            {isNavOpen && (
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-48 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl p-3 z-[110] flex flex-col gap-3 animate-in fade-in zoom-in duration-200 origin-top">
+                <div className="flex bg-neutral-100 dark:bg-neutral-800 p-1 rounded-lg">
+                  {(['page', 'juz', 'ayah'] as const).map(tab => (
+                    <button
+                      key={tab}
+                      onClick={() => {
+                        setActiveNavTab(tab);
+                        setJumpInput("");
+                      }}
+                      className={`flex-1 py-1 text-[9px] font-bold uppercase rounded-md transition-all ${activeNavTab === tab ? 'bg-white dark:bg-neutral-700 text-neutral-800 dark:text-neutral-100 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+                
+                <div className="relative">
+                  <input
+                    autoFocus
+                    type="number"
+                    inputMode="numeric"
+                    placeholder={`Enter ${activeNavTab}...`}
+                    className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#D6C19E] dark:text-neutral-100"
+                    value={jumpInput}
+                    onChange={(e) => setJumpInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleJumpTo(activeNavTab, parseInt(jumpInput));
+                        setIsNavOpen(false);
+                      }
+                    }}
+                  />
+                  <button 
+                    onClick={() => {
+                      handleJumpTo(activeNavTab, parseInt(jumpInput));
+                      setIsNavOpen(false);
+                    }}
+                    className="absolute right-1 top-1 bottom-1 px-3 bg-[#D6C19E] text-white rounded-lg text-[9px] font-bold"
+                  >
+                    GO
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* SEARCHABLE DROPDOWN MODAL */}
           {isDropdownOpen && (
             <div 
-              ref={dropdownRef}
-              className="absolute top-full mt-3 w-72 max-h-[450px] bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl flex flex-col z-20 overflow-hidden animate-in fade-in zoom-in duration-200 origin-top"
+              className="absolute top-full mt-3 left-1/2 -translate-x-1/2 w-64 sm:w-72 max-h-[350px] sm:max-h-[450px] bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl flex flex-col z-20 overflow-hidden animate-in fade-in zoom-in duration-200 origin-top"
             >
-              <div className="p-4 border-b border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50">
+              <div className="p-3 sm:p-4 border-b border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50">
                   <div className="relative">
                     <input 
                       autoFocus
@@ -256,7 +354,7 @@ export default function Page() {
           )}
         </div>
 
-        <div className="flex-auto sm:flex-1 flex justify-end items-center gap-1 sm:gap-3 pr-2 sm:pr-4">
+        <div className="flex-auto sm:flex-1 flex justify-end items-center gap-0.5 sm:gap-3 pr-1 sm:pr-4">
           {reviewQueue.length > 0 ? (
             <div className="flex items-center gap-1 sm:gap-3 bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/30 rounded-full pl-2 sm:pl-4 pr-1 py-1 shadow-sm shrink-0">
               <span className="text-[10px] sm:text-xs font-bold text-orange-600 dark:text-orange-400 hidden sm:inline">
@@ -280,7 +378,7 @@ export default function Page() {
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <button 
                 onClick={startReview}
                 className="flex items-center gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E] dark:hover:border-orange-600 hover:text-orange-500 rounded-full text-xs font-bold text-neutral-600 dark:text-neutral-300 transition-all shadow-sm shrink-0"
@@ -308,7 +406,15 @@ export default function Page() {
       {/* MAIN CONTENT AREA */}
       <main className="flex-1 flex flex-col items-center justify-start min-h-screen relative pt-16">
         <div className="w-full flex-1 flex flex-col items-center pb-12 pt-12 md:pt-16">
-          {isMounted && <TypingArea key={`${surahNumber}-${resetKey}`} surahNumber={surahNumber} jumpTarget={jumpTarget} onJump={handleJumpTo} />}
+          {isMounted && (
+            <TypingArea 
+              key={`${surahNumber}-${resetKey}`} 
+              surahNumber={surahNumber} 
+              jumpTarget={jumpTarget} 
+              onJump={handleJumpTo} 
+              onBlockChange={(page, juz, ayah) => setNavInfo({ page, juz, ayah })}
+            />
+          )}
 
         </div>
       </main>
