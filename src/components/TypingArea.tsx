@@ -17,11 +17,30 @@ interface TypingAreaProps {
   jumpTarget?: { index: number; ts: number } | null;
   onJump: (type: 'ayah' | 'page' | 'juz' | 'surah', val: number) => void;
   onBlockChange?: (page: number, juz: number, ayah: number) => void;
+  onStartReview?: () => void;
+  onClearHistory?: () => void;
+  onExitReview?: () => void;
+  onNextReviewSpot?: () => void;
+  isReviewMode?: boolean;
+  reviewProgress?: string;
+  hasWeakSpots?: boolean;
 }
 
 type VisibilityMode = "hidden" | "ayah" | "all";
 
-export function TypingArea({ surahNumber, jumpTarget, onJump, onBlockChange }: TypingAreaProps) {
+export function TypingArea({
+  surahNumber,
+  jumpTarget,
+  onJump,
+  onBlockChange,
+  onStartReview,
+  onClearHistory,
+  onExitReview,
+  onNextReviewSpot,
+  isReviewMode = false,
+  reviewProgress = "",
+  hasWeakSpots = false
+}: TypingAreaProps) {
   const pageData = useMemo(() => getSurah(surahNumber), [surahNumber]);
   const surahMeta = useMemo(() => getAllSurahsMeta().find(s => s.number === surahNumber), [surahNumber]);
   const surahName = surahMeta?.name;
@@ -71,7 +90,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump, onBlockChange }: T
     }
   });
 
-  const [modalType, setModalType] = useState<"reset" | "rewrite" | "rewrite_ayah" | null>(null);
+  const [modalType, setModalType] = useState<"reset" | "rewrite" | "rewrite_ayah" | "mistake_menu" | null>(null);
 
   const sessionMistakes = sessionMistakeIndices.size;
 
@@ -241,7 +260,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump, onBlockChange }: T
   }, [currentIndex]);
 
   const handleResetSessionStats = () => {
-    setModalType("reset");
+    setModalType("mistake_menu");
   };
 
   const handleRestart = () => {
@@ -557,24 +576,52 @@ export function TypingArea({ surahNumber, jumpTarget, onJump, onBlockChange }: T
         {/* PASSIVE STATS */}
         <div className="flex flex-col gap-6 w-full">
           <div className="flex flex-col items-center gap-1 text-center">
-            <span className="text-[9px] uppercase font-bold text-neutral-400 tracking-widest select-none">Done</span>
-            <span className="text-[20px] font-bold text-neutral-800 dark:text-neutral-200 leading-none">
-              {((currentIndex / (globalCheckString.length || 1)) * 100).toFixed(0)}<span className="text-[15px] ml-0.5 opacity-40">%</span>
-            </span>
+            <span className="text-[9px] uppercase font-bold text-green-500 tracking-widest select-none">Done</span>
+            <div className="flex items-center justify-center w-12 h-12 rounded-full border border-green-500/40 bg-green-50 dark:bg-green-900/10 shadow-sm mt-1">
+              <span className="text-[20px] font-bold text-green-600 dark:text-green-400">
+                {((currentIndex / (globalCheckString.length || 1)) * 100).toFixed(0)}<span className="text-[10px] ml-0.5 opacity-50">%</span>
+              </span>
+            </div>
           </div>
 
-          <div className="flex flex-col items-center gap-1 text-center relative group/err">
-            <span className="text-[9px] uppercase font-bold text-red-500/70 tracking-widest select-none">Errors</span>
-            <span className="text-xl font-bold text-red-600 dark:text-red-400 leading-none">
-              {sessionMistakes}
+          <div className={`flex flex-col items-center gap-1 text-center relative group/err min-h-[70px] transition-all duration-300 ${(!isReviewMode && sessionMistakes === 0 && hasWeakSpots) ? 'opacity-60 grayscale hover:grayscale-0 hover:opacity-100' : ''}`}>
+            <span className={`text-[9px] uppercase font-bold tracking-widest select-none ${isReviewMode ? 'text-orange-500' : (sessionMistakes > 0 ? 'text-red-500/70' : 'text-neutral-400')}`}>
+              {isReviewMode ? 'Reviewing' : 'Errors'}
             </span>
-            <button
-              onClick={handleResetSessionStats}
-              className="absolute -bottom-10 flex items-center justify-center w-7 h-7 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-full shadow-md text-neutral-400 hover:text-red-500 transition-all z-10 duration-200 hover:scale-110 active:scale-95"
-              title="Reset Session Mistakes"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
-            </button>
+
+            <div className={`flex items-center mt-1 ${isReviewMode ? 'flex-col gap-0.5' : 'gap-1.5'}`}>
+              <div
+                onClick={handleResetSessionStats}
+                className={`flex items-center justify-center ${isReviewMode ? 'px-3' : 'w-10'} h-10 rounded-full border transition-all duration-300 shadow-sm cursor-pointer hover:scale-105 active:scale-95 ${isReviewMode
+                  ? 'border-orange-500/40 bg-orange-50 dark:bg-orange-900/10 text-orange-600 dark:text-orange-400'
+                  : 'border-red-500/40 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400'
+                  }`}
+              >
+                <span className={`font-bold ${isReviewMode ? 'text-sm' : 'text-lg'}`}>
+                  {isReviewMode ? reviewProgress : sessionMistakes}
+                </span>
+              </div>
+
+              {isReviewMode && (
+                <button
+                  onClick={onNextReviewSpot}
+                  className="flex items-center justify-center w-7 h-7 rounded-full text-orange-500 hover:bg-orange-100 dark:hover:bg-orange-900/20 transition-all active:scale-90"
+                  title="Next Weak Spot"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+                </button>
+              )}
+            </div>
+
+            {!isReviewMode && sessionMistakes > 0 && (
+              <button
+                onClick={handleResetSessionStats}
+                className="absolute -bottom-6 flex items-center justify-center w-6 h-6 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-full shadow-md text-neutral-400 hover:text-red-500 transition-all z-10 duration-200 hover:scale-110 active:scale-95 sm:opacity-0 group-hover/err:opacity-100"
+                title="Reset Session Mistakes"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -757,8 +804,8 @@ export function TypingArea({ surahNumber, jumpTarget, onJump, onBlockChange }: T
         <div className="w-full sm:hidden border-b border-neutral-100 dark:border-neutral-800/50 py-2 px-2 bg-white/50 dark:bg-neutral-800/50">
           <div className="flex items-center justify-center gap-0.5 sm:gap-1.5 relative">
             {/* PROGRESS PERCENTAGE (left) */}
-            <div className="absolute left-2 flex items-center justify-center w-9 h-9 rounded-full border border-[#D6C19E]/40 bg-[#D6C19E]/5 shadow-sm">
-              <span className="text-[11px] font-bold text-[#D6C19E]">
+            <div className="absolute left-2 flex items-center justify-center w-9 h-9 rounded-full border border-green-500/40 bg-green-500/5 shadow-sm">
+              <span className="text-[11px] font-bold text-green-600 dark:text-green-400">
                 {Math.round((currentIndex / globalCheckString.length) * 100)}%
               </span>
             </div>
@@ -832,16 +879,35 @@ export function TypingArea({ surahNumber, jumpTarget, onJump, onBlockChange }: T
               )}
             </button>
 
-            {/* ERROR COUNTER (right) */}
-            {sessionMistakes > 0 && (
-              <div className="absolute right-2 flex items-center gap-1.5 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-full pl-2.5 pr-1 py-1 shadow-sm">
-                <span className="text-[11px] font-bold text-red-600 dark:text-red-400">{sessionMistakes}</span>
+            {/* ERROR COUNTER / REVIEW TRACKER (right) */}
+            {(sessionMistakes > 0 || isReviewMode || hasWeakSpots) && (
+              <div className={`absolute right-2 flex items-center gap-0.1 transition-all duration-300 ${(!isReviewMode && sessionMistakes === 0 && hasWeakSpots) ? 'opacity-60 grayscale hover:grayscale-0 hover:opacity-100' : ''}`}>
+                {isReviewMode && (
+                  <button
+                    onClick={onNextReviewSpot}
+                    className="flex items-center justify-center w-7 h-7 rounded-full text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all active:scale-90"
+                    title="Next Weak Spot"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+                  </button>
+                )}
                 <button
-                  onClick={() => setModalType("reset")}
-                  className="w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                  title="Clear Session Mistakes"
+                  onClick={() => setModalType("mistake_menu")}
+                  className={`flex items-center justify-center ${isReviewMode ? 'px-2.5' : 'w-9'} h-9 rounded-full border transition-all duration-300 shadow-sm active:scale-95 ${isReviewMode
+                    ? 'border-orange-500/40 bg-orange-50 dark:bg-orange-900/10'
+                    : 'border-red-500/40 bg-red-50 dark:bg-red-900/10'
+                    }`}
+                  title={isReviewMode ? "Review Progress" : "Manage Mistakes"}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                  <span className={`font-bold ${isReviewMode ? 'text-[11px]' : 'text-[13px]'} ${isReviewMode ? 'text-orange-600 dark:text-orange-400' : 'text-red-600 dark:text-red-400'
+                    }`}>
+                    {isReviewMode ? reviewProgress : sessionMistakes}
+                  </span>
+                  {!isReviewMode && (
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                    </div>
+                  )}
                 </button>
               </div>
             )}
@@ -982,10 +1048,77 @@ export function TypingArea({ surahNumber, jumpTarget, onJump, onBlockChange }: T
       <ConfirmationModal
         isOpen={modalType === "reset"}
         onClose={() => setModalType(null)}
-        onConfirm={confirmReset}
-        title="Reset Session Mistakes?"
-        message="This will clear the current session mistake counter for this Surah."
+        onConfirm={() => {
+          confirmReset();
+          onClearHistory?.();
+        }}
+        title="Reset All Progress?"
+        message="This will clear your current session mistakes and your entire mistake history for this Surah."
       />
+
+      {/* NEW MISTAKE MENU MODAL */}
+      {modalType === "mistake_menu" && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
+          <div
+            className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm"
+            onClick={() => setModalType(null)}
+          />
+          <div className="relative bg-white dark:bg-neutral-900 w-full max-w-sm rounded-[2rem] shadow-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 sm:p-8 text-center">
+              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
+              </div>
+              <h3 className="text-xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">Manage Mistakes</h3>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-8">Choose an action for your session</p>
+
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => {
+                    confirmReset();
+                    onClearHistory?.();
+                    setModalType(null);
+                  }}
+                  className="w-full py-4 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-3"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
+                  Reset Session & History
+                </button>
+
+                <button
+                  onClick={() => {
+                    onStartReview?.();
+                    setModalType(null);
+                  }}
+                  className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-3"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.29 7 12 12 20.71 7" /><line x1="12" y1="22" x2="12" y2="12" /></svg>
+                  Review Weak Spots
+                </button>
+
+                {isReviewMode && (
+                  <button
+                    onClick={() => {
+                      onExitReview?.();
+                      setModalType(null);
+                    }}
+                    className="w-full py-4 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-300 rounded-2xl font-bold transition-all active:scale-95 flex items-center justify-center gap-3"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                    Exit Review Mode
+                  </button>
+                )}
+
+                <button
+                  onClick={() => setModalType(null)}
+                  className="w-full py-2 text-sm text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 font-medium transition-colors mt-2"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ConfirmationModal
         isOpen={modalType === "rewrite"}

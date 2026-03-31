@@ -17,7 +17,7 @@ export default function Page() {
 
   useEffect(() => {
     migrateLegacyLocalStorage(); // Safely scrapes unprotected older JSON if applicable
-    
+
     const savedSurah = getStorage('surah');
     if (savedSurah) {
       setSurahNumber(parseInt(savedSurah, 10));
@@ -30,8 +30,8 @@ export default function Page() {
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  
-  const [jumpTarget, setJumpTarget] = useState<{index: number, ts: number} | null>(null);
+
+  const [jumpTarget, setJumpTarget] = useState<{ index: number, ts: number } | null>(null);
 
   const [reviewQueue, setReviewQueue] = useState<WeakSpot[]>([]);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(-1);
@@ -86,7 +86,7 @@ export default function Page() {
     const spots = getWeakSpots();
     setReviewQueue(spots);
     setCurrentReviewIndex(0);
-    
+
     const first = spots[0];
     const sData = getSurah(first.surahNumber);
     const block = sData.blocks.find(b => b.ayahNumber === first.ayahNumber);
@@ -146,7 +146,7 @@ export default function Page() {
 
   const handleJumpTo = (type: 'ayah' | 'page' | 'juz' | 'surah', val: number) => {
     if (!val || val < 1) return;
-    
+
     if (type === 'surah') {
       if (val >= 1 && val <= 114) {
         setSurahNumber(val);
@@ -188,7 +188,7 @@ export default function Page() {
   };
 
 
-  const filteredSurahs = surahs.filter(s => 
+  const filteredSurahs = surahs.filter(s =>
     s.englishName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.number.toString().includes(searchQuery)
   );
@@ -201,9 +201,9 @@ export default function Page() {
       <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 flex items-center px-3 sm:px-6 z-[100] shadow-sm">
         <div className="flex-none sm:flex-1 flex items-center gap-2.5 group cursor-pointer" onClick={() => window.location.reload()}>
           <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-sm border border-[#D6C19E]/30">
-            <Image 
-              src="/icon.svg" 
-              alt="WriteQuran Logo" 
+            <Image
+              src="/icon.svg"
+              alt="WriteQuran Logo"
               fill
               className="object-contain"
             />
@@ -212,11 +212,11 @@ export default function Page() {
         </div>
 
         {/* ABSOLUTE CENTERED SURAH SELECTOR */}
-        <div 
+        <div
           ref={dropdownRef}
           className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-1 sm:gap-2"
         >
-          <button 
+          <button
             onClick={() => {
               setIsDropdownOpen(!isDropdownOpen);
               setIsNavOpen(false);
@@ -226,17 +226,17 @@ export default function Page() {
             <span className="text-[10px] sm:text-sm font-bold text-neutral-700 dark:text-neutral-200 uppercase tracking-widest truncate max-w-[150px] sm:max-w-none">
               {currentSurah?.number}. {currentSurah?.englishName}
             </span>
-            <svg 
-              className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-neutral-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
+            <svg
+              className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-neutral-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
               xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
             >
-              <path d="m6 9 6 6 6-6"/>
+              <path d="m6 9 6 6 6-6" />
             </svg>
           </button>
 
           {/* MOBILE-ONLY NAV BOX */}
           <div className="sm:hidden -mt-0.5" ref={navRef}>
-            <button 
+            <button
               onClick={() => {
                 setIsNavOpen(!isNavOpen);
                 setIsDropdownOpen(false);
@@ -276,7 +276,7 @@ export default function Page() {
                     </button>
                   ))}
                 </div>
-                
+
                 <div className="relative">
                   <input
                     autoFocus
@@ -293,7 +293,7 @@ export default function Page() {
                       }
                     }}
                   />
-                  <button 
+                  <button
                     onClick={() => {
                       handleJumpTo(activeNavTab, parseInt(jumpInput));
                       setIsNavOpen(false);
@@ -309,105 +309,58 @@ export default function Page() {
 
           {/* SEARCHABLE DROPDOWN MODAL */}
           {isDropdownOpen && (
-            <div 
+            <div
               className="absolute top-full mt-3 left-1/2 -translate-x-1/2 w-64 sm:w-72 max-h-[350px] sm:max-h-[450px] bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl flex flex-col z-20 overflow-hidden animate-in fade-in zoom-in duration-200 origin-top"
             >
               <div className="p-3 sm:p-4 border-b border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50">
-                  <div className="relative">
-                    <input 
-                      autoFocus
-                      type="text"
-                      placeholder="Search Surah..."
-                      className="w-full pl-9 pr-4 py-2 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#D6C19E] transition-all dark:text-neutral-100"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                    <svg className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
-                    </svg>
-                  </div>
-                </div>
-                
-                <div className="flex-1 overflow-y-auto py-2 h-[350px] custom-scrollbar">
-                  {filteredSurahs.map((s) => {
-                    const isActive = s.number === surahNumber;
-                    return (
-                      <button
-                        key={s.number}
-                        onClick={() => {
-                          setSurahNumber(s.number);
-                          setJumpTarget(null);
-                          setStorage('surah', s.number.toString());
-                          setIsDropdownOpen(false);
-                          setSearchQuery("");
-                        }}
-                        className={`w-full flex items-center px-5 py-3 transition-colors ${
-                          isActive 
-                            ? 'bg-[#D6C19E]/10 text-[#D6C19E] font-bold' 
-                            : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
-                        }`}
-                      >
-                        <span className="text-xs font-mono mr-4 w-5 text-right opacity-50">{s.number}</span>
-                        <span className="text-sm">{s.englishName}</span>
-                        {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#D6C19E]"/>}
-                      </button>
-                    );
-                  })}
-                  {filteredSurahs.length === 0 && (
-                    <div className="px-6 py-12 text-center text-sm text-neutral-400 italic">No matches found</div>
-                  )}
+                <div className="relative">
+                  <input
+                    autoFocus
+                    type="text"
+                    placeholder="Search Surah..."
+                    className="w-full pl-9 pr-4 py-2 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#D6C19E] transition-all dark:text-neutral-100"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  <svg className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+                  </svg>
                 </div>
               </div>
+
+              <div className="flex-1 overflow-y-auto py-2 h-[350px] custom-scrollbar">
+                {filteredSurahs.map((s) => {
+                  const isActive = s.number === surahNumber;
+                  return (
+                    <button
+                      key={s.number}
+                      onClick={() => {
+                        setSurahNumber(s.number);
+                        setJumpTarget(null);
+                        setStorage('surah', s.number.toString());
+                        setIsDropdownOpen(false);
+                        setSearchQuery("");
+                      }}
+                      className={`w-full flex items-center px-5 py-3 transition-colors ${isActive
+                          ? 'bg-[#D6C19E]/10 text-[#D6C19E] font-bold'
+                          : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
+                        }`}
+                    >
+                      <span className="text-xs font-mono mr-4 w-5 text-right opacity-50">{s.number}</span>
+                      <span className="text-sm">{s.englishName}</span>
+                      {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#D6C19E]" />}
+                    </button>
+                  );
+                })}
+                {filteredSurahs.length === 0 && (
+                  <div className="px-6 py-12 text-center text-sm text-neutral-400 italic">No matches found</div>
+                )}
+              </div>
+            </div>
           )}
         </div>
 
         <div className="flex-auto sm:flex-1 flex justify-end items-center gap-0.5 sm:gap-3 pr-1 sm:pr-4">
-          {reviewQueue.length > 0 ? (
-            <div className="flex items-center gap-1 sm:gap-3 bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/30 rounded-full pl-2 sm:pl-4 pr-1 py-1 shadow-sm shrink-0">
-              <span className="text-[10px] sm:text-xs font-bold text-orange-600 dark:text-orange-400 hidden sm:inline">
-                Reviewing {currentReviewIndex + 1}/{reviewQueue.length}
-              </span>
-              <span className="text-[10px] sm:text-xs font-bold text-orange-600 dark:text-orange-400 sm:hidden">
-                {currentReviewIndex + 1}/{reviewQueue.length}
-              </span>
-              <button 
-                onClick={nextReviewSpot} 
-                className="w-6 h-6 sm:w-auto sm:px-3 py-1 sm:py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full text-[9px] sm:text-xs font-bold transition-colors shadow-sm flex items-center justify-center"
-                title="Next Weak Spot"
-              >
-                <span className="hidden sm:inline">Next Spot</span>
-                <svg className="sm:hidden" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                <svg className="hidden sm:block sm:ml-1" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-              </button>
-              <button 
-                onClick={exitReview} 
-                className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-orange-500 hover:bg-orange-100 dark:hover:bg-orange-500/20 rounded-full transition-colors ml-0.5 sm:ml-1" 
-                title="Exit Review"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1 sm:gap-2">
-              <button 
-                onClick={startReview}
-                className="flex items-center gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E] dark:hover:border-orange-600 hover:text-orange-500 rounded-full text-xs font-bold text-neutral-600 dark:text-neutral-300 transition-all shadow-sm shrink-0"
-                title="Review Weak Spots"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
-                <span className="hidden sm:inline">Review Weak Spots</span>
-              </button>
-              
-              <button 
-                onClick={clearAllMistakes}
-                className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-red-300 dark:hover:border-red-600 hover:text-red-500 rounded-full text-neutral-400 transition-all shadow-sm shrink-0"
-                title="Clear All Mistake History"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-              </button>
-            </div>
-          )}
-
           <AuthWidget onAuthChange={() => setResetKey(prev => prev + 1)} />
         </div>
 
@@ -417,12 +370,19 @@ export default function Page() {
       <main className="flex-1 flex flex-col items-center justify-start min-h-screen relative pt-16">
         <div className="w-full flex-1 flex flex-col items-center pb-12 pt-12 md:pt-16">
           {isMounted && (
-            <TypingArea 
-              key={`${surahNumber}-${resetKey}`} 
-              surahNumber={surahNumber} 
-              jumpTarget={jumpTarget} 
-              onJump={handleJumpTo} 
+            <TypingArea
+              key={`${surahNumber}-${resetKey}`}
+              surahNumber={surahNumber}
+              jumpTarget={jumpTarget}
+              onJump={handleJumpTo}
               onBlockChange={handleBlockChange}
+              onStartReview={confirmStartReview}
+              onClearHistory={confirmClearAll}
+              onExitReview={exitReview}
+              onNextReviewSpot={nextReviewSpot}
+              isReviewMode={reviewQueue.length > 0}
+              reviewProgress={reviewQueue.length > 0 ? `${currentReviewIndex + 1}/${reviewQueue.length}` : ""}
+              hasWeakSpots={getWeakSpots().length > 0}
             />
           )}
 
@@ -443,7 +403,7 @@ export default function Page() {
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #D6C19E88; }
       `}</style>
 
-      <ConfirmationModal 
+      <ConfirmationModal
         isOpen={modalType === "review"}
         onClose={() => setModalType(null)}
         onConfirm={confirmStartReview}
@@ -451,7 +411,7 @@ export default function Page() {
         message="This will start a review session of your logged mistakes across all Surahs."
       />
 
-      <ConfirmationModal 
+      <ConfirmationModal
         isOpen={modalType === "clear"}
         onClose={() => setModalType(null)}
         onConfirm={confirmClearAll}
@@ -459,7 +419,7 @@ export default function Page() {
         message="Are you sure you want to clear ALL mistake history for this account? This cannot be undone."
       />
 
-      <ConfirmationModal 
+      <ConfirmationModal
         isOpen={modalType === "no-mistakes"}
         onClose={() => setModalType(null)}
         onConfirm={() => setModalType(null)}
@@ -469,7 +429,7 @@ export default function Page() {
         showCancel={false}
       />
 
-      <ConfirmationModal 
+      <ConfirmationModal
         isOpen={modalType === "review-complete"}
         onClose={() => setModalType(null)}
         onConfirm={() => setModalType(null)}
