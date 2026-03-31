@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { TypingArea } from "@/components/TypingArea";
 import { AuthWidget } from "@/components/AuthWidget";
+import { ConfirmationModal } from "@/components/ConfirmationModal";
 import Image from "next/image";
 import { getAllSurahsMeta, getSurah, getLocationByPage, getLocationByJuz } from "@/lib/quran-data";
 import { WeakSpot, getWeakSpots } from "@/lib/stats";
@@ -34,13 +35,35 @@ export default function Page() {
 
   const [reviewQueue, setReviewQueue] = useState<WeakSpot[]>([]);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(-1);
+  const [modalType, setModalType] = useState<"review" | "clear" | "no-mistakes" | "review-complete" | null>(null);
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    if (isDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isDropdownOpen]);
 
   const startReview = () => {
     const spots = getWeakSpots();
     if (spots.length === 0) {
-      alert("No mistakes logged yet! Keep practicing to build your stats.");
+      setModalType("no-mistakes");
       return;
     }
+    setModalType("review");
+  };
+
+  const confirmStartReview = () => {
+    const spots = getWeakSpots();
     setReviewQueue(spots);
     setCurrentReviewIndex(0);
     
@@ -67,7 +90,7 @@ export default function Page() {
       setStorage('surah', spot.surahNumber.toString());
       setJumpTarget({ index: block ? block.globalCheckOffset : 0, ts: Date.now() });
     } else {
-      alert("Review complete! MashAllah.");
+      setModalType("review-complete");
       setReviewQueue([]);
       setCurrentReviewIndex(-1);
     }
@@ -79,17 +102,19 @@ export default function Page() {
   };
 
   const clearAllMistakes = () => {
-    if (confirm("Are you sure you want to clear ALL mistake history for this account? This cannot be undone.")) {
-      localStorage.removeItem(getScopedKey('mistake_stats'));
-      for (let i = 1; i <= 114; i++) {
-        localStorage.removeItem(getScopedKey(`session_mistakes_${i}`));
-        localStorage.removeItem(getScopedKey(`session_attempts_${i}`));
-        localStorage.removeItem(getScopedKey(`session_mistake_indices_${i}`));
-      }
-      setReviewQueue([]);
-      setCurrentReviewIndex(-1);
-      setResetKey(prev => prev + 1);
+    setModalType("clear");
+  };
+
+  const confirmClearAll = () => {
+    localStorage.removeItem(getScopedKey('mistake_stats'));
+    for (let i = 1; i <= 114; i++) {
+      localStorage.removeItem(getScopedKey(`session_mistakes_${i}`));
+      localStorage.removeItem(getScopedKey(`session_attempts_${i}`));
+      localStorage.removeItem(getScopedKey(`session_mistake_indices_${i}`));
     }
+    setReviewQueue([]);
+    setCurrentReviewIndex(-1);
+    setResetKey(prev => prev + 1);
   };
 
   const handleJumpTo = (type: 'ayah' | 'page' | 'juz', val: number) => {
@@ -138,9 +163,9 @@ export default function Page() {
   const currentSurah = surahs.find(s => s.number === surahNumber);
 
   return (
-    <div className="flex flex-col min-h-screen bg-neutral-100 dark:bg-neutral-950 transition-colors duration-300">
+    <div className="flex flex-col min-h-screen bg-neutral-100 dark:bg-neutral-900 transition-colors duration-300">
       {/* FIXED TOP HEADER */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 flex items-center px-6 z-[60] shadow-sm">
+      <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 dark:bg-neutral-800/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 flex items-center px-6 z-[60] shadow-sm">
         <div className="flex-1 flex items-center gap-2.5 group cursor-pointer" onClick={() => window.location.reload()}>
           <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-sm border border-[#D6C19E]/30">
             <Image 
@@ -171,19 +196,17 @@ export default function Page() {
 
           {/* SEARCHABLE DROPDOWN MODAL */}
           {isDropdownOpen && (
-            <>
-              <div 
-                className="fixed inset-0 z-10" 
-                onClick={() => setIsDropdownOpen(false)}
-              />
-              <div className="absolute top-full mt-3 w-72 max-h-[450px] bg-white dark:bg-[#121212] border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl flex flex-col z-20 overflow-hidden animate-in fade-in zoom-in duration-200 origin-top">
-                <div className="p-4 border-b border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50">
+            <div 
+              ref={dropdownRef}
+              className="absolute top-full mt-3 w-72 max-h-[450px] bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl flex flex-col z-20 overflow-hidden animate-in fade-in zoom-in duration-200 origin-top"
+            >
+              <div className="p-4 border-b border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50">
                   <div className="relative">
                     <input 
                       autoFocus
                       type="text"
                       placeholder="Search Surah..."
-                      className="w-full pl-9 pr-4 py-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#D6C19E] transition-all dark:text-neutral-100"
+                      className="w-full pl-9 pr-4 py-2 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#D6C19E] transition-all dark:text-neutral-100"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -223,7 +246,6 @@ export default function Page() {
                   )}
                 </div>
               </div>
-            </>
           )}
         </div>
 
@@ -298,6 +320,42 @@ export default function Page() {
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #D6C19E44; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #D6C19E88; }
       `}</style>
+
+      <ConfirmationModal 
+        isOpen={modalType === "review"}
+        onClose={() => setModalType(null)}
+        onConfirm={confirmStartReview}
+        title="Review Weak Spots?"
+        message="This will start a review session of your logged mistakes across all Surahs."
+      />
+
+      <ConfirmationModal 
+        isOpen={modalType === "clear"}
+        onClose={() => setModalType(null)}
+        onConfirm={confirmClearAll}
+        title="Clear All Mistake History?"
+        message="Are you sure you want to clear ALL mistake history for this account? This cannot be undone."
+      />
+
+      <ConfirmationModal 
+        isOpen={modalType === "no-mistakes"}
+        onClose={() => setModalType(null)}
+        onConfirm={() => setModalType(null)}
+        title="No Mistakes Yet"
+        message="Keep practicing to build your stats. Once you make a mistake, it will appear here for review."
+        confirmLabel="OK"
+        showCancel={false}
+      />
+
+      <ConfirmationModal 
+        isOpen={modalType === "review-complete"}
+        onClose={() => setModalType(null)}
+        onConfirm={() => setModalType(null)}
+        title="Review Complete!"
+        message="MashAllah, you've completed your review session."
+        confirmLabel="Finish"
+        showCancel={false}
+      />
     </div>
   );
 }

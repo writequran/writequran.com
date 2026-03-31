@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { getSurah } from "@/lib/quran-data";
 import { MistakeRecord, ProgressStats, loadMistakeStats, loadProgressStats, saveMistakeStats, saveProgressStats } from "@/lib/stats";
 import { getStorage, setStorage } from "@/lib/storage";
+import { ConfirmationModal } from "./ConfirmationModal";
 
 // Helper to prevent verse markers from breaking to the next line
 const preserveMarkerSpacing = (str: string) => {
@@ -65,6 +66,8 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
       return new Set<number>();
     }
   });
+
+  const [modalType, setModalType] = useState<"reset" | "rewrite" | null>(null);
 
   const sessionMistakes = sessionMistakeIndices.size;
 
@@ -179,10 +182,23 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
   }, [currentIndex]);
 
   const handleResetSessionStats = () => {
-    if (confirm("Reset mistake counter for this Surah?")) {
-      setSessionAttempts(0);
-      setSessionMistakeIndices(new Set());
-    }
+    setModalType("reset");
+  };
+
+  const handleRestart = () => {
+    setModalType("rewrite");
+  };
+
+  const confirmReset = () => {
+    setSessionAttempts(0);
+    setSessionMistakeIndices(new Set());
+  };
+
+  const confirmRestart = () => {
+    setCurrentIndex(0);
+    setWrongChar(null);
+    setTimeout(updateCursorPos, 100);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleInput = useCallback((char: string) => {
@@ -295,12 +311,6 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleInput]);
 
-  const handleRestart = () => {
-    setCurrentIndex(0);
-    setWrongChar(null);
-    setTimeout(updateCursorPos, 100);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
 
   type TextMode = "typed" | "hint" | "hidden" | "mistake";
 
@@ -371,7 +381,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
   return (
     <div className="w-full flex flex-col items-center pb-36 px-4">
       {/* LEFT STATS DOCK */}
-      <div className="fixed left-6 top-1/2 -translate-y-1/2 hidden sm:flex flex-col items-center gap-3 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl rounded-full shadow-2xl border border-neutral-200/50 dark:border-neutral-800/50 py-10 px-2 z-50 transition-all duration-500 w-[64px]">
+      <div className="fixed left-6 top-1/2 -translate-y-1/2 hidden sm:flex flex-col items-center gap-3 bg-white/95 dark:bg-neutral-800/95 backdrop-blur-xl rounded-full shadow-2xl border border-neutral-200/50 dark:border-neutral-800/50 py-10 px-2 z-50 transition-all duration-500 w-[64px]">
 
         {/* JUMP CONTROLS GROUP */}
         <div className="flex flex-col gap-3 w-full items-center">
@@ -489,7 +499,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
       )}
 
       <div
-        className="relative w-full max-w-[800px] bg-[#FDFBF7] dark:bg-[#121212] shadow-2xl rounded-sm border-[16px] border-[#D6C19E] dark:border-neutral-800 px-8 py-24 rtl quran-text tracking-normal transition-colors duration-500 cursor-default select-none"
+        className="relative w-full max-w-[800px] bg-[#FDFBF7] dark:bg-neutral-900 shadow-2xl rounded-sm border-[16px] border-[#D6C19E] dark:border-neutral-700 px-8 py-24 rtl quran-text tracking-normal transition-colors duration-500 cursor-default select-none"
         dir="rtl"
         style={{ WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale" }}
       >
@@ -629,13 +639,13 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
       </div>
 
       <div
-        className={`fixed bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#FDFBF7] dark:from-[#121212] via-[#FDFBF7]/80 dark:via-[#121212]/80 to-transparent pointer-events-none z-30 transition-opacity duration-700 ease-in-out ${isAtBottom || showKeyboard ? 'opacity-0' : 'opacity-100'}`}
+        className={`fixed bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#FDFBF7] dark:from-neutral-900 via-[#FDFBF7]/80 dark:via-neutral-900/80 to-transparent pointer-events-none z-30 transition-opacity duration-700 ease-in-out ${isAtBottom || showKeyboard ? 'opacity-0' : 'opacity-100'}`}
         aria-hidden="true"
       />
 
       {/* ARABIC ON-SCREEN KEYBOARD */}
       <div
-        className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[750px] bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t border-neutral-200 dark:border-neutral-800 p-6 pb-8 transition-all duration-500 transform z-40 ${showKeyboard ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}
+        className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[750px] bg-white/95 dark:bg-neutral-800/95 backdrop-blur-md rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t border-neutral-200 dark:border-neutral-800 p-6 pb-8 transition-all duration-500 transform z-40 ${showKeyboard ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}
         dir="rtl"
       >
         <div className="flex flex-col gap-2">
@@ -674,7 +684,7 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
         </div>
       </div>
 
-      <div className="fixed right-6 top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl rounded-full shadow-2xl border border-neutral-200/50 dark:border-neutral-800/50 py-2 px-2 z-50 transition-all duration-500 w-[64px]">
+      <div className="fixed right-6 top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 bg-white/95 dark:bg-neutral-800/95 backdrop-blur-xl rounded-full shadow-2xl border border-neutral-200/50 dark:border-neutral-800/50 py-2 px-2 z-50 transition-all duration-500 w-[64px]">
         <div className="flex flex-col items-center gap-1 group/btn">
           <button
             onClick={() => setVisibilityMode('hidden')}
@@ -743,6 +753,22 @@ export function TypingArea({ surahNumber, jumpTarget, onJump }: TypingAreaProps)
           )}
         </button>
       </div>
+
+      <ConfirmationModal 
+        isOpen={modalType === "reset"}
+        onClose={() => setModalType(null)}
+        onConfirm={confirmReset}
+        title="Reset Session Mistakes?"
+        message="This will clear the current session mistake counter for this Surah."
+      />
+
+      <ConfirmationModal 
+        isOpen={modalType === "rewrite"}
+        onClose={() => setModalType(null)}
+        onConfirm={confirmRestart}
+        title="Rewrite Surah?"
+        message="This will reset your progress to the beginning of this Surah."
+      />
     </div>
   );
 }

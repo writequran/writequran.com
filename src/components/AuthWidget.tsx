@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { syncCloudToLocal, syncLocalToCloud } from '@/lib/sync-manager';
 import { setActiveUserId } from '@/lib/storage';
 import { createClient } from '@/utils/supabase/client';
@@ -17,6 +17,7 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const authRef = useRef<HTMLDivElement>(null);
 
   const supabase = createClient();
 
@@ -58,6 +59,20 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
 
     return () => { listener.subscription.unsubscribe(); };
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (authRef.current && !authRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
 
   const resetForm = () => {
     setEmail('');
@@ -216,14 +231,15 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
   // ─── Signed-out / auth panel ─────────────────────────────────────────────────
   return (
     <div className="relative">
-      <button onClick={() => { setIsOpen(!isOpen); if (!isOpen) { resetForm(); setView('signin'); } }} className="text-xs font-bold text-neutral-500 hover:text-[#D6C19E] transition-colors ml-4 mr-2">
+      <button 
+        onClick={() => { setIsOpen(!isOpen); if (!isOpen) { resetForm(); setView('signin'); } }} 
+        className="px-4 py-1.5 text-xs font-bold text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E] dark:hover:border-[#D6C19E] hover:bg-white dark:hover:bg-neutral-900 transition-all rounded-full ml-4 mr-2 shadow-sm"
+      >
         Sign In
       </button>
 
       {isOpen && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute top-full mt-2 w-72 right-0 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl p-4 z-50">
+        <div ref={authRef} className="absolute top-full mt-2 w-72 right-0 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl p-4 z-50">
 
             {/* ── Check your email ── */}
             {view === 'check_email' && (
@@ -337,7 +353,6 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
             )}
 
           </div>
-        </>
       )}
     </div>
   );
