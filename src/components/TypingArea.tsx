@@ -487,7 +487,7 @@ export function TypingArea({
   };
 
   return (
-    <div className="w-full flex flex-col items-center pb-36 px-4">
+    <div className="w-full flex flex-col items-center pb-36 px-0">
       {/* LEFT STATS DOCK */}
       <div className="fixed left-6 top-1/2 -translate-y-1/2 hidden sm:flex flex-col items-center gap-3 bg-white/95 dark:bg-neutral-800/95 backdrop-blur-xl rounded-full shadow-2xl border border-neutral-200/50 dark:border-neutral-800/50 py-10 px-2 z-50 transition-all duration-500 w-[64px]">
 
@@ -635,7 +635,7 @@ export function TypingArea({
       )}
 
       <div
-        className="relative w-full max-w-[800px] bg-[#FDFBF7] dark:bg-neutral-900 shadow-2xl rounded-sm border-4 sm:border-[16px] border-[#D6C19E] dark:border-neutral-700 px-4 sm:px-8 py-12 sm:py-24 rtl quran-text tracking-normal transition-colors duration-500 cursor-default select-none"
+        className="relative w-full max-w-[800px] bg-[#FDFBF7] dark:bg-neutral-900 shadow-2xl rounded-sm border-2 sm:border-[16px] border-[#D6C19E] dark:border-neutral-700 px-3 sm:px-8 py-12 sm:py-24 rtl quran-text tracking-normal transition-colors duration-500 cursor-default select-none"
         dir="rtl"
         style={{ WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale" }}
       >
@@ -643,7 +643,7 @@ export function TypingArea({
 
         <div
           ref={containerRef}
-          className="w-full text-[1.5rem] sm:text-[2.2rem] leading-[2.5] sm:leading-[2.8] text-justify mushaf-rules relative" style={{ textAlignLast: 'center' }}
+          className="w-full text-[1.5rem] sm:text-[2.2rem] leading-[2.2] sm:leading-[2.8] text-justify mushaf-rules relative" style={{ textAlignLast: 'center' }}
         >
           {/* SURAH NAME HEADER (ABSOLUTE) */}
           <div className="absolute -top-10 sm:-top-16 left-0 right-0 flex justify-center pointer-events-none select-none">
@@ -801,11 +801,11 @@ export function TypingArea({
         dir="rtl"
       >
         {/* Integrated Mobile Toolbar (Header) */}
-        <div className="w-full sm:hidden border-b border-neutral-100 dark:border-neutral-800/50 py-2 px-2 bg-white/50 dark:bg-neutral-800/50">
-          <div className="flex items-center justify-center gap-0.5 sm:gap-1.5 relative">
+        <div className="w-full sm:hidden border-b border-neutral-100 dark:border-neutral-800/50 py-1.5 px-1 bg-white/50 dark:bg-neutral-800/50">
+          <div className="flex items-center justify-center gap-0 relative">
             {/* PROGRESS PERCENTAGE (left) */}
-            <div className="absolute left-2 flex items-center justify-center w-9 h-9 rounded-full border border-green-500/40 bg-green-500/5 shadow-sm">
-              <span className="text-[11px] font-bold text-green-600 dark:text-green-400">
+            <div className="absolute left-1 flex items-center justify-center w-8 h-8 rounded-full border border-green-500/40 bg-green-500/5 shadow-sm">
+              <span className="text-[10px] font-bold text-green-600 dark:text-green-400">
                 {Math.round((currentIndex / globalCheckString.length) * 100)}%
               </span>
             </div>
@@ -814,40 +814,40 @@ export function TypingArea({
 
             <button
               onClick={() => setVisibilityMode('hidden')}
-              className={`flex items-center justify-center w-9 h-9 rounded-full transition-all shrink-0 ${visibilityMode === 'hidden' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all shrink-0 ${visibilityMode === 'hidden' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" y1="2" x2="22" y2="22" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" y1="2" x2="22" y2="22" /></svg>
             </button>
 
             <button
               onClick={() => setVisibilityMode('ayah')}
-              className={`flex items-center justify-center w-9 h-9 rounded-full transition-all shrink-0 ${visibilityMode === 'ayah' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all shrink-0 ${visibilityMode === 'ayah' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
             </button>
 
             <button
               onClick={() => setVisibilityMode('all')}
-              className={`flex items-center justify-center w-9 h-9 rounded-full transition-all shrink-0 ${visibilityMode === 'all' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all shrink-0 ${visibilityMode === 'all' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /></svg>
             </button>
 
-            <div className="w-px h-6 bg-neutral-200 dark:bg-neutral-700 mx-0.5 shrink-0" />
+            <div className="w-px h-5 bg-neutral-200 dark:bg-neutral-700 shrink-0" />
 
             <button
               onClick={() => setShowKeyboard(!showKeyboard)}
-              className={`flex items-center justify-center w-9 h-9 rounded-full transition-all shrink-0 ${showKeyboard ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all shrink-0 ${showKeyboard ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
             </button>
 
             <div className="relative shrink-0" ref={popConfirmRef}>
               <button
                 onClick={handleRestartAyah}
-                className="flex items-center justify-center w-9 h-9 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all font-bold"
+                className="flex items-center justify-center w-8 h-8 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all font-bold"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18" /><path d="M12 7v5l3 3" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18" /><path d="M12 7v5l3 3" /></svg>
               </button>
               <PopConfirm
                 isOpen={modalType === "rewrite_ayah"}
@@ -861,51 +861,51 @@ export function TypingArea({
 
             <button
               onClick={handleRestart}
-              className="flex items-center justify-center w-9 h-9 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all font-bold shrink-0"
+              className="flex items-center justify-center w-8 h-8 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all font-bold shrink-0"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
             </button>
 
-            <div className="w-px h-6 bg-neutral-200 dark:bg-neutral-700 mx-0.5 shrink-0" />
+            <div className="w-px h-5 bg-neutral-200 dark:bg-neutral-700 shrink-0" />
 
             <button
               onClick={toggleTheme}
-              className="flex items-center justify-center w-9 h-9 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all shrink-0"
+              className="flex items-center justify-center w-8 h-8 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all shrink-0"
             >
               {isDarkMode ? (
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
               ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>
               )}
             </button>
 
             {/* ERROR COUNTER / REVIEW TRACKER (right) */}
             {(sessionMistakes > 0 || isReviewMode || hasWeakSpots) && (
-              <div className={`absolute right-2 flex items-center gap-0.1 transition-all duration-300 ${(!isReviewMode && sessionMistakes === 0 && hasWeakSpots) ? 'opacity-60 grayscale hover:grayscale-0 hover:opacity-100' : ''}`}>
+              <div className={`absolute right-1 flex items-center gap-0 transition-all duration-300 ${(!isReviewMode && sessionMistakes === 0 && hasWeakSpots) ? 'opacity-60 grayscale hover:grayscale-0 hover:opacity-100' : ''}`}>
                 {isReviewMode && (
                   <button
                     onClick={onNextReviewSpot}
-                    className="flex items-center justify-center w-7 h-7 rounded-full text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all active:scale-90"
+                    className="flex items-center justify-center w-6 h-6 rounded-full text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all active:scale-90"
                     title="Next Weak Spot"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
                   </button>
                 )}
                 <button
                   onClick={() => setModalType("mistake_menu")}
-                  className={`flex items-center justify-center ${isReviewMode ? 'px-2.5' : 'w-9'} h-9 rounded-full border transition-all duration-300 shadow-sm active:scale-95 ${isReviewMode
+                  className={`flex items-center justify-center ${isReviewMode ? 'px-1.5' : 'w-8'} h-8 rounded-full border transition-all duration-300 shadow-sm active:scale-95 ${isReviewMode
                     ? 'border-orange-500/40 bg-orange-50 dark:bg-orange-900/10'
                     : 'border-red-500/40 bg-red-50 dark:bg-red-900/10'
                     }`}
                   title={isReviewMode ? "Review Progress" : "Manage Mistakes"}
                 >
-                  <span className={`font-bold ${isReviewMode ? 'text-[11px]' : 'text-[13px]'} ${isReviewMode ? 'text-orange-600 dark:text-orange-400' : 'text-red-600 dark:text-red-400'
+                  <span className={`font-bold ${isReviewMode ? 'text-[10px]' : 'text-[12px]'} ${isReviewMode ? 'text-orange-600 dark:text-orange-400' : 'text-red-600 dark:text-red-400'
                     }`}>
                     {isReviewMode ? reviewProgress : sessionMistakes}
                   </span>
                   {!isReviewMode && (
-                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                    <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
                     </div>
                   )}
                 </button>
