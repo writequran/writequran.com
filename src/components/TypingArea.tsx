@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { getSurah, getAllSurahsMeta } from "@/lib/quran-data";
+import { getSurah, getAllSurahsMeta, type MushafBlock } from "@/lib/quran-data";
 import { MistakeRecord, ProgressStats, loadMistakeStats, loadProgressStats, saveMistakeStats, saveProgressStats } from "@/lib/stats";
 import { getStorage, setStorage } from "@/lib/storage";
 import { ConfirmationModal } from "./ConfirmationModal";
@@ -33,6 +33,11 @@ function findFirstUntypedIndexInRange(typedIndices: Set<number>, start: number, 
 
 function findNextUntypedIndex(typedIndices: Set<number>, start: number, totalLength: number): number {
   return findFirstUntypedIndexInRange(typedIndices, start, totalLength);
+}
+
+function getBlockLimit(blocks: MushafBlock[], blockIndex: number, totalLength: number): number {
+  const nextBlock = blocks[blockIndex + 1];
+  return nextBlock ? nextBlock.globalCheckOffset : totalLength;
 }
 
 interface TypingAreaProps {
@@ -232,7 +237,6 @@ export function TypingArea({
 
   const targetRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const popConfirmRef = useRef<HTMLDivElement>(null);
   const lastHandledJumpTsRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -246,6 +250,30 @@ export function TypingArea({
       currentIndex < b.globalCheckOffset + b.checkString.length
     ) || blocks[blocks.length - 1];
   }, [currentIndex, blocks]);
+
+  const rewriteAyahTarget = useMemo(() => {
+    const blockIndex = blocks.findIndex((block) =>
+      currentIndex >= block.globalCheckOffset &&
+      currentIndex < block.globalCheckOffset + block.checkString.length
+    );
+
+    if (blockIndex >= 0) {
+      return {
+        block: blocks[blockIndex],
+        startIdx: blocks[blockIndex].globalCheckOffset,
+        limit: getBlockLimit(blocks, blockIndex, globalCheckString.length),
+      };
+    }
+
+    const fallbackIndex = currentIndex >= globalCheckString.length ? blocks.length - 1 : 0;
+    const fallbackBlock = blocks[fallbackIndex];
+
+    return fallbackBlock ? {
+      block: fallbackBlock,
+      startIdx: fallbackBlock.globalCheckOffset,
+      limit: getBlockLimit(blocks, fallbackIndex, globalCheckString.length),
+    } : null;
+  }, [blocks, currentIndex, globalCheckString.length]);
 
   useEffect(() => {
     if (currentBlock && onBlockChange) {
@@ -302,7 +330,7 @@ export function TypingArea({
       
       // Rewrite Ayah PopConfirm logic
       if (modalType === "rewrite_ayah") {
-        if (popConfirmRef.current && !popConfirmRef.current.contains(target as Node)) {
+        if (!target.closest('[data-rewrite-ayah="true"]')) {
           setModalType(null);
         }
       }
@@ -360,7 +388,7 @@ export function TypingArea({
   };
 
   const handleRestartAyah = () => {
-    if (!currentBlock) return;
+    if (!rewriteAyahTarget) return;
     setModalType("rewrite_ayah");
   };
 
@@ -378,12 +406,8 @@ export function TypingArea({
   };
 
   const confirmRestartAyah = () => {
-    if (!currentBlock) return;
-    const startIdx = currentBlock.globalCheckOffset;
-
-    // Find next block to determine end of current ayah
-    const nextBlock = blocks.find((b: any) => b.ayahNumber === currentBlock.ayahNumber + 1);
-    const limit = nextBlock ? nextBlock.globalCheckOffset : globalCheckString.length;
+    if (!rewriteAyahTarget) return;
+    const { startIdx, limit } = rewriteAyahTarget;
 
     setCurrentIndex(startIdx);
     setWrongChar(null);
@@ -938,7 +962,7 @@ export function TypingArea({
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
             </button>
 
-            <div className="relative shrink-0" ref={popConfirmRef}>
+            <div className="relative shrink-0" data-rewrite-ayah="true">
               <button
                 onClick={handleRestartAyah}
                 className="flex items-center justify-center w-8 h-8 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all scale-100 active:scale-95"
@@ -1109,7 +1133,7 @@ export function TypingArea({
 
         <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-1 hidden sm:block" />
 
-        <div className="flex flex-col items-center gap-1 group/btn relative">
+        <div className="flex flex-col items-center gap-1 group/btn relative" data-rewrite-ayah="true">
           <button
             onClick={handleRestartAyah}
             className="flex items-center justify-center w-11 h-11 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all focus:outline-none"
