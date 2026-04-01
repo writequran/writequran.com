@@ -392,6 +392,18 @@ export function TypingArea({
     setModalType("rewrite_ayah");
   };
 
+  const handleAyahClick = useCallback((blockIndex: number) => {
+    const block = blocks[blockIndex];
+    if (!block) return;
+
+    const startIdx = block.globalCheckOffset;
+    const limit = getBlockLimit(blocks, blockIndex, globalCheckString.length);
+    const nextIndex = findFirstUntypedIndexInRange(typedIndices, startIdx, limit);
+
+    setWrongChar(null);
+    setCurrentIndex(nextIndex);
+  }, [blocks, globalCheckString.length, typedIndices]);
+
   const confirmReset = () => {
     setSessionAttempts(0);
     setSessionMistakeIndices(new Set());
@@ -794,7 +806,12 @@ export function TypingArea({
             const showHint = visibilityMode === "all" || (visibilityMode === "ayah" && isActiveAyah);
 
             return (
-              <span key={blockIndex}>
+              <span
+                key={blockIndex}
+                onClick={() => handleAyahClick(blockIndex)}
+                className="cursor-pointer"
+                title={`Go to Ayah ${block.ayahNumber}`}
+              >
                 {block.mapping.map((_: number, localIndex: number) => {
                   const start = block.mapping[localIndex];
                   const end = (localIndex + 1 === block.mapping.length)
