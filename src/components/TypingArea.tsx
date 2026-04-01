@@ -26,6 +26,83 @@ interface TypingAreaProps {
   hasWeakSpots?: boolean;
 }
 
+interface PopConfirmProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+}
+
+function MistakePopover({
+  isOpen,
+  onClose,
+  onReset,
+  onReview,
+  onExit,
+  isReviewMode,
+  variant = "top"
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onReset: () => void;
+  onReview: () => void;
+  onExit: () => void;
+  isReviewMode: boolean;
+  variant?: "top" | "side";
+}) {
+  if (!isOpen) return null;
+
+  return (
+    <div 
+      className={`absolute z-[110] animate-in fade-in zoom-in-95 duration-200 ${
+        variant === "top" 
+          ? "bottom-full right-0 left-auto translate-x-0 mb-3 slide-in-from-bottom-2" 
+          : "left-full top-1/2 -translate-y-1/2 ml-4 slide-in-from-left-2"
+      }`}
+    >
+      {/* Invisible backdrop for closing */}
+      <div className="fixed inset-0 z-[-1]" onClick={(e) => { e.stopPropagation(); onClose(); }} />
+      
+      <div className="bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl p-1.5 min-w-fit flex flex-col gap-0.5">
+        <button
+          onClick={(e) => { e.stopPropagation(); onReset(); onClose(); }}
+          className="flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all active:scale-95 text-right w-full whitespace-nowrap"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
+          Reset Session & History
+        </button>
+        
+        {isReviewMode ? (
+          <button
+            onClick={(e) => { e.stopPropagation(); onExit(); onClose(); }}
+            className="flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-xl transition-all active:scale-95 text-right w-full font-sans whitespace-nowrap"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+            Exit Review Mode
+          </button>
+        ) : (
+          <button
+            onClick={(e) => { e.stopPropagation(); onReview(); onClose(); }}
+            className="flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-xl transition-all active:scale-95 text-right w-full whitespace-nowrap"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.29 7 12 12 20.71 7" /><line x1="12" y1="22" x2="12" y2="12" /></svg>
+            Review Weak Spots
+          </button>
+        )}
+      </div>
+      
+      {/* Adaptive Arrow */}
+      <div className={`absolute w-3 h-3 bg-white dark:bg-neutral-900 rotate-45 z-[-1] ${
+        variant === "top" 
+          ? "-bottom-1.5 right-4 border-r border-b border-neutral-200 dark:border-neutral-800" 
+          : "-left-1.5 top-1/2 -translate-y-1/2 border-l border-t border-neutral-200 dark:border-neutral-800"
+      }`} />
+    </div>
+  );
+}
+
 type VisibilityMode = "hidden" | "ayah" | "all";
 
 export function TypingArea({
@@ -589,18 +666,29 @@ export function TypingArea({
               {isReviewMode ? 'Reviewing' : 'Errors'}
             </span>
 
-            <div className={`flex items-center mt-1 ${isReviewMode ? 'flex-col gap-0.5' : 'gap-1.5'}`}>
-              <div
-                onClick={handleResetSessionStats}
-                className={`flex items-center justify-center ${isReviewMode ? 'px-3' : 'w-10'} h-10 rounded-full border transition-all duration-300 shadow-sm cursor-pointer hover:scale-105 active:scale-95 ${isReviewMode
-                  ? 'border-orange-500/40 bg-orange-50 dark:bg-orange-900/10 text-orange-600 dark:text-orange-400'
-                  : 'border-red-500/40 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400'
-                  }`}
+            <div className={`flex items-center mt-1 relative ${isReviewMode ? 'flex-col gap-0.5' : 'gap-1.5'}`}>
+              <div 
+                onClick={() => setModalType("mistake_menu")}
+                className={`flex items-center justify-center ${isReviewMode ? 'px-3' : 'w-10'} h-10 rounded-full border transition-all duration-300 shadow-sm cursor-pointer hover:scale-105 active:scale-95 ${
+                  isReviewMode 
+                    ? 'border-orange-500/40 bg-orange-50 dark:bg-orange-900/10 text-orange-600 dark:text-orange-400' 
+                    : 'border-red-500/40 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400'
+                }`}
               >
                 <span className={`font-bold ${isReviewMode ? 'text-sm' : 'text-lg'}`}>
                   {isReviewMode ? reviewProgress : sessionMistakes}
                 </span>
               </div>
+              
+              <MistakePopover
+                isOpen={modalType === "mistake_menu"}
+                onClose={() => setModalType(null)}
+                onReset={() => { confirmReset(); onClearHistory?.(); setModalType(null); }}
+                onReview={() => { onStartReview?.(); setModalType(null); }}
+                onExit={() => { onExitReview?.(); setModalType(null); }}
+                isReviewMode={isReviewMode}
+                variant="side"
+              />
 
               {isReviewMode && (
                 <button
@@ -891,24 +979,36 @@ export function TypingArea({
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
                   </button>
                 )}
-                <button
-                  onClick={() => setModalType("mistake_menu")}
-                  className={`flex items-center justify-center ${isReviewMode ? 'px-1.5' : 'w-8'} h-8 rounded-full border transition-all duration-300 shadow-sm active:scale-95 ${isReviewMode
-                    ? 'border-orange-500/40 bg-orange-50 dark:bg-orange-900/10'
-                    : 'border-red-500/40 bg-red-50 dark:bg-red-900/10'
-                    }`}
-                  title={isReviewMode ? "Review Progress" : "Manage Mistakes"}
-                >
-                  <span className={`font-bold ${isReviewMode ? 'text-[10px]' : 'text-[12px]'} ${isReviewMode ? 'text-orange-600 dark:text-orange-400' : 'text-red-600 dark:text-red-400'
-                    }`}>
-                    {isReviewMode ? reviewProgress : sessionMistakes}
-                  </span>
-                  {!isReviewMode && (
-                    <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-                    </div>
-                  )}
-                </button>
+                <div className="relative">
+                  <button
+                    onClick={() => setModalType(modalType === "mistake_menu" ? null : "mistake_menu")}
+                    className={`flex items-center justify-center ${isReviewMode ? 'px-1.5' : 'w-8'} h-8 rounded-full border transition-all duration-300 shadow-sm active:scale-95 ${isReviewMode
+                      ? 'border-orange-500/40 bg-orange-50 dark:bg-orange-900/10'
+                      : 'border-red-500/40 bg-red-50 dark:bg-red-900/10'
+                      }`}
+                    title={isReviewMode ? "Review Progress" : "Manage Mistakes"}
+                  >
+                    <span className={`font-bold ${isReviewMode ? 'text-[10px]' : 'text-[12px]'} ${isReviewMode ? 'text-orange-600 dark:text-orange-400' : 'text-red-600 dark:text-red-400'
+                      }`}>
+                      {isReviewMode ? reviewProgress : sessionMistakes}
+                    </span>
+                    {!isReviewMode && (
+                      <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                      </div>
+                    )}
+                  </button>
+
+                  <MistakePopover
+                    isOpen={modalType === "mistake_menu"}
+                    onClose={() => setModalType(null)}
+                    onReset={() => { confirmReset(); onClearHistory?.(); }}
+                    onReview={() => onStartReview?.()}
+                    onExit={() => onExitReview?.()}
+                    isReviewMode={isReviewMode}
+                    variant="top"
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -1056,69 +1156,7 @@ export function TypingArea({
         message="This will clear your current session mistakes and your entire mistake history for this Surah."
       />
 
-      {/* NEW MISTAKE MENU MODAL */}
-      {modalType === "mistake_menu" && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
-          <div
-            className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm"
-            onClick={() => setModalType(null)}
-          />
-          <div className="relative bg-white dark:bg-neutral-900 w-full max-w-sm rounded-[2rem] shadow-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-6 sm:p-8 text-center">
-              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
-              </div>
-              <h3 className="text-xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">Manage Mistakes</h3>
-              <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-8">Choose an action for your session</p>
 
-              <div className="flex flex-col gap-3">
-                <button
-                  onClick={() => {
-                    confirmReset();
-                    onClearHistory?.();
-                    setModalType(null);
-                  }}
-                  className="w-full py-4 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-3"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
-                  Reset Session & History
-                </button>
-
-                <button
-                  onClick={() => {
-                    onStartReview?.();
-                    setModalType(null);
-                  }}
-                  className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-3"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.29 7 12 12 20.71 7" /><line x1="12" y1="22" x2="12" y2="12" /></svg>
-                  Review Weak Spots
-                </button>
-
-                {isReviewMode && (
-                  <button
-                    onClick={() => {
-                      onExitReview?.();
-                      setModalType(null);
-                    }}
-                    className="w-full py-4 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-300 rounded-2xl font-bold transition-all active:scale-95 flex items-center justify-center gap-3"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-                    Exit Review Mode
-                  </button>
-                )}
-
-                <button
-                  onClick={() => setModalType(null)}
-                  className="w-full py-2 text-sm text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 font-medium transition-colors mt-2"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       <ConfirmationModal
         isOpen={modalType === "rewrite"}
