@@ -12,6 +12,29 @@ const preserveMarkerSpacing = (str: string) => {
   return str.replace(/ \u06DD/g, '\u00A0\u06DD');
 };
 
+const getTypedIndicesStorageKey = (surahNumber: number) => `typed_indices_${surahNumber}`;
+
+function loadTypedIndices(surahNumber: number): Set<number> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const saved = getStorage(getTypedIndicesStorageKey(surahNumber));
+    return saved ? new Set<number>(JSON.parse(saved)) : new Set<number>();
+  } catch {
+    return new Set<number>();
+  }
+}
+
+function findFirstUntypedIndexInRange(typedIndices: Set<number>, start: number, end: number): number {
+  for (let i = start; i < end; i++) {
+    if (!typedIndices.has(i)) return i;
+  }
+  return end;
+}
+
+function findNextUntypedIndex(typedIndices: Set<number>, start: number, totalLength: number): number {
+  return findFirstUntypedIndexInRange(typedIndices, start, totalLength);
+}
+
 interface TypingAreaProps {
   surahNumber: number;
   jumpTarget?: { index: number; ts: number } | null;
@@ -124,12 +147,17 @@ export function TypingArea({
   const surahMeta = useMemo(() => getAllSurahsMeta().find(s => s.number === surahNumber), [surahNumber]);
   const surahName = surahMeta?.name;
   const { globalCheckString, blocks } = pageData;
+  const [typedIndices, setTypedIndices] = useState<Set<number>>(() => loadTypedIndices(surahNumber));
 
   const [currentIndex, setCurrentIndex] = useState(() => {
     if (typeof window === "undefined") return 0;
-    if (jumpTarget) return jumpTarget.index;
+    const initialTypedIndices = loadTypedIndices(surahNumber);
+    if (jumpTarget) {
+      return findNextUntypedIndex(initialTypedIndices, jumpTarget.index, globalCheckString.length);
+    }
     const saved = getStorage(`quran_typing_progress_${surahNumber}`);
-    return saved ? parseInt(saved, 10) || 0 : 0;
+    const parsed = saved ? parseInt(saved, 10) || 0 : 0;
+    return findNextUntypedIndex(initialTypedIndices, parsed, globalCheckString.length);
   });
 
   const [wrongChar, setWrongChar] = useState<string | null>(null);
@@ -175,6 +203,10 @@ export function TypingArea({
     setStorage(`session_mistake_indices_${surahNumber}`, JSON.stringify(Array.from(sessionMistakeIndices)));
   }, [sessionMistakeIndices, surahNumber]);
 
+  useEffect(() => {
+    setStorage(getTypedIndicesStorageKey(surahNumber), JSON.stringify(Array.from(typedIndices).sort((a, b) => a - b)));
+  }, [typedIndices, surahNumber]);
+
   const globalMistakesRef = useRef<Record<string, MistakeRecord>>({});
   const globalProgressRef = useRef<Record<number, ProgressStats>>({});
 
@@ -201,6 +233,7 @@ export function TypingArea({
   const targetRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const popConfirmRef = useRef<HTMLDivElement>(null);
+  const lastHandledJumpTsRef = useRef<number | null>(null);
 
   useEffect(() => {
     globalMistakesRef.current = loadMistakeStats();
@@ -221,10 +254,11 @@ export function TypingArea({
   }, [currentBlock, onBlockChange]);
 
   useEffect(() => {
-    if (jumpTarget) {
-      setCurrentIndex(jumpTarget.index);
+    if (jumpTarget && lastHandledJumpTsRef.current !== jumpTarget.ts) {
+      lastHandledJumpTsRef.current = jumpTarget.ts;
+      setCurrentIndex(findNextUntypedIndex(typedIndices, jumpTarget.index, globalCheckString.length));
     }
-  }, [jumpTarget]);
+  }, [jumpTarget, typedIndices, globalCheckString.length]);
 
   useEffect(() => {
     setStorage(`quran_typing_progress_${surahNumber}`, currentIndex.toString());
@@ -338,6 +372,7 @@ export function TypingArea({
   const confirmRestart = () => {
     setCurrentIndex(0);
     setWrongChar(null);
+    setTypedIndices(new Set());
     setTimeout(updateCursorPos, 100);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -352,6 +387,15 @@ export function TypingArea({
 
     setCurrentIndex(startIdx);
     setWrongChar(null);
+    setTypedIndices(prev => {
+      const next = new Set(prev);
+      for (const idx of Array.from(next)) {
+        if (idx >= startIdx && idx < limit) {
+          next.delete(idx);
+        }
+      }
+      return next;
+    });
 
     // Clear mistakes in the current ayah range
     setSessionMistakeIndices(prev => {
@@ -373,6 +417,11 @@ export function TypingArea({
         setWrongChar(null);
       } else {
         setCurrentIndex((prev) => Math.max(0, prev - 1));
+        setTypedIndices(prev => {
+          const next = new Set(prev);
+          next.delete(Math.max(0, currentIndex - 1));
+          return next;
+        });
         setWrongChar(null);
       }
       return;
@@ -384,8 +433,13 @@ export function TypingArea({
     if (!expectedChar) return;
 
     if (char === expectedChar) {
+      setTypedIndices(prev => {
+        const next = new Set(prev);
+        next.add(currentIndex);
+        return next;
+      });
       setCurrentIndex((prev) => {
-        const next = prev + 1;
+        const next = findNextUntypedIndex(new Set([...typedIndices, currentIndex]), prev + 1, globalCheckString.length);
         const progressStats = globalProgressRef.current;
         const p = progressStats[surahNumber] || {
           surahNumber,
@@ -451,7 +505,7 @@ export function TypingArea({
       saveMistakeStats(mistakes);
       saveProgressStats(progress);
     }
-  }, [currentIndex, globalCheckString, wrongChar, surahNumber, currentBlock]);
+  }, [currentIndex, globalCheckString, wrongChar, surahNumber, currentBlock, typedIndices]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -504,7 +558,6 @@ export function TypingArea({
       }
 
       let colorClass = "";
-      let customStyle = {};
       if (mode === "typed") {
         colorClass = "text-[#2A2826] dark:text-neutral-100";
       } else if (mode === "hint") {
@@ -516,33 +569,14 @@ export function TypingArea({
       }
 
       return (
-        <span key={i} className={`${colorClass} transition-colors duration-300`} style={customStyle}>
+        <span key={i} className={`${colorClass} transition-colors duration-300`}>
           {part}
         </span>
       );
     });
   };
 
-  const renderTypedSpan = (block: any, blockStart: number, localIndexLimit: number) => {
-    const clusters = [];
-    for (let i = 0; i < localIndexLimit; i++) {
-      const start = block.mapping[i];
-      const end = (i + 1 === block.mapping.length)
-        ? block.displayString.length
-        : block.mapping[i + 1];
-
-      const cluster = block.displayString.slice(start, end);
-      const globalIdx = blockStart + i;
-      const isMistake = sessionMistakeIndices.has(globalIdx);
-
-      clusters.push(
-        <span key={globalIdx} className="inline">
-          {renderTextWithMarkers(cluster, isMistake ? "mistake" : "typed")}
-        </span>
-      );
-    }
-    return clusters;
-  };
+  const typedCount = typedIndices.size;
 
   return (
     <div className="w-full flex flex-col items-center pb-36 px-0">
@@ -637,7 +671,7 @@ export function TypingArea({
             <span className="text-[9px] uppercase font-bold text-green-500 tracking-widest select-none">Done</span>
             <div className="flex items-center justify-center w-12 h-12 rounded-full border border-green-500/40 bg-green-50 dark:bg-green-900/10 shadow-sm mt-1">
               <span className="text-[20px] font-bold text-green-600 dark:text-green-400">
-                {((currentIndex / (globalCheckString.length || 1)) * 100).toFixed(0)}<span className="text-[10px] ml-0.5 opacity-50">%</span>
+                {((typedCount / (globalCheckString.length || 1)) * 100).toFixed(0)}<span className="text-[10px] ml-0.5 opacity-50">%</span>
               </span>
             </div>
           </div>
@@ -695,7 +729,7 @@ export function TypingArea({
         </div>
       </div>
 
-      {currentIndex === globalCheckString.length && globalCheckString.length > 0 && (
+      {typedCount === globalCheckString.length && globalCheckString.length > 0 && (
         <div className="my-8 flex flex-col items-center animate-in fade-in duration-500">
           <p className="text-3xl font-medium text-green-700 dark:text-green-500 quran-text tracking-normal border-b-2 border-green-500/30 pb-4">
             صَدَقَ اللّٰهُ الْعَظِيمُ
@@ -733,41 +767,34 @@ export function TypingArea({
             const blockEnd = blockStart + blockLength;
 
             const isActiveAyah = currentIndex >= blockStart && currentIndex < blockEnd;
-            const isFinished = currentIndex >= blockEnd;
-            const isFuture = currentIndex < blockStart;
-
             const showHint = visibilityMode === "all" || (visibilityMode === "ayah" && isActiveAyah);
 
             return (
               <span key={blockIndex}>
-                {isFinished ? (
-                  renderTypedSpan(block, blockStart, block.mapping.length)
-                ) : isFuture ? (
-                  renderTextWithMarkers(block.displayString, showHint ? "hint" : "hidden")
-                ) : (
-                  <>
-                    {(() => {
-                      const localIndex = currentIndex - blockStart;
-                      const currentDisplayIndex = block.mapping[localIndex] || 0;
+                {block.mapping.map((_: number, localIndex: number) => {
+                  const start = block.mapping[localIndex];
+                  const end = (localIndex + 1 === block.mapping.length)
+                    ? block.displayString.length
+                    : block.mapping[localIndex + 1];
+                  const cluster = block.displayString.slice(start, end);
+                  const globalIdx = blockStart + localIndex;
+                  const isTyped = typedIndices.has(globalIdx);
+                  const isMistake = sessionMistakeIndices.has(globalIdx);
+                  const isTarget = globalIdx === currentIndex && currentIndex < globalCheckString.length;
 
-                      const targetChar = block.displayString[currentDisplayIndex] || "";
-                      const untypedSpan = block.displayString.slice(currentDisplayIndex + 1);
-
-                      return (
-                        <span className="inline">
-                          {renderTypedSpan(block, blockStart, localIndex)}
-                          <span
-                            ref={targetRef}
-                            className="relative inline"
-                          >
-                            {renderTextWithMarkers(targetChar, showHint ? "hint" : "hidden")}
-                          </span>
-                          {renderTextWithMarkers(untypedSpan, showHint ? "hint" : "hidden")}
-                        </span>
-                      );
-                    })()}
-                  </>
-                )}
+                  return (
+                    <span
+                      key={globalIdx}
+                      ref={isTarget ? targetRef : null}
+                      className="inline"
+                    >
+                      {renderTextWithMarkers(
+                        cluster,
+                        isTyped ? (isMistake ? "mistake" : "typed") : (showHint ? "hint" : "hidden")
+                      )}
+                    </span>
+                  );
+                })}
                 {" "}
               </span>
             );
@@ -875,7 +902,7 @@ export function TypingArea({
             {/* PROGRESS PERCENTAGE (left) */}
             <div className="absolute left-1 flex items-center justify-center w-8 h-8 rounded-full border border-green-500/40 bg-green-500/5 shadow-sm">
               <span className="text-[10px] font-bold text-green-600 dark:text-green-400">
-                {Math.round((currentIndex / globalCheckString.length) * 100)}%
+                {Math.round((typedCount / (globalCheckString.length || 1)) * 100)}%
               </span>
             </div>
 
