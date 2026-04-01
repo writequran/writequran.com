@@ -55,17 +55,16 @@ function MistakePopover({
   if (!isOpen) return null;
 
   return (
-    <div 
-      className={`absolute z-[110] animate-in fade-in zoom-in-95 duration-200 ${
-        variant === "top" 
-          ? "bottom-full right-0 left-auto translate-x-0 mb-3 slide-in-from-bottom-2" 
-          : "left-full top-1/2 -translate-y-1/2 ml-4 slide-in-from-left-2"
-      }`}
+    <div
+      className={`absolute z-[110] animate-in fade-in zoom-in-95 duration-200 ${variant === "top"
+        ? "bottom-full right-0 left-auto translate-x-0 mb-3 slide-in-from-bottom-2"
+        : "left-full top-1/2 -translate-y-1/2 ml-4 slide-in-from-left-2"
+        }`}
     >
-      {/* Invisible backdrop for closing */}
-      <div className="fixed inset-0 z-[-1]" onClick={(e) => { e.stopPropagation(); onClose(); }} />
-      
-      <div className="bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl p-1.5 min-w-fit flex flex-col gap-0.5">
+      <div 
+        className="bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl p-1.5 min-w-fit flex flex-col gap-0.5"
+        data-mistake-menu="true"
+      >
         <button
           onClick={(e) => { e.stopPropagation(); onReset(); onClose(); }}
           className="flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all active:scale-95 text-right w-full whitespace-nowrap"
@@ -73,7 +72,7 @@ function MistakePopover({
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
           Reset Session & History
         </button>
-        
+
         {isReviewMode ? (
           <button
             onClick={(e) => { e.stopPropagation(); onExit(); onClose(); }}
@@ -92,13 +91,12 @@ function MistakePopover({
           </button>
         )}
       </div>
-      
+
       {/* Adaptive Arrow */}
-      <div className={`absolute w-3 h-3 bg-white dark:bg-neutral-900 rotate-45 z-[-1] ${
-        variant === "top" 
-          ? "-bottom-1.5 right-4 border-r border-b border-neutral-200 dark:border-neutral-800" 
-          : "-left-1.5 top-1/2 -translate-y-1/2 border-l border-t border-neutral-200 dark:border-neutral-800"
-      }`} />
+      <div className={`absolute w-3 h-3 bg-white dark:bg-neutral-900 rotate-45 z-[-1] ${variant === "top"
+        ? "-bottom-1.5 right-4 border-r border-b border-neutral-200 dark:border-neutral-800"
+        : "-left-1.5 top-1/2 -translate-y-1/2 border-l border-t border-neutral-200 dark:border-neutral-800"
+        }`} />
     </div>
   );
 }
@@ -279,16 +277,32 @@ export function TypingArea({
   }, []);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (modalType === "rewrite_ayah" && popConfirmRef.current && !popConfirmRef.current.contains(event.target as Node)) {
-        setModalType(null);
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement;
+      
+      // Mistake Menu Popover logic
+      if (modalType === "mistake_menu") {
+        if (!target.closest('[data-mistake-menu="true"]') && !target.closest('[data-mistake-trigger="true"]')) {
+          setModalType(null);
+        }
+      }
+      
+      // Rewrite Ayah PopConfirm logic
+      if (modalType === "rewrite_ayah") {
+        if (popConfirmRef.current && !popConfirmRef.current.contains(target as Node)) {
+          setModalType(null);
+        }
       }
     };
 
-    if (modalType === "rewrite_ayah") {
+    if (modalType) {
       document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside);
     }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, [modalType]);
 
   const updateCursorPos = useCallback(() => {
@@ -667,19 +681,19 @@ export function TypingArea({
             </span>
 
             <div className={`flex items-center mt-1 relative ${isReviewMode ? 'flex-col gap-0.5' : 'gap-1.5'}`}>
-              <div 
+              <div
                 onClick={() => setModalType("mistake_menu")}
-                className={`flex items-center justify-center ${isReviewMode ? 'px-3' : 'w-10'} h-10 rounded-full border transition-all duration-300 shadow-sm cursor-pointer hover:scale-105 active:scale-95 ${
-                  isReviewMode 
-                    ? 'border-orange-500/40 bg-orange-50 dark:bg-orange-900/10 text-orange-600 dark:text-orange-400' 
-                    : 'border-red-500/40 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400'
-                }`}
+                data-mistake-trigger="true"
+                className={`flex items-center justify-center ${isReviewMode ? 'px-3' : 'w-10'} h-10 rounded-full border transition-all duration-300 shadow-sm cursor-pointer hover:scale-105 active:scale-95 ${isReviewMode
+                  ? 'border-orange-500/40 bg-orange-50 dark:bg-orange-900/10 text-orange-600 dark:text-orange-400'
+                  : 'border-red-500/40 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400'
+                  }`}
               >
                 <span className={`font-bold ${isReviewMode ? 'text-sm' : 'text-lg'}`}>
                   {isReviewMode ? reviewProgress : sessionMistakes}
                 </span>
               </div>
-              
+
               <MistakePopover
                 isOpen={modalType === "mistake_menu"}
                 onClose={() => setModalType(null)}
@@ -884,7 +898,7 @@ export function TypingArea({
 
       {/* ARABIC ON-SCREEN KEYBOARD + MOBILE TOOLBAR */}
       <div
-        className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[750px] bg-white/95 dark:bg-neutral-800/95 backdrop-blur-md rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t border-neutral-200 dark:border-neutral-800 transition-all duration-500 transform z-[60] ${showKeyboard ? 'translate-y-0' : 'translate-y-[calc(100%-68px)] sm:translate-y-full sm:opacity-0 sm:pointer-events-none'
+        className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[750px] bg-white/95 dark:bg-neutral-800/95 backdrop-blur-md rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t border-neutral-200 dark:border-neutral-800 transition-all duration-500 transform z-[60] ${showKeyboard ? 'translate-y-0' : 'translate-y-[calc(100%-54px)] sm:translate-y-full sm:opacity-0 sm:pointer-events-none'
           }`}
         dir="rtl"
       >
@@ -904,38 +918,38 @@ export function TypingArea({
               onClick={() => setVisibilityMode('hidden')}
               className={`flex items-center justify-center w-8 h-8 rounded-full transition-all shrink-0 ${visibilityMode === 'hidden' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" y1="2" x2="22" y2="22" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" y1="2" x2="22" y2="22" /></svg>
             </button>
 
             <button
               onClick={() => setVisibilityMode('ayah')}
               className={`flex items-center justify-center w-8 h-8 rounded-full transition-all shrink-0 ${visibilityMode === 'ayah' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
             </button>
 
             <button
               onClick={() => setVisibilityMode('all')}
               className={`flex items-center justify-center w-8 h-8 rounded-full transition-all shrink-0 ${visibilityMode === 'all' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /></svg>
             </button>
 
-            <div className="w-px h-5 bg-neutral-200 dark:bg-neutral-700 shrink-0" />
+            <div className="w-px h-5 bg-neutral-200 dark:bg-neutral-700 shrink-0 mx-1" />
 
             <button
               onClick={() => setShowKeyboard(!showKeyboard)}
               className={`flex items-center justify-center w-8 h-8 rounded-full transition-all shrink-0 ${showKeyboard ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
             </button>
 
             <div className="relative shrink-0" ref={popConfirmRef}>
               <button
                 onClick={handleRestartAyah}
-                className="flex items-center justify-center w-8 h-8 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all font-bold"
+                className="flex items-center justify-center w-8 h-8 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all scale-100 active:scale-95"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18" /><path d="M12 7v5l3 3" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18" /><path d="M12 7v5l3 3" /></svg>
               </button>
               <PopConfirm
                 isOpen={modalType === "rewrite_ayah"}
@@ -949,21 +963,21 @@ export function TypingArea({
 
             <button
               onClick={handleRestart}
-              className="flex items-center justify-center w-8 h-8 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all font-bold shrink-0"
+              className="flex items-center justify-center w-8 h-8 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all shrink-0 active:scale-95"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
             </button>
 
-            <div className="w-px h-5 bg-neutral-200 dark:bg-neutral-700 shrink-0" />
+            <div className="w-px h-5 bg-neutral-200 dark:bg-neutral-700 shrink-0 mx-1" />
 
             <button
               onClick={toggleTheme}
               className="flex items-center justify-center w-8 h-8 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all shrink-0"
             >
               {isDarkMode ? (
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
               ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>
               )}
             </button>
 
@@ -982,6 +996,7 @@ export function TypingArea({
                 <div className="relative">
                   <button
                     onClick={() => setModalType(modalType === "mistake_menu" ? null : "mistake_menu")}
+                    data-mistake-trigger="true"
                     className={`flex items-center justify-center ${isReviewMode ? 'px-1.5' : 'w-8'} h-8 rounded-full border transition-all duration-300 shadow-sm active:scale-95 ${isReviewMode
                       ? 'border-orange-500/40 bg-orange-50 dark:bg-orange-900/10'
                       : 'border-red-500/40 bg-red-50 dark:bg-red-900/10'
