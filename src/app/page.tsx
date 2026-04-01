@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { TypingArea } from "@/components/TypingArea";
 import { AuthWidget } from "@/components/AuthWidget";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
+import { MenuDrawer } from "@/components/MenuDrawer";
 import Image from "next/image";
 import { getAllSurahsMeta, getSurah, getLocationByPage, getLocationByJuz } from "@/lib/quran-data";
 import { WeakSpot, getWeakSpots } from "@/lib/stats";
@@ -39,6 +40,8 @@ export default function Page() {
 
   const [navInfo, setNavInfo] = useState({ page: 1, juz: 1, ayah: 1 });
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [jumpInput, setJumpInput] = useState("");
   const [activeNavTab, setActiveNavTab] = useState<'page' | 'juz' | 'ayah'>('page');
 
@@ -97,6 +100,28 @@ export default function Page() {
     setIsMounted(true);
     setIsDropdownOpen(false);
   };
+
+  // Sync theme
+  useEffect(() => {
+    if (!isMounted) return;
+    const saved = getStorage('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initialDark = saved ? saved === 'dark' : systemDark;
+    setIsDarkMode(initialDark);
+    if (initialDark) document.documentElement.classList.add('dark');
+  }, [isMounted]);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      setStorage('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      setStorage('theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  const toggleTheme = () => setIsDarkMode(prev => !prev);
 
   const nextReviewSpot = () => {
     if (currentReviewIndex + 1 < reviewQueue.length) {
@@ -199,7 +224,15 @@ export default function Page() {
     <div className="flex flex-col min-h-screen bg-neutral-100 dark:bg-neutral-900 transition-colors duration-300">
       {/* FIXED TOP HEADER */}
       <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 flex items-center px-3 sm:px-6 z-[100] shadow-sm">
-        <div className="flex-none sm:flex-1 flex items-center gap-2.5 group cursor-pointer" onClick={() => window.location.reload()}>
+        <button 
+          onClick={() => setIsMenuOpen(true)}
+          className="mr-2 sm:mr-4 p-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors flex items-center justify-center"
+          title="Open Menu"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
+        </button>
+
+        <div className="hidden sm:flex flex-none sm:flex-1 items-center gap-2.5 group cursor-pointer" onClick={() => window.location.reload()}>
           <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-sm border border-[#D6C19E]/30">
             <Image
               src="/icon.svg"
@@ -383,9 +416,18 @@ export default function Page() {
               isReviewMode={reviewQueue.length > 0}
               reviewProgress={reviewQueue.length > 0 ? `${currentReviewIndex + 1}/${reviewQueue.length}` : ""}
               hasWeakSpots={getWeakSpots().length > 0}
+              isDarkMode={isDarkMode}
+              toggleTheme={toggleTheme}
             />
           )}
 
+          <MenuDrawer 
+            isOpen={isMenuOpen} 
+            onClose={() => setIsMenuOpen(false)} 
+            isDarkMode={isDarkMode} 
+            toggleTheme={toggleTheme} 
+            onClearHistory={() => setModalType("clear")} 
+          />
         </div>
       </main>
 

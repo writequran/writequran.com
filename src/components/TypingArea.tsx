@@ -24,6 +24,8 @@ interface TypingAreaProps {
   isReviewMode?: boolean;
   reviewProgress?: string;
   hasWeakSpots?: boolean;
+  isDarkMode: boolean;
+  toggleTheme: () => void;
 }
 
 interface PopConfirmProps {
@@ -114,7 +116,9 @@ export function TypingArea({
   onNextReviewSpot,
   isReviewMode = false,
   reviewProgress = "",
-  hasWeakSpots = false
+  hasWeakSpots = false,
+  isDarkMode,
+  toggleTheme
 }: TypingAreaProps) {
   const pageData = useMemo(() => getSurah(surahNumber), [surahNumber]);
   const surahMeta = useMemo(() => getAllSurahsMeta().find(s => s.number === surahNumber), [surahNumber]);
@@ -135,12 +139,6 @@ export function TypingArea({
     return (getStorage('visibility_mode') as VisibilityMode) || "hidden";
   });
 
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    if (typeof window === "undefined") return false;
-    const saved = getStorage('theme');
-    if (saved) return saved === 'dark';
-    return document.documentElement.classList.contains('dark') || window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
 
   const [isAtBottom, setIsAtBottom] = useState(false);
 
@@ -240,25 +238,6 @@ export function TypingArea({
     setStorage('keyboard', showKeyboard.toString());
   }, [showKeyboard]);
 
-  useEffect(() => {
-    setStorage('theme', isDarkMode ? 'dark' : 'light');
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
-
-  const toggleTheme = () => {
-    const nextMode = !isDarkMode;
-    setIsDarkMode(nextMode);
-    if (nextMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    setTimeout(updateCursorPos, 50);
-  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -329,19 +308,7 @@ export function TypingArea({
   }, [updateCursorPos]);
 
   useEffect(() => {
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'class') {
-          const isDark = document.documentElement.classList.contains('dark');
-          if (isDark !== isDarkMode) {
-            setIsDarkMode(isDark);
-            setTimeout(updateCursorPos, 50);
-          }
-        }
-      });
-    });
-    observer.observe(document.documentElement, { attributes: true });
-    return () => observer.disconnect();
+    setTimeout(updateCursorPos, 50);
   }, [isDarkMode, updateCursorPos]);
 
   useEffect(() => {
