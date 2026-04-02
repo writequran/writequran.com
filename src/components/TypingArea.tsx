@@ -13,6 +13,7 @@ const preserveMarkerSpacing = (str: string) => {
 };
 
 const getTypedIndicesStorageKey = (surahNumber: number) => `typed_indices_${surahNumber}`;
+const getWordDraftsStorageKey = (surahNumber: number) => `word_drafts_${surahNumber}`;
 
 function loadTypedIndices(surahNumber: number): Set<number> {
   if (typeof window === "undefined") return new Set();
@@ -21,6 +22,16 @@ function loadTypedIndices(surahNumber: number): Set<number> {
     return saved ? new Set<number>(JSON.parse(saved)) : new Set<number>();
   } catch {
     return new Set<number>();
+  }
+}
+
+function loadWordDrafts(surahNumber: number): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  try {
+    const saved = getStorage(getWordDraftsStorageKey(surahNumber));
+    return saved ? JSON.parse(saved) : {};
+  } catch {
+    return {};
   }
 }
 
@@ -41,6 +52,14 @@ function getBlockLimit(blocks: MushafBlock[], blockIndex: number, totalLength: n
 }
 
 const WORD_CLUSTER_RE = /[^\s\u00A0\u06DD\u0660-\u0669]/;
+const CHECK_SPACE_RE = /[\s\u00A0]/;
+
+interface WordSegment {
+  id: string;
+  start: number;
+  end: number;
+  commitEnd: number;
+}
 
 interface BlockClusterMeta {
   clusters: Array<{
@@ -84,8 +103,53 @@ function getWeakHeatIntensity(score: number, maxScore: number): number {
   return Math.sqrt(score / maxScore);
 }
 
+function buildWordSegments(checkString: string): WordSegment[] {
+  const segments: WordSegment[] = [];
+  let index = 0;
+
+  while (index < checkString.length) {
+    while (index < checkString.length && CHECK_SPACE_RE.test(checkString[index])) {
+      index += 1;
+    }
+
+    if (index >= checkString.length) break;
+
+    const start = index;
+    while (index < checkString.length && !CHECK_SPACE_RE.test(checkString[index])) {
+      index += 1;
+    }
+
+    const end = index;
+    let commitEnd = end;
+    while (commitEnd < checkString.length && CHECK_SPACE_RE.test(checkString[commitEnd])) {
+      commitEnd += 1;
+    }
+
+    segments.push({
+      id: `${start}-${end}`,
+      start,
+      end,
+      commitEnd,
+    });
+  }
+
+  return segments;
+}
+
+function isRangeFullyTyped(typedIndices: Set<number>, start: number, end: number): boolean {
+  for (let i = start; i < end; i++) {
+    if (!typedIndices.has(i)) return false;
+  }
+  return true;
+}
+
+function findWordSegmentIndexForPosition(wordSegments: WordSegment[], index: number): number {
+  return wordSegments.findIndex((segment) => index >= segment.start && index < segment.commitEnd);
+}
+
 interface TypingAreaProps {
   surahNumber: number;
+  typingMode: "letter" | "word";
   jumpTarget?: { index: number; ts: number } | null;
   onJump: (type: 'ayah' | 'page' | 'juz' | 'surah', val: number) => void;
   onBlockChange?: (page: number, juz: number, ayah: number) => void;
@@ -179,6 +243,7 @@ type VisibilityMode = "hidden" | "ayah" | "all";
 
 export function TypingArea({
   surahNumber,
+  typingMode,
   jumpTarget,
   onJump,
   onBlockChange,
@@ -197,16 +262,35 @@ export function TypingArea({
   const surahName = surahMeta?.name;
   const { globalCheckString, blocks } = pageData;
   const [typedIndices, setTypedIndices] = useState<Set<number>>(() => loadTypedIndices(surahNumber));
+  const [wordDrafts, setWordDrafts] = useState<Record<string, string>>(() => loadWordDrafts(surahNumber));
+  const wordSegments = useMemo(() => buildWordSegments(globalCheckString), [globalCheckString]);
 
   const [currentIndex, setCurrentIndex] = useState(() => {
     if (typeof window === "undefined") return 0;
     const initialTypedIndices = loadTypedIndices(surahNumber);
+    const initialWordDrafts = loadWordDrafts(surahNumber);
+    const initialWordSegments = buildWordSegments(globalCheckString);
+    const resolveInitialIndex = (start: number) => {
+      if (typingMode === "letter") {
+        return findNextUntypedIndex(initialTypedIndices, start, globalCheckString.length);
+      }
+
+      for (const segment of initialWordSegments) {
+        if (segment.commitEnd <= start) continue;
+        if (isRangeFullyTyped(initialTypedIndices, segment.start, segment.commitEnd)) continue;
+        const draftLength = Math.min(initialWordDrafts[segment.id]?.length || 0, segment.end - segment.start);
+        return segment.start + draftLength;
+      }
+
+      return globalCheckString.length;
+    };
+
     if (jumpTarget) {
-      return findNextUntypedIndex(initialTypedIndices, jumpTarget.index, globalCheckString.length);
+      return resolveInitialIndex(jumpTarget.index);
     }
     const saved = getStorage(`quran_typing_progress_${surahNumber}`);
     const parsed = saved ? parseInt(saved, 10) || 0 : 0;
-    return findNextUntypedIndex(initialTypedIndices, parsed, globalCheckString.length);
+    return resolveInitialIndex(parsed);
   });
 
   const [wrongChar, setWrongChar] = useState<string | null>(null);
@@ -260,6 +344,10 @@ export function TypingArea({
   useEffect(() => {
     setStorage(getTypedIndicesStorageKey(surahNumber), JSON.stringify(Array.from(typedIndices).sort((a, b) => a - b)));
   }, [typedIndices, surahNumber]);
+
+  useEffect(() => {
+    setStorage(getWordDraftsStorageKey(surahNumber), JSON.stringify(wordDrafts));
+  }, [surahNumber, wordDrafts]);
 
   const globalMistakesRef = useRef<Record<string, MistakeRecord>>({});
   const globalProgressRef = useRef<Record<number, ProgressStats>>({});
@@ -326,6 +414,30 @@ export function TypingArea({
     } : null;
   }, [blocks, currentIndex, globalCheckString.length]);
 
+  const getCursorIndexFrom = useCallback((start: number, limit = globalCheckString.length) => {
+    if (typingMode === "letter") {
+      return findFirstUntypedIndexInRange(typedIndices, start, limit);
+    }
+
+    for (const segment of wordSegments) {
+      if (segment.commitEnd <= start) continue;
+      if (segment.start >= limit) break;
+      if (isRangeFullyTyped(typedIndices, segment.start, Math.min(segment.commitEnd, limit))) continue;
+      const draftLength = Math.min(wordDrafts[segment.id]?.length || 0, segment.end - segment.start);
+      return Math.min(segment.start + draftLength, segment.end);
+    }
+
+    return limit;
+  }, [globalCheckString.length, typedIndices, typingMode, wordDrafts, wordSegments]);
+
+  const activeWordSegmentIndex = useMemo(() => {
+    if (typingMode !== "word") return -1;
+    return findWordSegmentIndexForPosition(wordSegments, currentIndex);
+  }, [currentIndex, typingMode, wordSegments]);
+
+  const activeWordSegment = activeWordSegmentIndex >= 0 ? wordSegments[activeWordSegmentIndex] : null;
+  const activeWordDraft = activeWordSegment ? (wordDrafts[activeWordSegment.id] || "") : "";
+
   useEffect(() => {
     if (currentBlock && onBlockChange) {
       onBlockChange(currentBlock.page, currentBlock.juz, currentBlock.ayahNumber);
@@ -335,9 +447,14 @@ export function TypingArea({
   useEffect(() => {
     if (jumpTarget && lastHandledJumpTsRef.current !== jumpTarget.ts) {
       lastHandledJumpTsRef.current = jumpTarget.ts;
-      setCurrentIndex(findNextUntypedIndex(typedIndices, jumpTarget.index, globalCheckString.length));
+      setCurrentIndex(getCursorIndexFrom(jumpTarget.index));
     }
-  }, [jumpTarget, typedIndices, globalCheckString.length]);
+  }, [getCursorIndexFrom, jumpTarget]);
+
+  useEffect(() => {
+    setCurrentIndex((prev) => getCursorIndexFrom(prev));
+    setWrongChar(null);
+  }, [getCursorIndexFrom, typingMode]);
 
   useEffect(() => {
     setStorage(`quran_typing_progress_${surahNumber}`, currentIndex.toString());
@@ -453,11 +570,11 @@ export function TypingArea({
 
     const startIdx = block.globalCheckOffset;
     const limit = getBlockLimit(blocks, blockIndex, globalCheckString.length);
-    const nextIndex = findFirstUntypedIndexInRange(typedIndices, startIdx, limit);
+    const nextIndex = getCursorIndexFrom(startIdx, limit);
 
     setWrongChar(null);
     setCurrentIndex(nextIndex);
-  }, [blocks, globalCheckString.length, typedIndices]);
+  }, [blocks, getCursorIndexFrom, globalCheckString.length]);
 
   const confirmReset = () => {
     setSessionAttempts(0);
@@ -468,6 +585,7 @@ export function TypingArea({
     setCurrentIndex(0);
     setWrongChar(null);
     setTypedIndices(new Set());
+    setWordDrafts({});
     setTimeout(updateCursorPos, 100);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -488,6 +606,16 @@ export function TypingArea({
       return next;
     });
 
+    setWordDrafts(prev => {
+      const next = { ...prev };
+      for (const segment of wordSegments) {
+        if (segment.start < limit && segment.commitEnd > startIdx) {
+          delete next[segment.id];
+        }
+      }
+      return next;
+    });
+
     // Clear mistakes in the current ayah range
     setSessionMistakeIndices(prev => {
       const next = new Set(prev);
@@ -503,6 +631,133 @@ export function TypingArea({
   };
 
   const handleInput = useCallback((char: string) => {
+    if (typingMode === "word") {
+      const segment = activeWordSegment;
+      if (!segment) {
+        if (char === "Backspace") setWrongChar(null);
+        return;
+      }
+
+      const draft = wordDrafts[segment.id] || "";
+      const draftLength = Math.min(draft.length, segment.end - segment.start);
+      const targetIndex = segment.start + draftLength;
+
+      if (char === "Backspace") {
+        if (wrongChar) {
+          setWrongChar(null);
+          return;
+        }
+
+        if (draftLength === 0) return;
+
+        const nextDraft = draft.slice(0, -1);
+        setWordDrafts(prev => ({ ...prev, [segment.id]: nextDraft }));
+        setCurrentIndex(segment.start + nextDraft.length);
+        setWrongChar(null);
+        return;
+      }
+
+      if (wrongChar) return;
+
+      const expectedChar = globalCheckString[targetIndex];
+      if (!expectedChar) return;
+
+      if (char === expectedChar) {
+        const nextDraft = draft + char;
+
+        if (targetIndex + 1 >= segment.end) {
+          const nextTypedIndices = new Set(typedIndices);
+          for (let i = segment.start; i < segment.commitEnd; i++) {
+            nextTypedIndices.add(i);
+          }
+
+          setTypedIndices(nextTypedIndices);
+          setWordDrafts(prev => {
+            const next = { ...prev };
+            delete next[segment.id];
+            return next;
+          });
+
+          const nextIndex = (() => {
+            for (const nextSegment of wordSegments) {
+              if (nextSegment.commitEnd <= segment.commitEnd) continue;
+              if (isRangeFullyTyped(nextTypedIndices, nextSegment.start, nextSegment.commitEnd)) continue;
+              const nextDraftLength = Math.min((wordDrafts[nextSegment.id] || "").length, nextSegment.end - nextSegment.start);
+              return nextSegment.start + nextDraftLength;
+            }
+            return globalCheckString.length;
+          })();
+
+          setCurrentIndex(nextIndex);
+
+          const progressStats = globalProgressRef.current;
+          const p = progressStats[surahNumber] || {
+            surahNumber,
+            highestIndexReached: 0,
+            totalMistakeEvents: 0,
+            totalWrongAttempts: 0,
+            lastPracticed: Date.now()
+          };
+
+          if (nextIndex > p.highestIndexReached) {
+            p.highestIndexReached = nextIndex;
+          }
+          p.lastPracticed = Date.now();
+          progressStats[surahNumber] = p;
+          saveProgressStats(progressStats);
+        } else {
+          setWordDrafts(prev => ({ ...prev, [segment.id]: nextDraft }));
+          setCurrentIndex(segment.start + nextDraft.length);
+        }
+
+        setWrongChar(null);
+        return;
+      }
+
+      setWrongChar(char);
+
+      const mistakes = globalMistakesRef.current;
+      const progress = globalProgressRef.current;
+      const mistakeKey = `${surahNumber}-${targetIndex}`;
+      const p = progress[surahNumber] || {
+        surahNumber, highestIndexReached: targetIndex, totalMistakeEvents: 0, totalWrongAttempts: 0, lastPracticed: Date.now()
+      };
+
+      if (mistakes[mistakeKey]) {
+        mistakes[mistakeKey].wrongAttempts += 1;
+        mistakes[mistakeKey].timestamp = Date.now();
+        p.totalWrongAttempts += 1;
+      } else {
+        mistakes[mistakeKey] = {
+          surahNumber,
+          ayahNumber: currentBlock?.ayahNumber || 0,
+          globalIndex: targetIndex,
+          expectedChar,
+          wrongAttempts: 1,
+          timestamp: Date.now()
+        };
+        p.totalMistakeEvents += 1;
+        p.totalWrongAttempts += 1;
+      }
+
+      setSessionAttempts(s => s + 1);
+      setSessionMistakeIndices(prev => {
+        if (!prev.has(targetIndex)) {
+          const next = new Set(prev);
+          next.add(targetIndex);
+          return next;
+        }
+        return prev;
+      });
+
+      p.lastPracticed = Date.now();
+      progress[surahNumber] = p;
+      saveMistakeStats(mistakes);
+      saveProgressStats(progress);
+      setStatsVersion(prev => prev + 1);
+      return;
+    }
+
     if (char === "Backspace") {
       if (wrongChar) {
         setWrongChar(null);
@@ -597,7 +852,7 @@ export function TypingArea({
       saveProgressStats(progress);
       setStatsVersion(prev => prev + 1);
     }
-  }, [currentIndex, globalCheckString, wrongChar, surahNumber, currentBlock, typedIndices]);
+  }, [activeWordSegment, currentBlock, currentIndex, globalCheckString, surahNumber, typedIndices, typingMode, wordDrafts, wordSegments, wrongChar]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -669,6 +924,7 @@ export function TypingArea({
   };
 
   const typedCount = typedIndices.size;
+  const visualTypedCount = typedCount + (typingMode === "word" ? activeWordDraft.length : 0);
   const blockClusterMeta = useMemo(() => blocks.map((block) => buildBlockClusterMeta(block)), [blocks]);
 
   const weakHeatmapData = useMemo(() => {
@@ -823,7 +1079,7 @@ export function TypingArea({
             <span className="text-[9px] uppercase font-bold text-green-500 tracking-widest select-none">Done</span>
             <div className="flex items-center justify-center w-12 h-12 rounded-full border border-green-500/40 bg-green-50 dark:bg-green-900/10 shadow-sm mt-1">
               <span className="text-[20px] font-bold text-green-600 dark:text-green-400">
-                {((typedCount / (globalCheckString.length || 1)) * 100).toFixed(0)}<span className="text-[10px] ml-0.5 opacity-50">%</span>
+                {((visualTypedCount / (globalCheckString.length || 1)) * 100).toFixed(0)}<span className="text-[10px] ml-0.5 opacity-50">%</span>
               </span>
             </div>
           </div>
@@ -939,6 +1195,12 @@ export function TypingArea({
                   const isTyped = typedIndices.has(globalIdx);
                   const isMistake = sessionMistakeIndices.has(globalIdx);
                   const isTarget = globalIdx === currentIndex && currentIndex < globalCheckString.length;
+                  const isDraftTyped = Boolean(
+                    typingMode === "word" &&
+                    activeWordSegment &&
+                    globalIdx >= activeWordSegment.start &&
+                    globalIdx < activeWordSegment.start + activeWordDraft.length
+                  );
                   const wordIndex = clusterMeta?.clusters[localIndex]?.wordIndex ?? -1;
                   const wordIntensity = getWeakHeatIntensity(
                     wordIndex >= 0 ? (weakHeatmapData.wordScores.get(`${block.ayahNumber}-${wordIndex}`) || 0) : 0,
@@ -973,7 +1235,7 @@ export function TypingArea({
                     >
                       {renderTextWithMarkers(
                         cluster,
-                        isTyped ? (isMistake ? "mistake" : "typed") : (showHint ? "hint" : "hidden")
+                        (isTyped || isDraftTyped) ? (isMistake ? "mistake" : "typed") : (showHint ? "hint" : "hidden")
                       )}
                     </span>
                   );
@@ -1085,7 +1347,7 @@ export function TypingArea({
             {/* PROGRESS PERCENTAGE (left) */}
             <div className="absolute left-1 flex items-center justify-center w-8 h-8 rounded-full border border-green-500/40 bg-green-500/5 shadow-sm">
               <span className="text-[10px] font-bold text-green-600 dark:text-green-400">
-                {Math.round((typedCount / (globalCheckString.length || 1)) * 100)}%
+                {Math.round((visualTypedCount / (globalCheckString.length || 1)) * 100)}%
               </span>
             </div>
 

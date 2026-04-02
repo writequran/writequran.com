@@ -8,9 +8,11 @@ interface MenuDrawerProps {
   isDarkMode: boolean;
   toggleTheme: () => void;
   onClearHistory: () => void;
+  typingMode: "letter" | "word";
+  onTypingModeChange: (mode: "letter" | "word") => void;
 }
 
-export function MenuDrawer({ isOpen, onClose, isDarkMode, toggleTheme, onClearHistory }: MenuDrawerProps) {
+export function MenuDrawer({ isOpen, onClose, isDarkMode, toggleTheme, onClearHistory, typingMode, onTypingModeChange }: MenuDrawerProps) {
   return (
     <>
       {/* Backdrop */}
@@ -64,6 +66,36 @@ export function MenuDrawer({ isOpen, onClose, isDarkMode, toggleTheme, onClearHi
                 <div className={`absolute top-0.5 w-3 h-3 rounded-full transition-all duration-300 ${isDarkMode ? 'right-0.5 bg-yellow-500 shadow-sm' : 'left-0.5 bg-white shadow-sm'}`} />
               </div>
             </button>
+
+            <div className="px-4 py-3.5 rounded-2xl bg-neutral-50/80 dark:bg-neutral-800/70 border border-neutral-100 dark:border-neutral-700/70 mt-1">
+              <div className="flex items-center justify-between gap-4 mb-3">
+                <div className="flex items-center gap-4 text-neutral-600 dark:text-neutral-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#D6C19E]"><path d="M4 7h16" /><path d="M4 12h10" /><path d="M4 17h7" /></svg>
+                  <div>
+                    <span className="font-semibold text-sm block">Typing Mode</span>
+                    <span className="text-[11px] text-neutral-400 dark:text-neutral-500">Choose how progress is checked</span>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => onTypingModeChange("letter")}
+                  className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all border ${typingMode === "letter"
+                    ? "bg-[#D6C19E] text-white border-[#D6C19E] shadow-sm"
+                    : "bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E]/50"}`}
+                >
+                  Letter by Letter
+                </button>
+                <button
+                  onClick={() => onTypingModeChange("word")}
+                  className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all border ${typingMode === "word"
+                    ? "bg-[#D6C19E] text-white border-[#D6C19E] shadow-sm"
+                    : "bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E]/50"}`}
+                >
+                  Word by Word
+                </button>
+              </div>
+            </div>
 
             <button 
               onClick={() => { onClearHistory(); onClose(); }}

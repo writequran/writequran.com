@@ -14,6 +14,7 @@ export default function Page() {
   const [surahNumber, setSurahNumber] = useState(1);
   const [isMounted, setIsMounted] = useState(false);
   const [resetKey, setResetKey] = useState(0);
+  const [typingMode, setTypingMode] = useState<"letter" | "word">("letter");
   const surahs = getAllSurahsMeta();
 
   useEffect(() => {
@@ -26,6 +27,12 @@ export default function Page() {
     } else {
       setSurahNumber(1);
     }
+
+    const savedTypingMode = getStorage("typing_mode");
+    if (savedTypingMode === "letter" || savedTypingMode === "word") {
+      setTypingMode(savedTypingMode);
+    }
+
     setIsMounted(true);
   }, [resetKey]);
 
@@ -120,6 +127,10 @@ export default function Page() {
       setStorage('theme', 'light');
     }
   }, [isDarkMode]);
+
+  useEffect(() => {
+    setStorage("typing_mode", typingMode);
+  }, [typingMode]);
 
   const toggleTheme = () => setIsDarkMode(prev => !prev);
 
@@ -414,6 +425,7 @@ export default function Page() {
             <TypingArea
               key={`${surahNumber}-${resetKey}`}
               surahNumber={surahNumber}
+              typingMode={typingMode}
               jumpTarget={jumpTarget}
               onJump={handleJumpTo}
               onBlockChange={handleBlockChange}
@@ -435,6 +447,8 @@ export default function Page() {
             isDarkMode={isDarkMode} 
             toggleTheme={toggleTheme} 
             onClearHistory={() => setModalType("clear")} 
+            typingMode={typingMode}
+            onTypingModeChange={setTypingMode}
           />
         </div>
       </main>
