@@ -7,7 +7,7 @@ import { ConfirmationModal } from "@/components/ConfirmationModal";
 import { MenuDrawer } from "@/components/MenuDrawer";
 import Image from "next/image";
 import { getAllSurahsMeta, getSurah, getLocationByPage, getLocationByJuz } from "@/lib/quran-data";
-import { WeakSpot, getWeakSpots } from "@/lib/stats";
+import { WeakSpot, getNextWeakSpotDueAt, getTrackedWeakSpotsCount, getWeakSpots, markWeakSpotReviewed } from "@/lib/stats";
 import { getStorage, setStorage, getScopedKey, migrateLegacyLocalStorage } from "@/lib/storage";
 
 export default function Page() {
@@ -36,7 +36,7 @@ export default function Page() {
 
   const [reviewQueue, setReviewQueue] = useState<WeakSpot[]>([]);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(-1);
-  const [modalType, setModalType] = useState<"review" | "clear" | "no-mistakes" | "review-complete" | null>(null);
+  const [modalType, setModalType] = useState<"review" | "clear" | "no-mistakes" | "review-complete" | "review-scheduled" | null>(null);
 
   const [navInfo, setNavInfo] = useState({ page: 1, juz: 1, ayah: 1 });
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -79,7 +79,7 @@ export default function Page() {
   const startReview = () => {
     const spots = getWeakSpots();
     if (spots.length === 0) {
-      setModalType("no-mistakes");
+      setModalType(getTrackedWeakSpotsCount() > 0 ? "review-scheduled" : "no-mistakes");
       return;
     }
     setModalType("review");
@@ -123,7 +123,13 @@ export default function Page() {
 
   const toggleTheme = () => setIsDarkMode(prev => !prev);
 
+  const completeCurrentReviewSpot = () => {
+    if (currentReviewIndex < 0 || currentReviewIndex >= reviewQueue.length) return;
+    markWeakSpotReviewed(reviewQueue[currentReviewIndex]);
+  };
+
   const nextReviewSpot = () => {
+    completeCurrentReviewSpot();
     if (currentReviewIndex + 1 < reviewQueue.length) {
       const nextIdx = currentReviewIndex + 1;
       setCurrentReviewIndex(nextIdx);
@@ -142,6 +148,7 @@ export default function Page() {
   };
 
   const exitReview = () => {
+    completeCurrentReviewSpot();
     setReviewQueue([]);
     setCurrentReviewIndex(-1);
   };
@@ -152,6 +159,7 @@ export default function Page() {
 
   const confirmClearAll = () => {
     localStorage.removeItem(getScopedKey('mistake_stats'));
+    localStorage.removeItem(getScopedKey('weak_spot_reviews'));
     for (let i = 1; i <= 114; i++) {
       localStorage.removeItem(getScopedKey(`session_mistakes_${i}`));
       localStorage.removeItem(getScopedKey(`session_attempts_${i}`));
@@ -415,7 +423,7 @@ export default function Page() {
               onNextReviewSpot={nextReviewSpot}
               isReviewMode={reviewQueue.length > 0}
               reviewProgress={reviewQueue.length > 0 ? `${currentReviewIndex + 1}/${reviewQueue.length}` : ""}
-              hasWeakSpots={getWeakSpots().length > 0}
+              hasWeakSpots={getTrackedWeakSpotsCount() > 0}
               isDarkMode={isDarkMode}
               toggleTheme={toggleTheme}
             />
@@ -467,6 +475,20 @@ export default function Page() {
         onConfirm={() => setModalType(null)}
         title="No Mistakes Yet"
         message="Keep practicing to build your stats. Once you make a mistake, it will appear here for review."
+        confirmLabel="OK"
+        showCancel={false}
+      />
+
+      <ConfirmationModal
+        isOpen={modalType === "review-scheduled"}
+        onClose={() => setModalType(null)}
+        onConfirm={() => setModalType(null)}
+        title="Review Not Due Yet"
+        message={`Your weak ayat are on a spaced review schedule. ${(() => {
+          const nextDueAt = getNextWeakSpotDueAt();
+          if (!nextDueAt) return "Keep practicing and they will reappear automatically.";
+          return `Next review becomes due on ${new Date(nextDueAt).toLocaleDateString()}.`;
+        })()}`}
         confirmLabel="OK"
         showCancel={false}
       />
