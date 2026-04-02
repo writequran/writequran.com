@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { TypingArea } from "@/components/TypingArea";
+import { MemorizationTestPanel } from "@/components/MemorizationTestPanel";
 import { AuthWidget } from "@/components/AuthWidget";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 import { MenuDrawer } from "@/components/MenuDrawer";
@@ -15,6 +16,8 @@ export default function Page() {
   const [isMounted, setIsMounted] = useState(false);
   const [resetKey, setResetKey] = useState(0);
   const [typingMode, setTypingMode] = useState<"letter" | "word">("letter");
+  const [memorizationRange, setMemorizationRange] = useState({ startSurah: 1, endSurah: 114 });
+  const [memorizationTarget, setMemorizationTarget] = useState<{ surahNumber: number; ayahNumber: number; nonce: number } | null>(null);
   const surahs = getAllSurahsMeta();
 
   useEffect(() => {
@@ -31,6 +34,19 @@ export default function Page() {
     const savedTypingMode = getStorage("typing_mode");
     if (savedTypingMode === "letter" || savedTypingMode === "word") {
       setTypingMode(savedTypingMode);
+    }
+
+    const savedMemorizationRange = getStorage("memorization_range");
+    if (savedMemorizationRange) {
+      try {
+        const parsed = JSON.parse(savedMemorizationRange) as { startSurah?: number; endSurah?: number };
+        setMemorizationRange({
+          startSurah: Math.min(114, Math.max(1, parsed.startSurah || 1)),
+          endSurah: Math.min(114, Math.max(1, parsed.endSurah || 114)),
+        });
+      } catch {
+        setMemorizationRange({ startSurah: 1, endSurah: 114 });
+      }
     }
 
     setIsMounted(true);
@@ -132,7 +148,60 @@ export default function Page() {
     setStorage("typing_mode", typingMode);
   }, [typingMode]);
 
+  useEffect(() => {
+    setStorage("memorization_range", JSON.stringify(memorizationRange));
+  }, [memorizationRange]);
+
   const toggleTheme = () => setIsDarkMode(prev => !prev);
+
+  const pickRandomAyahInRange = useCallback((startSurah: number, endSurah: number) => {
+    const normalizedStart = Math.min(startSurah, endSurah);
+    const normalizedEnd = Math.max(startSurah, endSurah);
+    const candidates: Array<{ surahNumber: number; ayahNumber: number }> = [];
+
+    for (let number = normalizedStart; number <= normalizedEnd; number += 1) {
+      const surah = getSurah(number);
+      surah.blocks.forEach((block) => {
+        candidates.push({
+          surahNumber: number,
+          ayahNumber: block.ayahNumber,
+        });
+      });
+    }
+
+    if (candidates.length === 0) return null;
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  }, []);
+
+  const handleMemorizationRangeChange = useCallback((range: { startSurah: number; endSurah: number }) => {
+    setMemorizationRange({
+      startSurah: Math.min(114, Math.max(1, range.startSurah || 1)),
+      endSurah: Math.min(114, Math.max(1, range.endSurah || 1)),
+    });
+  }, []);
+
+  const startMemorizationTest = useCallback(() => {
+    const next = pickRandomAyahInRange(memorizationRange.startSurah, memorizationRange.endSurah);
+    if (!next) return;
+
+    setReviewQueue([]);
+    setCurrentReviewIndex(-1);
+    setModalType(null);
+    setSurahNumber(next.surahNumber);
+    setStorage("surah", next.surahNumber.toString());
+    setJumpTarget(null);
+    setIsDropdownOpen(false);
+    setIsNavOpen(false);
+    setMemorizationTarget({
+      surahNumber: next.surahNumber,
+      ayahNumber: next.ayahNumber,
+      nonce: Date.now(),
+    });
+  }, [memorizationRange.endSurah, memorizationRange.startSurah, pickRandomAyahInRange]);
+
+  const exitMemorizationTest = useCallback(() => {
+    setMemorizationTarget(null);
+  }, []);
 
   const completeCurrentReviewSpot = () => {
     if (currentReviewIndex < 0 || currentReviewIndex >= reviewQueue.length) return;
@@ -238,6 +307,7 @@ export default function Page() {
   );
 
   const currentSurah = surahs.find(s => s.number === surahNumber);
+  const isMemorizationMode = memorizationTarget !== null;
 
   return (
     <div className="flex flex-col min-h-screen bg-neutral-100 dark:bg-neutral-900 transition-colors duration-300">
@@ -270,24 +340,27 @@ export default function Page() {
         >
           <button
             onClick={() => {
+              if (isMemorizationMode) return;
               setIsDropdownOpen(!isDropdownOpen);
               setIsNavOpen(false);
             }}
             className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-full transition-all border border-neutral-200 dark:border-neutral-700 shadow-sm group"
           >
             <span className="text-[10px] sm:text-sm font-bold text-neutral-700 dark:text-neutral-200 uppercase tracking-widest truncate max-w-[150px] sm:max-w-none">
-              {currentSurah?.number}. {currentSurah?.englishName}
+              {isMemorizationMode ? "Memorization Test" : `${currentSurah?.number}. ${currentSurah?.englishName}`}
             </span>
-            <svg
-              className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-neutral-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
-              xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-            >
-              <path d="m6 9 6 6 6-6" />
-            </svg>
+            {!isMemorizationMode && (
+              <svg
+                className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-neutral-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            )}
           </button>
 
           {/* MOBILE-ONLY NAV BOX */}
-          <div className="sm:hidden -mt-0.5" ref={navRef}>
+          {!isMemorizationMode && <div className="sm:hidden -mt-0.5" ref={navRef}>
             <button
               onClick={() => {
                 setIsNavOpen(!isNavOpen);
@@ -357,10 +430,10 @@ export default function Page() {
                 </div>
               </div>
             )}
-          </div>
+          </div>}
 
           {/* SEARCHABLE DROPDOWN MODAL */}
-          {isDropdownOpen && (
+          {!isMemorizationMode && isDropdownOpen && (
             <div
               className="absolute top-full mt-3 left-1/2 -translate-x-1/2 w-64 sm:w-72 max-h-[350px] sm:max-h-[450px] bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl flex flex-col z-20 overflow-hidden animate-in fade-in zoom-in duration-200 origin-top"
             >
@@ -421,7 +494,7 @@ export default function Page() {
       {/* MAIN CONTENT AREA */}
       <main className="flex-1 flex flex-col items-center justify-start min-h-screen relative pt-16">
         <div className="w-full flex-1 flex flex-col items-center pb-12 pt-12 md:pt-16">
-          {isMounted && (
+          {isMounted && !isMemorizationMode && (
             <TypingArea
               key={`${surahNumber}-${resetKey}`}
               surahNumber={surahNumber}
@@ -441,6 +514,19 @@ export default function Page() {
             />
           )}
 
+          {isMounted && memorizationTarget && (
+            <MemorizationTestPanel
+              key={`${memorizationTarget.surahNumber}-${memorizationTarget.ayahNumber}-${memorizationTarget.nonce}-${typingMode}`}
+              surahNumber={memorizationTarget.surahNumber}
+              ayahNumber={memorizationTarget.ayahNumber}
+              typingMode={typingMode}
+              isDarkMode={isDarkMode}
+              toggleTheme={toggleTheme}
+              onExit={exitMemorizationTest}
+              onNext={startMemorizationTest}
+            />
+          )}
+
           <MenuDrawer 
             isOpen={isMenuOpen} 
             onClose={() => setIsMenuOpen(false)} 
@@ -449,6 +535,10 @@ export default function Page() {
             onClearHistory={() => setModalType("clear")} 
             typingMode={typingMode}
             onTypingModeChange={setTypingMode}
+            memorizationRange={memorizationRange}
+            onMemorizationRangeChange={handleMemorizationRangeChange}
+            onStartMemorizationTest={startMemorizationTest}
+            isMemorizationMode={isMemorizationMode}
           />
         </div>
       </main>

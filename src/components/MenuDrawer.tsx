@@ -10,9 +10,25 @@ interface MenuDrawerProps {
   onClearHistory: () => void;
   typingMode: "letter" | "word";
   onTypingModeChange: (mode: "letter" | "word") => void;
+  memorizationRange: { startSurah: number; endSurah: number };
+  onMemorizationRangeChange: (range: { startSurah: number; endSurah: number }) => void;
+  onStartMemorizationTest: () => void;
+  isMemorizationMode: boolean;
 }
 
-export function MenuDrawer({ isOpen, onClose, isDarkMode, toggleTheme, onClearHistory, typingMode, onTypingModeChange }: MenuDrawerProps) {
+export function MenuDrawer({
+  isOpen,
+  onClose,
+  isDarkMode,
+  toggleTheme,
+  onClearHistory,
+  typingMode,
+  onTypingModeChange,
+  memorizationRange,
+  onMemorizationRangeChange,
+  onStartMemorizationTest,
+  isMemorizationMode,
+}: MenuDrawerProps) {
   return (
     <>
       {/* Backdrop */}
@@ -95,6 +111,55 @@ export function MenuDrawer({ isOpen, onClose, isDarkMode, toggleTheme, onClearHi
                   Word by Word
                 </button>
               </div>
+            </div>
+
+            <div className="px-4 py-3.5 rounded-2xl bg-neutral-50/80 dark:bg-neutral-800/70 border border-neutral-100 dark:border-neutral-700/70 mt-1">
+              <div className="flex items-start gap-4 text-neutral-600 dark:text-neutral-300 mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#D6C19E] mt-0.5"><path d="M9 3H5a2 2 0 0 0-2 2v4" /><path d="M15 3h4a2 2 0 0 1 2 2v4" /><path d="M21 15v4a2 2 0 0 1-2 2h-4" /><path d="M3 15v4a2 2 0 0 0 2 2h4" /><path d="M9 9h6v6H9z" /></svg>
+                <div>
+                  <span className="font-semibold text-sm block">Memorization Test</span>
+                  <span className="text-[11px] text-neutral-400 dark:text-neutral-500">Pick a surah range and get one random ayah to type from memory</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <label className="flex flex-col gap-1">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">From</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="114"
+                    value={memorizationRange.startSurah}
+                    onChange={(e) => onMemorizationRangeChange({
+                      startSurah: Number.parseInt(e.target.value || "1", 10),
+                      endSurah: memorizationRange.endSurah,
+                    })}
+                    className="w-full px-3 py-2 bg-white dark:bg-neutral-900 text-sm font-semibold text-neutral-700 dark:text-neutral-100 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D6C19E]"
+                  />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">To</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="114"
+                    value={memorizationRange.endSurah}
+                    onChange={(e) => onMemorizationRangeChange({
+                      startSurah: memorizationRange.startSurah,
+                      endSurah: Number.parseInt(e.target.value || "114", 10),
+                    })}
+                    className="w-full px-3 py-2 bg-white dark:bg-neutral-900 text-sm font-semibold text-neutral-700 dark:text-neutral-100 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D6C19E]"
+                  />
+                </label>
+              </div>
+              <button
+                onClick={() => {
+                  onStartMemorizationTest();
+                  onClose();
+                }}
+                className="w-full px-3 py-2.5 rounded-xl text-xs font-bold tracking-widest uppercase bg-[#D6C19E] text-white shadow-sm hover:brightness-105 transition-all"
+              >
+                {isMemorizationMode ? "New Random Ayah" : "Start Test"}
+              </button>
             </div>
 
             <button 
