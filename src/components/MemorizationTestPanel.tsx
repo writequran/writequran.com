@@ -102,6 +102,9 @@ export function MemorizationTestPanel({
 
   const currentSegment = currentSegmentIndex >= 0 ? wordSegments[currentSegmentIndex] : null;
   const score = Math.round((ayahBlock.checkString.length / Math.max(ayahBlock.checkString.length + wrongAttempts, 1)) * 100);
+  const currentTargetWord = currentSegment
+    ? ayahBlock.checkString.slice(currentSegment.start, currentSegment.end)
+    : "";
 
   const updateCursorPos = useCallback(() => {
     if (targetRef.current && containerRef.current && currentIndex < ayahBlock.checkString.length) {
@@ -151,61 +154,47 @@ export function MemorizationTestPanel({
       const segment = currentSegment;
       if (!segment) return;
 
-      const activeIndex = segment.start + wordDraft.length;
+      const targetWord = ayahBlock.checkString.slice(segment.start, segment.end);
       if (char === "Backspace") {
-        if (wrongChar) {
+        if (wordDraft.length === 0) {
           setWrongChar(null);
           return;
         }
 
-        if (wordDraft.length > 0) {
-          const nextDraft = wordDraft.slice(0, -1);
-          setWordDraft(nextDraft);
-          setCurrentIndex(segment.start + nextDraft.length);
-          return;
-        }
-
-        const previousSegment = currentSegmentIndex > 0 ? wordSegments[currentSegmentIndex - 1] : null;
-        if (!previousSegment) return;
-
-        const nextTypedIndices = new Set(typedIndices);
-        for (let i = previousSegment.start; i < previousSegment.commitEnd; i++) {
-          nextTypedIndices.delete(i);
-        }
-        setTypedIndices(nextTypedIndices);
-        setWordDraft(ayahBlock.checkString.slice(previousSegment.start, previousSegment.end - 1));
-        setCurrentIndex(Math.max(previousSegment.start, previousSegment.end - 1));
-        return;
-      }
-
-      if (wrongChar) return;
-
-      const expectedChar = ayahBlock.checkString[activeIndex];
-      if (!expectedChar) return;
-
-      if (char === expectedChar) {
-        const nextDraft = wordDraft + char;
-        if (activeIndex + 1 >= segment.end) {
-          const nextTypedIndices = new Set(typedIndices);
-          for (let i = segment.start; i < segment.commitEnd; i++) {
-            nextTypedIndices.add(i);
-          }
-          setTypedIndices(nextTypedIndices);
-          setWordDraft("");
-
-          const nextSegment = wordSegments[currentSegmentIndex + 1];
-          const nextIndex = nextSegment ? nextSegment.start : ayahBlock.checkString.length;
-          setCurrentIndex(nextIndex);
-          completeIfNeeded(nextTypedIndices);
-        } else {
-          setWordDraft(nextDraft);
-          setCurrentIndex(segment.start + nextDraft.length);
-        }
+        const nextDraft = wordDraft.slice(0, -1);
+        setWordDraft(nextDraft);
+        setCurrentIndex(segment.start);
         setWrongChar(null);
         return;
       }
 
-      setWrongChar(char);
+      const nextDraft = wordDraft + char;
+      if (nextDraft === targetWord) {
+        const nextTypedIndices = new Set(typedIndices);
+        for (let i = segment.start; i < segment.commitEnd; i++) {
+          nextTypedIndices.add(i);
+        }
+        setTypedIndices(nextTypedIndices);
+        setWordDraft("");
+
+        const nextSegment = wordSegments[currentSegmentIndex + 1];
+        const nextIndex = nextSegment ? nextSegment.start : ayahBlock.checkString.length;
+        setCurrentIndex(nextIndex);
+        setWrongChar(null);
+        completeIfNeeded(nextTypedIndices);
+        return;
+      }
+
+      setWordDraft(nextDraft);
+      setCurrentIndex(segment.start);
+      setWrongChar(null);
+
+      if (targetWord.startsWith(nextDraft)) {
+        return;
+      }
+
+      const errorOffset = Math.min(Math.max(nextDraft.length - 1, 0), Math.max(targetWord.length - 1, 0));
+      const activeIndex = segment.start + errorOffset;
       setWrongAttempts((value) => value + 1);
       setMistakeIndices((prev) => new Set(prev).add(activeIndex));
       return;
@@ -419,14 +408,9 @@ export function MemorizationTestPanel({
       <div className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[750px] bg-white/95 dark:bg-neutral-800/95 backdrop-blur-md rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t border-neutral-200 dark:border-neutral-800 transition-all duration-500 transform z-[60] ${showKeyboard ? "translate-y-0" : "translate-y-[calc(100%-54px)] sm:translate-y-full sm:opacity-0 sm:pointer-events-none"}`} dir="rtl">
         {typingMode === "word" && showKeyboard && (wordDraft.length > 0 || wrongChar) && (
           <div className="absolute bottom-full mb-1.5 sm:mb-2 left-1/2 -translate-x-1/2 w-fit max-w-[min(68vw,14rem)] pointer-events-none">
-            <div className="rounded-full border border-white/45 dark:border-neutral-700/60 bg-white/45 dark:bg-neutral-800/50 backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.10)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.24)] px-4 py-2">
+            <div className="rounded-full border border-[#E3C57A]/45 dark:border-[#D6C19E]/35 bg-[#F3E3BE]/55 dark:bg-[#6B5730]/28 backdrop-blur-xl px-4 py-2 shadow-[0_8px_24px_rgba(180,140,60,0.16)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.24)]">
               <div className="min-h-[1.45rem] flex items-center justify-center text-[1rem] sm:text-[1.15rem] leading-none quran-text text-[#2A2826] dark:text-neutral-100">
                 <span>{wordDraft || "\u00A0"}</span>
-                {wrongChar && (
-                  <span className="text-red-500 dark:text-red-400 ml-1">
-                    {wrongChar}
-                  </span>
-                )}
               </div>
             </div>
           </div>

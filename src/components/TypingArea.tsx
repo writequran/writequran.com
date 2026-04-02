@@ -436,6 +436,9 @@ export function TypingArea({
 
   const activeWordSegment = activeWordSegmentIndex >= 0 ? wordSegments[activeWordSegmentIndex] : null;
   const activeWordDraft = activeWordSegment ? (wordDrafts[activeWordSegment.id] || "") : "";
+  const activeWordTarget = activeWordSegment
+    ? globalCheckString.slice(activeWordSegment.start, activeWordSegment.end)
+    : "";
 
   useEffect(() => {
     if (currentBlock && onBlockChange) {
@@ -638,16 +641,13 @@ export function TypingArea({
       }
 
       const draft = wordDrafts[segment.id] || "";
-      const draftLength = Math.min(draft.length, segment.end - segment.start);
-      const targetIndex = segment.start + draftLength;
+      const targetWord = globalCheckString.slice(segment.start, segment.end);
 
       if (char === "Backspace") {
-        if (wrongChar) {
+        if (draft.length === 0) {
           setWrongChar(null);
           return;
         }
-
-        if (draftLength === 0) return;
 
         const nextDraft = draft.slice(0, -1);
         setWordDrafts(prev => ({ ...prev, [segment.id]: nextDraft }));
@@ -656,67 +656,65 @@ export function TypingArea({
         return;
       }
 
-      if (wrongChar) return;
+      const nextDraft = draft + char;
 
-      const expectedChar = globalCheckString[targetIndex];
-      if (!expectedChar) return;
-
-      if (char === expectedChar) {
-        const nextDraft = draft + char;
-
-        if (targetIndex + 1 >= segment.end) {
-          const nextTypedIndices = new Set(typedIndices);
-          for (let i = segment.start; i < segment.commitEnd; i++) {
-            nextTypedIndices.add(i);
-          }
-
-          setTypedIndices(nextTypedIndices);
-          setWordDrafts(prev => {
-            const next = { ...prev };
-            delete next[segment.id];
-            return next;
-          });
-
-          const nextIndex = (() => {
-            for (const nextSegment of wordSegments) {
-              if (nextSegment.commitEnd <= segment.commitEnd) continue;
-              if (isRangeFullyTyped(nextTypedIndices, nextSegment.start, nextSegment.commitEnd)) continue;
-              const nextDraftLength = Math.min((wordDrafts[nextSegment.id] || "").length, nextSegment.end - nextSegment.start);
-              return nextSegment.start + nextDraftLength;
-            }
-            return globalCheckString.length;
-          })();
-
-          setCurrentIndex(nextIndex);
-
-          const progressStats = globalProgressRef.current;
-          const p = progressStats[surahNumber] || {
-            surahNumber,
-            highestIndexReached: 0,
-            totalMistakeEvents: 0,
-            totalWrongAttempts: 0,
-            lastPracticed: Date.now()
-          };
-
-          if (nextIndex > p.highestIndexReached) {
-            p.highestIndexReached = nextIndex;
-          }
-          p.lastPracticed = Date.now();
-          progressStats[surahNumber] = p;
-          saveProgressStats(progressStats);
-        } else {
-          setWordDrafts(prev => ({ ...prev, [segment.id]: nextDraft }));
-          setCurrentIndex(segment.start);
+      if (nextDraft === targetWord) {
+        const nextTypedIndices = new Set(typedIndices);
+        for (let i = segment.start; i < segment.commitEnd; i++) {
+          nextTypedIndices.add(i);
         }
 
+        setTypedIndices(nextTypedIndices);
+        setWordDrafts(prev => {
+          const next = { ...prev };
+          delete next[segment.id];
+          return next;
+        });
+
+        const nextIndex = (() => {
+          for (const nextSegment of wordSegments) {
+            if (nextSegment.commitEnd <= segment.commitEnd) continue;
+            if (isRangeFullyTyped(nextTypedIndices, nextSegment.start, nextSegment.commitEnd)) continue;
+            return nextSegment.start;
+          }
+          return globalCheckString.length;
+        })();
+
+        setCurrentIndex(nextIndex);
         setWrongChar(null);
+
+        const progressStats = globalProgressRef.current;
+        const p = progressStats[surahNumber] || {
+          surahNumber,
+          highestIndexReached: 0,
+          totalMistakeEvents: 0,
+          totalWrongAttempts: 0,
+          lastPracticed: Date.now()
+        };
+
+        if (nextIndex > p.highestIndexReached) {
+          p.highestIndexReached = nextIndex;
+        }
+        p.lastPracticed = Date.now();
+        progressStats[surahNumber] = p;
+        saveProgressStats(progressStats);
         return;
       }
 
-      setWrongChar(char);
+      setWordDrafts(prev => ({ ...prev, [segment.id]: nextDraft }));
+      setCurrentIndex(segment.start);
+      setWrongChar(null);
+
+      const isPrefix = targetWord.startsWith(nextDraft);
+      if (isPrefix) {
+        return;
+      }
 
       const mistakes = globalMistakesRef.current;
       const progress = globalProgressRef.current;
+      const errorOffset = Math.min(Math.max(nextDraft.length - 1, 0), Math.max(targetWord.length - 1, 0));
+      const targetIndex = segment.start + errorOffset;
+      const expectedChar = globalCheckString[targetIndex] || targetWord[targetWord.length - 1] || "";
       const mistakeKey = `${surahNumber}-${targetIndex}`;
       const p = progress[surahNumber] || {
         surahNumber, highestIndexReached: targetIndex, totalMistakeEvents: 0, totalWrongAttempts: 0, lastPracticed: Date.now()
@@ -1336,14 +1334,9 @@ export function TypingArea({
       >
         {typingMode === "word" && showKeyboard && (activeWordDraft.length > 0 || wrongChar) && (
           <div className="absolute bottom-full mb-1.5 sm:mb-2 left-1/2 -translate-x-1/2 w-fit max-w-[min(68vw,14rem)] pointer-events-none">
-            <div className="rounded-full border border-white/45 dark:border-neutral-700/60 bg-white/45 dark:bg-neutral-800/50 backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.10)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.24)] px-4 py-2">
+            <div className="rounded-full border border-[#E3C57A]/45 dark:border-[#D6C19E]/35 bg-[#F3E3BE]/55 dark:bg-[#6B5730]/28 backdrop-blur-xl px-4 py-2 shadow-[0_8px_24px_rgba(180,140,60,0.16)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.24)]">
               <div className="min-h-[1.45rem] flex items-center justify-center text-[1rem] sm:text-[1.15rem] leading-none quran-text text-[#2A2826] dark:text-neutral-100">
                 <span>{activeWordDraft || "\u00A0"}</span>
-                {wrongChar && (
-                  <span className="text-red-500 dark:text-red-400 ml-1">
-                    {wrongChar}
-                  </span>
-                )}
               </div>
             </div>
           </div>
