@@ -1,3 +1,4 @@
+import { getSurah } from './quran-data';
 import { getStorage, setStorage } from './storage';
 
 export interface MistakeRecord {
@@ -178,4 +179,46 @@ export const markWeakSpotReviewed = (spot: Pick<WeakSpot, 'surahNumber' | 'ayahN
   };
 
   saveWeakSpotReviewStates(states);
+};
+
+export interface MilestoneProgress {
+  firstCompletedSurahNumber: number | null;
+  totalCompletedAyat: number;
+  totalLettersTyped: number;
+}
+
+export const getMilestoneProgress = (): MilestoneProgress => {
+  const progressStats = loadProgressStats();
+  let firstCompletedSurahNumber: number | null = null;
+  let totalCompletedAyat = 0;
+  let totalLettersTyped = 0;
+
+  for (const surahId in progressStats) {
+    const stats = progressStats[surahId];
+    const surahNumber = parseInt(surahId, 10);
+    
+    totalLettersTyped += stats.highestIndexReached;
+    
+    try {
+      const surahData = getSurah(surahNumber);
+      
+      let ayatCompletedInSurah = 0;
+      for (const block of surahData.blocks) {
+        if (stats.highestIndexReached >= block.globalCheckOffset + block.checkString.length) {
+          ayatCompletedInSurah++;
+        }
+      }
+      totalCompletedAyat += ayatCompletedInSurah;
+      
+      if (stats.highestIndexReached >= surahData.globalCheckString.length) {
+        if (firstCompletedSurahNumber === null || surahNumber < firstCompletedSurahNumber) {
+          firstCompletedSurahNumber = surahNumber;
+        }
+      }
+    } catch (e) {
+      // Ignore if surah data cannot be loaded
+    }
+  }
+  
+  return { firstCompletedSurahNumber, totalCompletedAyat, totalLettersTyped };
 };
