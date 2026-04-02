@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, type CSSProperties } from "react";
 import { getSurah, getAllSurahsMeta, type MushafBlock } from "@/lib/quran-data";
 import { MistakeRecord, ProgressStats, loadMistakeStats, loadProgressStats, saveMistakeStats, saveProgressStats } from "@/lib/stats";
 import { getStorage, setStorage } from "@/lib/storage";
@@ -38,6 +38,50 @@ function findNextUntypedIndex(typedIndices: Set<number>, start: number, totalLen
 function getBlockLimit(blocks: MushafBlock[], blockIndex: number, totalLength: number): number {
   const nextBlock = blocks[blockIndex + 1];
   return nextBlock ? nextBlock.globalCheckOffset : totalLength;
+}
+
+const WORD_CLUSTER_RE = /[^\s\u00A0\u06DD\u0660-\u0669]/;
+
+interface BlockClusterMeta {
+  clusters: Array<{
+    text: string;
+    wordIndex: number;
+  }>;
+}
+
+function buildBlockClusterMeta(block: MushafBlock): BlockClusterMeta {
+  const clusters: BlockClusterMeta["clusters"] = [];
+  let wordIndex = -1;
+  let inWord = false;
+
+  for (let i = 0; i < block.mapping.length; i++) {
+    const start = block.mapping[i];
+    const end = (i + 1 === block.mapping.length)
+      ? block.displayString.length
+      : block.mapping[i + 1];
+
+    const text = block.displayString.slice(start, end);
+    const hasWordContent = WORD_CLUSTER_RE.test(text);
+
+    if (hasWordContent && !inWord) {
+      wordIndex += 1;
+      inWord = true;
+    } else if (!hasWordContent && /\s|\u00A0/.test(text)) {
+      inWord = false;
+    }
+
+    clusters.push({
+      text,
+      wordIndex: hasWordContent ? wordIndex : -1,
+    });
+  }
+
+  return { clusters };
+}
+
+function getWeakHeatIntensity(score: number, maxScore: number): number {
+  if (!score || !maxScore) return 0;
+  return Math.sqrt(score / maxScore);
 }
 
 interface TypingAreaProps {
@@ -172,6 +216,11 @@ export function TypingArea({
     return (getStorage('visibility_mode') as VisibilityMode) || "hidden";
   });
 
+  const [showWeakHeatmap, setShowWeakHeatmap] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return getStorage('weak_heatmap') === 'true';
+  });
+
 
   const [isAtBottom, setIsAtBottom] = useState(false);
 
@@ -214,6 +263,7 @@ export function TypingArea({
 
   const globalMistakesRef = useRef<Record<string, MistakeRecord>>({});
   const globalProgressRef = useRef<Record<number, ProgressStats>>({});
+  const [statsVersion, setStatsVersion] = useState(0);
 
   const [cursorPos, setCursorPos] = useState({ top: 0, left: 0, width: 0, height: 0 });
   const [showHint, setShowHint] = useState(false);
@@ -242,6 +292,7 @@ export function TypingArea({
   useEffect(() => {
     globalMistakesRef.current = loadMistakeStats();
     globalProgressRef.current = loadProgressStats();
+    setStatsVersion(prev => prev + 1);
   }, []);
 
   const currentBlock = useMemo(() => {
@@ -295,6 +346,10 @@ export function TypingArea({
   useEffect(() => {
     setStorage('visibility_mode', visibilityMode);
   }, [visibilityMode]);
+
+  useEffect(() => {
+    setStorage('weak_heatmap', showWeakHeatmap ? 'true' : 'false');
+  }, [showWeakHeatmap]);
 
   useEffect(() => {
     setStorage('keyboard', showKeyboard.toString());
@@ -540,6 +595,7 @@ export function TypingArea({
       progress[surahNumber] = p;
       saveMistakeStats(mistakes);
       saveProgressStats(progress);
+      setStatsVersion(prev => prev + 1);
     }
   }, [currentIndex, globalCheckString, wrongChar, surahNumber, currentBlock, typedIndices]);
 
@@ -613,6 +669,55 @@ export function TypingArea({
   };
 
   const typedCount = typedIndices.size;
+  const blockClusterMeta = useMemo(() => blocks.map((block) => buildBlockClusterMeta(block)), [blocks]);
+
+  const weakHeatmapData = useMemo(() => {
+    const letterScores = new Map<number, number>();
+    const wordScores = new Map<string, number>();
+    const ayahScores = new Map<number, number>();
+    let maxLetterScore = 0;
+    let maxWordScore = 0;
+    let maxAyahScore = 0;
+
+    Object.values(globalMistakesRef.current).forEach((mistake) => {
+      if (mistake.surahNumber !== surahNumber) return;
+
+      const intensity = Math.max(1, mistake.wrongAttempts);
+      const nextLetterScore = (letterScores.get(mistake.globalIndex) || 0) + intensity;
+      letterScores.set(mistake.globalIndex, nextLetterScore);
+      maxLetterScore = Math.max(maxLetterScore, nextLetterScore);
+
+      const nextAyahScore = (ayahScores.get(mistake.ayahNumber) || 0) + intensity;
+      ayahScores.set(mistake.ayahNumber, nextAyahScore);
+      maxAyahScore = Math.max(maxAyahScore, nextAyahScore);
+
+      const blockIndex = blocks.findIndex((block) => {
+        const start = block.globalCheckOffset;
+        const end = start + block.checkString.length;
+        return mistake.globalIndex >= start && mistake.globalIndex < end;
+      });
+
+      if (blockIndex === -1) return;
+
+      const localIndex = mistake.globalIndex - blocks[blockIndex].globalCheckOffset;
+      const wordIndex = blockClusterMeta[blockIndex]?.clusters[localIndex]?.wordIndex ?? -1;
+      if (wordIndex < 0) return;
+
+      const wordKey = `${mistake.ayahNumber}-${wordIndex}`;
+      const nextWordScore = (wordScores.get(wordKey) || 0) + intensity;
+      wordScores.set(wordKey, nextWordScore);
+      maxWordScore = Math.max(maxWordScore, nextWordScore);
+    });
+
+    return {
+      letterScores,
+      wordScores,
+      ayahScores,
+      maxLetterScore,
+      maxWordScore,
+      maxAyahScore,
+    };
+  }, [blockClusterMeta, blocks, statsVersion, surahNumber]);
 
   return (
     <div className="w-full flex flex-col items-center pb-36 px-0">
@@ -700,6 +805,17 @@ export function TypingArea({
         </div>
 
         <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-4" />
+
+        <div className="flex flex-col items-center gap-1 group/btn">
+          <button
+            onClick={() => setShowWeakHeatmap(prev => !prev)}
+            className={`flex items-center justify-center w-11 h-11 rounded-full transition-all ${showWeakHeatmap ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+            title="Show Weak Heatmap"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3c1.5 2 3 3.9 3 6.2A3 3 0 1 1 9 9.2C9 6.9 10.5 5 12 3Z" /><path d="M6.5 14.5A5.5 5.5 0 0 0 12 21a5.5 5.5 0 0 0 5.5-6.5c-.5-2-2-3.5-3.5-4.7.1 2.6-1.5 4.2-3.2 4.2-1.5 0-2.8-1-3.3-2.6-.7.8-1.2 1.8-1.5 3.1Z" /></svg>
+          </button>
+          <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors block ${showWeakHeatmap ? 'text-orange-600 dark:text-orange-400' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>weak</span>
+        </div>
 
         {/* PASSIVE STATS */}
         <div className="flex flex-col gap-6 w-full">
@@ -801,9 +917,14 @@ export function TypingArea({
             const blockStart = block.globalCheckOffset;
             const blockLength = block.checkString.length;
             const blockEnd = blockStart + blockLength;
+            const clusterMeta = blockClusterMeta[blockIndex];
 
             const isActiveAyah = currentIndex >= blockStart && currentIndex < blockEnd;
             const showHint = visibilityMode === "all" || (visibilityMode === "ayah" && isActiveAyah);
+            const ayahIntensity = getWeakHeatIntensity(
+              weakHeatmapData.ayahScores.get(block.ayahNumber) || 0,
+              weakHeatmapData.maxAyahScore
+            );
 
             return (
               <span
@@ -813,21 +934,42 @@ export function TypingArea({
                 title={`Go to Ayah ${block.ayahNumber}`}
               >
                 {block.mapping.map((_: number, localIndex: number) => {
-                  const start = block.mapping[localIndex];
-                  const end = (localIndex + 1 === block.mapping.length)
-                    ? block.displayString.length
-                    : block.mapping[localIndex + 1];
-                  const cluster = block.displayString.slice(start, end);
+                  const cluster = clusterMeta?.clusters[localIndex]?.text || "";
                   const globalIdx = blockStart + localIndex;
                   const isTyped = typedIndices.has(globalIdx);
                   const isMistake = sessionMistakeIndices.has(globalIdx);
                   const isTarget = globalIdx === currentIndex && currentIndex < globalCheckString.length;
+                  const wordIndex = clusterMeta?.clusters[localIndex]?.wordIndex ?? -1;
+                  const wordIntensity = getWeakHeatIntensity(
+                    wordIndex >= 0 ? (weakHeatmapData.wordScores.get(`${block.ayahNumber}-${wordIndex}`) || 0) : 0,
+                    weakHeatmapData.maxWordScore
+                  );
+                  const letterIntensity = getWeakHeatIntensity(
+                    weakHeatmapData.letterScores.get(globalIdx) || 0,
+                    weakHeatmapData.maxLetterScore
+                  );
+
+                  const heatmapStyle: CSSProperties | undefined = showWeakHeatmap ? {
+                    boxShadow: ayahIntensity > 0
+                      ? `inset 0 -0.12em 0 rgba(234, 88, 12, ${0.06 + (ayahIntensity * 0.18)})`
+                      : undefined,
+                    backgroundColor: wordIntensity > 0
+                      ? `rgba(245, 158, 11, ${0.04 + (wordIntensity * 0.16)})`
+                      : undefined,
+                    borderRadius: wordIntensity > 0 ? '0.22em' : undefined,
+                    textShadow: letterIntensity > 0
+                      ? `0 0 ${0.2 + (letterIntensity * 0.42)}em rgba(249, 115, 22, ${0.24 + (letterIntensity * 0.36)}), 0 0 ${0.05 + (letterIntensity * 0.1)}em rgba(251, 191, 36, ${0.2 + (letterIntensity * 0.2)})`
+                      : undefined,
+                    WebkitBoxDecorationBreak: 'clone',
+                    boxDecorationBreak: 'clone',
+                  } : undefined;
 
                   return (
                     <span
                       key={globalIdx}
                       ref={isTarget ? targetRef : null}
                       className="inline"
+                      style={heatmapStyle}
                     >
                       {renderTextWithMarkers(
                         cluster,
@@ -977,6 +1119,14 @@ export function TypingArea({
               className={`flex items-center justify-center w-8 h-8 rounded-full transition-all shrink-0 ${showKeyboard ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
+            </button>
+
+            <button
+              onClick={() => setShowWeakHeatmap(prev => !prev)}
+              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all shrink-0 ${showWeakHeatmap ? 'bg-orange-500 text-white shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+              title="Show Weak Heatmap"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3c1.5 2 3 3.9 3 6.2A3 3 0 1 1 9 9.2C9 6.9 10.5 5 12 3Z" /><path d="M6.5 14.5A5.5 5.5 0 0 0 12 21a5.5 5.5 0 0 0 5.5-6.5c-.5-2-2-3.5-3.5-4.7.1 2.6-1.5 4.2-3.2 4.2-1.5 0-2.8-1-3.3-2.6-.7.8-1.2 1.8-1.5 3.1Z" /></svg>
             </button>
 
             <div className="relative shrink-0" data-rewrite-ayah="true">
