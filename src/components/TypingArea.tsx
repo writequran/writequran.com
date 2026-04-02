@@ -423,12 +423,11 @@ export function TypingArea({
       if (segment.commitEnd <= start) continue;
       if (segment.start >= limit) break;
       if (isRangeFullyTyped(typedIndices, segment.start, Math.min(segment.commitEnd, limit))) continue;
-      const draftLength = Math.min(wordDrafts[segment.id]?.length || 0, segment.end - segment.start);
-      return Math.min(segment.start + draftLength, segment.end);
+      return segment.start;
     }
 
     return limit;
-  }, [globalCheckString.length, typedIndices, typingMode, wordDrafts, wordSegments]);
+  }, [globalCheckString.length, typedIndices, typingMode, wordSegments]);
 
   const activeWordSegmentIndex = useMemo(() => {
     if (typingMode !== "word") return -1;
@@ -652,7 +651,7 @@ export function TypingArea({
 
         const nextDraft = draft.slice(0, -1);
         setWordDrafts(prev => ({ ...prev, [segment.id]: nextDraft }));
-        setCurrentIndex(segment.start + nextDraft.length);
+        setCurrentIndex(segment.start);
         setWrongChar(null);
         return;
       }
@@ -707,7 +706,7 @@ export function TypingArea({
           saveProgressStats(progressStats);
         } else {
           setWordDrafts(prev => ({ ...prev, [segment.id]: nextDraft }));
-          setCurrentIndex(segment.start + nextDraft.length);
+          setCurrentIndex(segment.start);
         }
 
         setWrongChar(null);
@@ -924,7 +923,7 @@ export function TypingArea({
   };
 
   const typedCount = typedIndices.size;
-  const visualTypedCount = typedCount + (typingMode === "word" ? activeWordDraft.length : 0);
+  const visualTypedCount = typedCount;
   const blockClusterMeta = useMemo(() => blocks.map((block) => buildBlockClusterMeta(block)), [blocks]);
 
   const weakHeatmapData = useMemo(() => {
@@ -1195,12 +1194,6 @@ export function TypingArea({
                   const isTyped = typedIndices.has(globalIdx);
                   const isMistake = sessionMistakeIndices.has(globalIdx);
                   const isTarget = globalIdx === currentIndex && currentIndex < globalCheckString.length;
-                  const isDraftTyped = Boolean(
-                    typingMode === "word" &&
-                    activeWordSegment &&
-                    globalIdx >= activeWordSegment.start &&
-                    globalIdx < activeWordSegment.start + activeWordDraft.length
-                  );
                   const wordIndex = clusterMeta?.clusters[localIndex]?.wordIndex ?? -1;
                   const wordIntensity = getWeakHeatIntensity(
                     wordIndex >= 0 ? (weakHeatmapData.wordScores.get(`${block.ayahNumber}-${wordIndex}`) || 0) : 0,
@@ -1235,7 +1228,7 @@ export function TypingArea({
                     >
                       {renderTextWithMarkers(
                         cluster,
-                        (isTyped || isDraftTyped) ? (isMistake ? "mistake" : "typed") : (showHint ? "hint" : "hidden")
+                        isTyped ? (isMistake ? "mistake" : "typed") : (showHint ? "hint" : "hidden")
                       )}
                     </span>
                   );
@@ -1341,6 +1334,21 @@ export function TypingArea({
           }`}
         dir="rtl"
       >
+        {typingMode === "word" && showKeyboard && (activeWordDraft.length > 0 || wrongChar) && (
+          <div className="absolute bottom-full mb-1.5 sm:mb-2 left-1/2 -translate-x-1/2 w-fit max-w-[min(68vw,14rem)] pointer-events-none">
+            <div className="rounded-full border border-white/45 dark:border-neutral-700/60 bg-white/45 dark:bg-neutral-800/50 backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.10)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.24)] px-4 py-2">
+              <div className="min-h-[1.45rem] flex items-center justify-center text-[1rem] sm:text-[1.15rem] leading-none quran-text text-[#2A2826] dark:text-neutral-100">
+                <span>{activeWordDraft || "\u00A0"}</span>
+                {wrongChar && (
+                  <span className="text-red-500 dark:text-red-400 ml-1">
+                    {wrongChar}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Integrated Mobile Toolbar (Header) */}
         <div className="w-full sm:hidden border-b border-neutral-100 dark:border-neutral-800/50 py-1.5 px-1 bg-white/50 dark:bg-neutral-800/50">
           <div className="flex items-center justify-center gap-0 relative">

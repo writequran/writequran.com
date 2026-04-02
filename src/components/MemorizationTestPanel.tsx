@@ -417,6 +417,21 @@ export function MemorizationTestPanel({
       </div>
 
       <div className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[750px] bg-white/95 dark:bg-neutral-800/95 backdrop-blur-md rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t border-neutral-200 dark:border-neutral-800 transition-all duration-500 transform z-[60] ${showKeyboard ? "translate-y-0" : "translate-y-[calc(100%-54px)] sm:translate-y-full sm:opacity-0 sm:pointer-events-none"}`} dir="rtl">
+        {typingMode === "word" && showKeyboard && (wordDraft.length > 0 || wrongChar) && (
+          <div className="absolute bottom-full mb-1.5 sm:mb-2 left-1/2 -translate-x-1/2 w-fit max-w-[min(68vw,14rem)] pointer-events-none">
+            <div className="rounded-full border border-white/45 dark:border-neutral-700/60 bg-white/45 dark:bg-neutral-800/50 backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.10)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.24)] px-4 py-2">
+              <div className="min-h-[1.45rem] flex items-center justify-center text-[1rem] sm:text-[1.15rem] leading-none quran-text text-[#2A2826] dark:text-neutral-100">
+                <span>{wordDraft || "\u00A0"}</span>
+                {wrongChar && (
+                  <span className="text-red-500 dark:text-red-400 ml-1">
+                    {wrongChar}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="w-full sm:hidden border-b border-neutral-100 dark:border-neutral-800/50 py-1.5 px-1 bg-white/50 dark:bg-neutral-800/50">
           <div className="flex items-center justify-center gap-0 relative">
             <div className="absolute left-1 flex items-center justify-center min-w-[2.5rem] h-8 px-2 rounded-full border border-[#D6C19E]/40 bg-[#D6C19E]/10 shadow-sm">
