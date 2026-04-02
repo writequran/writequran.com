@@ -144,7 +144,16 @@ function isRangeFullyTyped(typedIndices: Set<number>, start: number, end: number
 }
 
 function findWordSegmentIndexForPosition(wordSegments: WordSegment[], index: number): number {
-  return wordSegments.findIndex((segment) => index >= segment.start && index < segment.commitEnd);
+  let low = 0;
+  let high = wordSegments.length - 1;
+  while (low <= high) {
+    const mid = (low + high) >> 1;
+    const seg = wordSegments[mid];
+    if (index >= seg.start && index < seg.commitEnd) return mid;
+    if (index < seg.start) high = mid - 1;
+    else low = mid + 1;
+  }
+  return -1;
 }
 
 interface TypingAreaProps {
@@ -199,7 +208,7 @@ function MistakePopover({
         : "left-full top-1/2 -translate-y-1/2 ml-4 slide-in-from-left-2"
         }`}
     >
-      <div 
+      <div
         className="bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl p-1.5 min-w-fit flex flex-col gap-0.5"
         data-mistake-menu="true"
       >
@@ -419,7 +428,11 @@ export function TypingArea({
       return findFirstUntypedIndexInRange(typedIndices, start, limit);
     }
 
-    for (const segment of wordSegments) {
+    const startSegIndex = findWordSegmentIndexForPosition(wordSegments, start);
+    const startIndex = startSegIndex >= 0 ? startSegIndex : 0;
+
+    for (let i = startIndex; i < wordSegments.length; i++) {
+      const segment = wordSegments[i];
       if (segment.commitEnd <= start) continue;
       if (segment.start >= limit) break;
       if (isRangeFullyTyped(typedIndices, segment.start, Math.min(segment.commitEnd, limit))) continue;
@@ -494,14 +507,14 @@ export function TypingArea({
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       const target = e.target as HTMLElement;
-      
+
       // Mistake Menu Popover logic
       if (modalType === "mistake_menu") {
         if (!target.closest('[data-mistake-menu="true"]') && !target.closest('[data-mistake-trigger="true"]')) {
           setModalType(null);
         }
       }
-      
+
       // Rewrite Ayah PopConfirm logic
       if (modalType === "rewrite_ayah") {
         if (!target.closest('[data-rewrite-ayah="true"]')) {
@@ -672,7 +685,10 @@ export function TypingArea({
         });
 
         const nextIndex = (() => {
-          for (const nextSegment of wordSegments) {
+          const startSegIndex = findWordSegmentIndexForPosition(wordSegments, segment.commitEnd);
+          const startLoop = startSegIndex >= 0 ? startSegIndex : 0;
+          for (let i = startLoop; i < wordSegments.length; i++) {
+            const nextSegment = wordSegments[i];
             if (nextSegment.commitEnd <= segment.commitEnd) continue;
             if (isRangeFullyTyped(nextTypedIndices, nextSegment.start, nextSegment.commitEnd)) continue;
             return nextSegment.start;
@@ -944,11 +960,21 @@ export function TypingArea({
       ayahScores.set(mistake.ayahNumber, nextAyahScore);
       maxAyahScore = Math.max(maxAyahScore, nextAyahScore);
 
-      const blockIndex = blocks.findIndex((block) => {
-        const start = block.globalCheckOffset;
-        const end = start + block.checkString.length;
-        return mistake.globalIndex >= start && mistake.globalIndex < end;
-      });
+      let blockIndex = -1;
+      let low = 0;
+      let high = blocks.length - 1;
+      while (low <= high) {
+        const mid = (low + high) >> 1;
+        const b = blocks[mid];
+        const s = b.globalCheckOffset;
+        const e = s + b.checkString.length;
+        if (mistake.globalIndex >= s && mistake.globalIndex < e) {
+          blockIndex = mid;
+          break;
+        }
+        if (mistake.globalIndex < s) high = mid - 1;
+        else low = mid + 1;
+      }
 
       if (blockIndex === -1) return;
 
@@ -1060,6 +1086,8 @@ export function TypingArea({
         <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-4" />
 
         <div className="flex flex-col items-center gap-1 group/btn">
+          <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors block ${showWeakHeatmap ? 'text-orange-600 dark:text-orange-400' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>weak</span>
+
           <button
             onClick={() => setShowWeakHeatmap(prev => !prev)}
             className={`flex items-center justify-center w-11 h-11 rounded-full transition-all ${showWeakHeatmap ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
@@ -1067,7 +1095,6 @@ export function TypingArea({
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3c1.5 2 3 3.9 3 6.2A3 3 0 1 1 9 9.2C9 6.9 10.5 5 12 3Z" /><path d="M6.5 14.5A5.5 5.5 0 0 0 12 21a5.5 5.5 0 0 0 5.5-6.5c-.5-2-2-3.5-3.5-4.7.1 2.6-1.5 4.2-3.2 4.2-1.5 0-2.8-1-3.3-2.6-.7.8-1.2 1.8-1.5 3.1Z" /></svg>
           </button>
-          <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors block ${showWeakHeatmap ? 'text-orange-600 dark:text-orange-400' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>weak</span>
         </div>
 
         {/* PASSIVE STATS */}
@@ -1121,15 +1148,6 @@ export function TypingArea({
               )}
             </div>
 
-            {!isReviewMode && sessionMistakes > 0 && (
-              <button
-                onClick={handleResetSessionStats}
-                className="absolute -bottom-6 flex items-center justify-center w-6 h-6 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 rounded-full shadow-md text-neutral-400 hover:text-red-500 transition-all z-10 duration-200 hover:scale-110 active:scale-95 sm:opacity-0 group-hover/err:opacity-100"
-                title="Reset Session Mistakes"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
-              </button>
-            )}
           </div>
         </div>
       </div>
@@ -1192,17 +1210,19 @@ export function TypingArea({
                   const isTyped = typedIndices.has(globalIdx);
                   const isMistake = sessionMistakeIndices.has(globalIdx);
                   const isTarget = globalIdx === currentIndex && currentIndex < globalCheckString.length;
-                  const wordIndex = clusterMeta?.clusters[localIndex]?.wordIndex ?? -1;
-                  const wordIntensity = getWeakHeatIntensity(
-                    wordIndex >= 0 ? (weakHeatmapData.wordScores.get(`${block.ayahNumber}-${wordIndex}`) || 0) : 0,
+                  const wordIndex = showWeakHeatmap ? (clusterMeta?.clusters[localIndex]?.wordIndex ?? -1) : -1;
+                  const wordIntensity = (showWeakHeatmap && wordIndex >= 0) ? getWeakHeatIntensity(
+                    weakHeatmapData.wordScores.get(`${block.ayahNumber}-${wordIndex}`) || 0,
                     weakHeatmapData.maxWordScore
-                  );
-                  const letterIntensity = getWeakHeatIntensity(
+                  ) : 0;
+                  const letterIntensity = showWeakHeatmap ? getWeakHeatIntensity(
                     weakHeatmapData.letterScores.get(globalIdx) || 0,
                     weakHeatmapData.maxLetterScore
-                  );
+                  ) : 0;
 
-                  const heatmapStyle: CSSProperties | undefined = showWeakHeatmap ? {
+                  const hasHeat = showWeakHeatmap && (ayahIntensity > 0 || wordIntensity > 0 || letterIntensity > 0);
+
+                  const heatmapStyle: CSSProperties | undefined = hasHeat ? {
                     boxShadow: ayahIntensity > 0
                       ? `inset 0 -0.12em 0 rgba(234, 88, 12, ${0.06 + (ayahIntensity * 0.18)})`
                       : undefined,
@@ -1517,8 +1537,10 @@ export function TypingArea({
       </div>
 
       {/* DESKTOP-ONLY TOOLBAR */}
-      <div className="fixed right-6 top-1/2 -translate-y-1/2 hidden sm:flex flex-col items-center gap-4 bg-white/95 dark:bg-neutral-800/95 backdrop-blur-xl rounded-full shadow-2xl border border-neutral-200/50 dark:border-neutral-800/50 py-2 px-2 z-50 transition-all duration-500 w-[64px]">
+      <div className="fixed right-6 top-1/2 -translate-y-1/2 hidden sm:flex flex-col items-center gap-4 bg-white/95 dark:bg-neutral-800/95 backdrop-blur-xl rounded-full shadow-2xl border border-neutral-200/50 dark:border-neutral-800/50 py-6 px-2 z-50 transition-all duration-500 w-[64px]">
         <div className="flex flex-col items-center gap-1 group/btn">
+          <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors block ${visibilityMode === 'hidden' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>hide</span>
+
           <button
             onClick={() => setVisibilityMode('hidden')}
             className={`flex items-center justify-center w-11 h-11 rounded-full transition-all ${visibilityMode === 'hidden' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
@@ -1526,10 +1548,11 @@ export function TypingArea({
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" y1="2" x2="22" y2="22" /></svg>
           </button>
-          <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors block ${visibilityMode === 'hidden' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>hide</span>
         </div>
 
         <div className="flex flex-col items-center gap-1 group/btn">
+          <span className={`text-[9px] uppercase font-bold tracking-widest text-center transition-colors block ${visibilityMode === 'ayah' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>ayah</span>
+
           <button
             onClick={() => setVisibilityMode('ayah')}
             className={`flex items-center justify-center w-11 h-11 rounded-full transition-all ${visibilityMode === 'ayah' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
@@ -1537,10 +1560,11 @@ export function TypingArea({
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
           </button>
-          <span className={`text-[9px] uppercase font-bold tracking-widest text-center transition-colors block ${visibilityMode === 'ayah' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>ayah</span>
         </div>
 
         <div className="flex flex-col items-center gap-1 group/btn">
+          <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors block ${visibilityMode === 'all' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>all</span>
+
           <button
             onClick={() => setVisibilityMode('all')}
             className={`flex items-center justify-center w-11 h-11 rounded-full transition-all ${visibilityMode === 'all' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
@@ -1548,7 +1572,6 @@ export function TypingArea({
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
           </button>
-          <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors block ${visibilityMode === 'all' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>all</span>
         </div>
 
         <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-1 hidden sm:block" />
@@ -1564,6 +1587,8 @@ export function TypingArea({
         <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-1 hidden sm:block" />
 
         <div className="flex flex-col items-center gap-1 group/btn relative" data-rewrite-ayah="true">
+          <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400 group-hover/btn:text-neutral-600 transition-colors block">ayah</span>
+
           <button
             onClick={handleRestartAyah}
             className="flex items-center justify-center w-11 h-11 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all focus:outline-none"
@@ -1571,7 +1596,6 @@ export function TypingArea({
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18" /><path d="M12 7v5l3 3" /></svg>
           </button>
-          <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400 group-hover/btn:text-neutral-600 transition-colors block">ayah</span>
 
           <PopConfirm
             isOpen={modalType === "rewrite_ayah"}
@@ -1584,6 +1608,8 @@ export function TypingArea({
         </div>
 
         <div className="flex flex-col items-center gap-1 group/btn">
+          <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400 group-hover/btn:text-neutral-600 transition-colors block">rewrite</span>
+
           <button
             onClick={handleRestart}
             className="flex items-center justify-center w-11 h-11 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all focus:outline-none"
@@ -1591,7 +1617,6 @@ export function TypingArea({
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
           </button>
-          <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400 group-hover/btn:text-neutral-600 transition-colors block">rewrite</span>
         </div>
         <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-1 hidden sm:block" />
 
