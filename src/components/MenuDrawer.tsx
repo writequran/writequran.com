@@ -32,13 +32,13 @@ export function MenuDrawer({
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className={`fixed inset-0 bg-black/10 dark:bg-black/40 backdrop-blur-[2px] z-[150] transition-opacity duration-500 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={onClose}
       />
-      
+
       {/* Drawer */}
-      <div 
+      <div
         className={`fixed top-0 left-0 bottom-0 w-[280px] sm:w-80 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-2xl z-[160] shadow-2xl border-r border-neutral-200/50 dark:border-neutral-800/50 transition-all duration-500 ease-out transform ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="flex flex-col h-full">
@@ -66,7 +66,7 @@ export function MenuDrawer({
             <div className="my-4 h-px bg-neutral-100 dark:bg-neutral-800/50 mx-4" />
 
             <p className="px-4 text-[10px] uppercase font-bold text-neutral-400 tracking-widest mb-2">Preferences</p>
-            <button 
+            <button
               onClick={toggleTheme}
               className="flex items-center justify-between w-full px-4 py-3.5 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300"
             >
@@ -162,13 +162,7 @@ export function MenuDrawer({
               </button>
             </div>
 
-            <button 
-              onClick={() => { onClearHistory(); onClose(); }}
-              className="flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-red-50 dark:hover:bg-red-900/10 transition-all group text-red-600 dark:text-red-400 mt-1"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
-              <span className="font-semibold text-sm">Clear All History</span>
-            </button>
+
 
             <div className="my-4 h-px bg-neutral-100 dark:bg-neutral-800/50 mx-4" />
 
@@ -179,11 +173,7 @@ export function MenuDrawer({
             </button>
           </div>
 
-          {/* Footer */}
-          <div className="p-8 border-t border-neutral-100 dark:border-neutral-800/50 flex flex-col items-center gap-1.5 opacity-40">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#D6C19E]" />
-            <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-neutral-500 dark:text-neutral-400">WriteQuran V1.0</span>
-          </div>
+
         </div>
       </div>
     </>

@@ -1013,8 +1013,7 @@ export function TypingArea({
                 type="number"
                 min="1"
                 max="604"
-                className="no-spinner bg-neutral-50 dark:bg-neutral-800/50 hover:bg-white dark:hover:bg-neutral-800 w-full py-2.5 text-center text-lg font-bold text-neutral-800 dark:text-neutral-100 rounded-2xl border border-neutral-100 dark:border-neutral-800 group-hover/ctrl:border-[#D6C19E]/40 focus:border-[#D6C19E] focus:bg-white dark:focus:bg-neutral-900 focus:outline-none shadow-sm transition-all cursor-pointer"
-                defaultValue={currentBlock?.page || 1}
+                className="no-spinner bg-neutral-50 dark:bg-neutral-800/50 hover:bg-white dark:hover:bg-neutral-800 w-12 h-12 flex items-center justify-center text-center text-lg font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-100 dark:border-neutral-800 group-hover/ctrl:border-[#D6C19E]/40 focus:border-[#D6C19E] focus:bg-white dark:focus:bg-neutral-900 focus:outline-none shadow-sm transition-all cursor-pointer" defaultValue={currentBlock?.page || 1}
                 key={`page-${currentBlock?.page}`}
                 onBlur={(e) => {
                   const val = parseInt(e.target.value);
@@ -1039,8 +1038,7 @@ export function TypingArea({
                 type="number"
                 min="1"
                 max="30"
-                className="no-spinner bg-neutral-50 dark:bg-neutral-800/50 hover:bg-white dark:hover:bg-neutral-800 w-full py-2.5 text-center text-lg font-bold text-neutral-800 dark:text-neutral-100 rounded-2xl border border-neutral-100 dark:border-neutral-800 group-hover/ctrl:border-[#D6C19E]/40 focus:border-[#D6C19E] focus:bg-white dark:focus:bg-neutral-900 focus:outline-none shadow-sm transition-all cursor-pointer"
-                defaultValue={currentBlock?.juz || 1}
+                className="no-spinner bg-neutral-50 dark:bg-neutral-800/50 hover:bg-white dark:hover:bg-neutral-800 w-12 h-12 flex items-center justify-center text-center text-lg font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-100 dark:border-neutral-800 group-hover/ctrl:border-[#D6C19E]/40 focus:border-[#D6C19E] focus:bg-white dark:focus:bg-neutral-900 focus:outline-none shadow-sm transition-all cursor-pointer" defaultValue={currentBlock?.juz || 1}
                 key={`juz-${currentBlock?.juz}`}
                 onBlur={(e) => {
                   const val = parseInt(e.target.value);
@@ -1064,8 +1062,7 @@ export function TypingArea({
               <input
                 type="number"
                 min="1"
-                className="no-spinner bg-neutral-50 dark:bg-neutral-800/50 hover:bg-white dark:hover:bg-neutral-800 w-full py-2.5 text-center text-lg font-bold text-neutral-800 dark:text-neutral-100 rounded-2xl border border-neutral-100 dark:border-neutral-800 group-hover/ctrl:border-[#D6C19E]/40 focus:border-[#D6C19E] focus:bg-white dark:focus:bg-neutral-900 focus:outline-none shadow-sm transition-all cursor-pointer"
-                defaultValue={currentBlock?.ayahNumber || 1}
+                className="no-spinner bg-neutral-50 dark:bg-neutral-800/50 hover:bg-white dark:hover:bg-neutral-800 w-12 h-12 flex items-center justify-center text-center text-lg font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-100 dark:border-neutral-800 group-hover/ctrl:border-[#D6C19E]/40 focus:border-[#D6C19E] focus:bg-white dark:focus:bg-neutral-900 focus:outline-none shadow-sm transition-all cursor-pointer" defaultValue={currentBlock?.ayahNumber || 1}
                 key={`ayah-${currentBlock?.ayahNumber}`}
                 onBlur={(e) => {
                   const val = parseInt(e.target.value);
@@ -1086,11 +1083,11 @@ export function TypingArea({
         <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-4" />
 
         <div className="flex flex-col items-center gap-1 group/btn">
-          <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors block ${showWeakHeatmap ? 'text-orange-600 dark:text-orange-400' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>weak</span>
+          <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors block ${showWeakHeatmap ? 'text-[#D6C19E]' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>weak</span>
 
           <button
             onClick={() => setShowWeakHeatmap(prev => !prev)}
-            className={`flex items-center justify-center w-11 h-11 rounded-full transition-all ${showWeakHeatmap ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+            className={`flex items-center justify-center w-11 h-11 rounded-full transition-all border border-neutral-400/50 dark:border-neutral-700/50 ${showWeakHeatmap ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md shadow-[#D6C19E]/20' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             title="Show Weak Heatmap"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3c1.5 2 3 3.9 3 6.2A3 3 0 1 1 9 9.2C9 6.9 10.5 5 12 3Z" /><path d="M6.5 14.5A5.5 5.5 0 0 0 12 21a5.5 5.5 0 0 0 5.5-6.5c-.5-2-2-3.5-3.5-4.7.1 2.6-1.5 4.2-3.2 4.2-1.5 0-2.8-1-3.3-2.6-.7.8-1.2 1.8-1.5 3.1Z" /></svg>
@@ -1376,21 +1373,21 @@ export function TypingArea({
 
             <button
               onClick={() => setVisibilityMode('hidden')}
-              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all shrink-0 ${visibilityMode === 'hidden' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all border border-neutral-400/50 dark:border-neutral-700/50 shrink-0 ${visibilityMode === 'hidden' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" y1="2" x2="22" y2="22" /></svg>
             </button>
 
             <button
               onClick={() => setVisibilityMode('ayah')}
-              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all shrink-0 ${visibilityMode === 'ayah' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all border border-neutral-400/50 dark:border-neutral-700/50 shrink-0 ${visibilityMode === 'ayah' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
             </button>
 
             <button
               onClick={() => setVisibilityMode('all')}
-              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all shrink-0 ${visibilityMode === 'all' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all border border-neutral-400/50 dark:border-neutral-700/50 shrink-0 ${visibilityMode === 'all' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /></svg>
             </button>
@@ -1399,14 +1396,15 @@ export function TypingArea({
 
             <button
               onClick={() => setShowKeyboard(!showKeyboard)}
-              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all shrink-0 ${showKeyboard ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all border border-neutral-400/50 dark:border-neutral-700/50 shrink-0 ${showKeyboard ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
             </button>
+            <div className="w-px h-5 bg-neutral-200 dark:bg-neutral-700 shrink-0 mx-1" />
 
             <button
               onClick={() => setShowWeakHeatmap(prev => !prev)}
-              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all shrink-0 ${showWeakHeatmap ? 'bg-orange-500 text-white shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+              className={`flex items-center justify-center w-8 h-8 rounded-full transition-all border border-neutral-400/50 dark:border-neutral-700/50 shrink-0 ${showWeakHeatmap ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
               title="Show Weak Heatmap"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3c1.5 2 3 3.9 3 6.2A3 3 0 1 1 9 9.2C9 6.9 10.5 5 12 3Z" /><path d="M6.5 14.5A5.5 5.5 0 0 0 12 21a5.5 5.5 0 0 0 5.5-6.5c-.5-2-2-3.5-3.5-4.7.1 2.6-1.5 4.2-3.2 4.2-1.5 0-2.8-1-3.3-2.6-.7.8-1.2 1.8-1.5 3.1Z" /></svg>
@@ -1415,7 +1413,7 @@ export function TypingArea({
             <div className="relative shrink-0" data-rewrite-ayah="true">
               <button
                 onClick={handleRestartAyah}
-                className="flex items-center justify-center w-8 h-8 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all scale-100 active:scale-95"
+                className="flex items-center justify-center w-8 h-8 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all border border-neutral-400/50 dark:border-neutral-700/50 scale-100 active:scale-95"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18" /><path d="M12 7v5l3 3" /></svg>
               </button>
@@ -1431,7 +1429,7 @@ export function TypingArea({
 
             <button
               onClick={handleRestart}
-              className="flex items-center justify-center w-8 h-8 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all shrink-0 active:scale-95"
+              className="flex items-center justify-center w-8 h-8 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all border border-neutral-400/50 dark:border-neutral-700/50 shrink-0 active:scale-95"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
             </button>
@@ -1531,7 +1529,7 @@ export function TypingArea({
 
           <button
             onClick={() => setVisibilityMode('hidden')}
-            className={`flex items-center justify-center w-11 h-11 rounded-full transition-all ${visibilityMode === 'hidden' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+            className={`flex items-center justify-center w-11 h-11 rounded-full transition-all border border-neutral-400/50 dark:border-neutral-700/50 ${visibilityMode === 'hidden' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             title="Hidden"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" y1="2" x2="22" y2="22" /></svg>
@@ -1543,7 +1541,7 @@ export function TypingArea({
 
           <button
             onClick={() => setVisibilityMode('ayah')}
-            className={`flex items-center justify-center w-11 h-11 rounded-full transition-all ${visibilityMode === 'ayah' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+            className={`flex items-center justify-center w-11 h-11 rounded-full transition-all border border-neutral-400/50 dark:border-neutral-700/50 ${visibilityMode === 'ayah' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             title="Active Ayah"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
@@ -1555,7 +1553,7 @@ export function TypingArea({
 
           <button
             onClick={() => setVisibilityMode('all')}
-            className={`flex items-center justify-center w-11 h-11 rounded-full transition-all ${visibilityMode === 'all' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+            className={`flex items-center justify-center w-11 h-11 rounded-full transition-all border border-neutral-400/50 dark:border-neutral-700/50 ${visibilityMode === 'all' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
             title="Show All"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
@@ -1566,7 +1564,7 @@ export function TypingArea({
 
         <button
           onClick={() => setShowKeyboard(!showKeyboard)}
-          className={`flex items-center justify-center w-11 h-11 rounded-full transition-all focus:outline-none ${showKeyboard ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+          className={`flex items-center justify-center w-11 h-11 rounded-full transition-all border border-neutral-400/50 dark:border-neutral-700/50 focus:outline-none ${showKeyboard ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
           title="On-Screen Keyboard"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
@@ -1579,7 +1577,7 @@ export function TypingArea({
 
           <button
             onClick={handleRestartAyah}
-            className="flex items-center justify-center w-11 h-11 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all focus:outline-none"
+            className="flex items-center justify-center w-11 h-11 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all border border-neutral-400/50 dark:border-neutral-700/50 focus:outline-none"
             title="Rewrite Ayah"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18" /><path d="M12 7v5l3 3" /></svg>
@@ -1600,7 +1598,7 @@ export function TypingArea({
 
           <button
             onClick={handleRestart}
-            className="flex items-center justify-center w-11 h-11 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all focus:outline-none"
+            className="flex items-center justify-center w-11 h-11 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all border border-neutral-400/50 dark:border-neutral-700/50 focus:outline-none"
             title="Rewrite Surah"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
@@ -1610,7 +1608,7 @@ export function TypingArea({
 
         <button
           onClick={toggleTheme}
-          className="flex items-center justify-center w-11 h-11 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all focus:outline-none hidden sm:flex"
+          className="flex items-center justify-center w-11 h-11 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all border border-neutral-400/50 dark:border-neutral-700/50 focus:outline-none hidden sm:flex"
           title="Toggle Night/Day Mode"
         >
           {isDarkMode ? (
