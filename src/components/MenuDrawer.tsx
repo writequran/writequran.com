@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { useLanguage } from '@/lib/i18n';
 
 interface MenuDrawerProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export function MenuDrawer({
   onStartMemorizationTest,
   isMemorizationMode,
 }: MenuDrawerProps) {
+  const { t, language, setLanguage } = useLanguage();
   return (
     <>
       {/* Backdrop */}
@@ -39,7 +41,7 @@ export function MenuDrawer({
 
       {/* Drawer */}
       <div
-        className={`fixed top-0 left-0 bottom-0 w-[280px] sm:w-80 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-2xl z-[160] shadow-2xl border-r border-neutral-200/50 dark:border-neutral-800/50 transition-all duration-500 ease-out transform ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed top-0 bottom-0 w-[280px] sm:w-80 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-2xl z-[160] shadow-2xl border-neutral-200/50 dark:border-neutral-800/50 transition-all duration-500 ease-out transform ${language === 'ar' ? 'right-0 border-l' : 'left-0 border-r'} ${isOpen ? 'translate-x-0' : (language === 'ar' ? 'translate-x-full' : '-translate-x-full')}`}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
@@ -57,15 +59,26 @@ export function MenuDrawer({
 
           {/* Nav Items */}
           <div className="flex-1 overflow-y-auto py-6 px-4 flex flex-col gap-1">
-            <p className="px-4 text-[10px] uppercase font-bold text-neutral-400 tracking-widest mb-2">Account</p>
+            <p className="px-4 text-[10px] uppercase font-bold text-neutral-400 tracking-widest mb-2">{t("account")}</p>
             <button className="flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:text-[#D6C19E]"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-              <span className="font-semibold text-sm">User Profile</span>
+              <span className="font-semibold text-sm">{t("user_profile")}</span>
             </button>
 
             <div className="my-4 h-px bg-neutral-100 dark:bg-neutral-800/50 mx-4" />
 
-            <p className="px-4 text-[10px] uppercase font-bold text-neutral-400 tracking-widest mb-2">Preferences</p>
+            <div className="my-4 h-px bg-neutral-100 dark:bg-neutral-800/50 mx-4" />
+
+            <p className="px-4 text-[10px] uppercase font-bold text-neutral-400 tracking-widest mb-2">{t("preferences")}</p>
+            <button
+              onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
+              className="flex items-center justify-between w-full px-4 py-3.5 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300 mb-1"
+            >
+              <div className="flex items-center gap-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400 group-hover:text-blue-500 transition-colors"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+                <span className="font-semibold text-sm">{t("language_toggle")}</span>
+              </div>
+            </button>
             <button
               onClick={toggleTheme}
               className="flex items-center justify-between w-full px-4 py-3.5 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300"
@@ -76,7 +89,7 @@ export function MenuDrawer({
                 ) : (
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-500"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>
                 )}
-                <span className="font-semibold text-sm">{isDarkMode ? 'Light Mode' : 'Night Mode'}</span>
+                <span className="font-semibold text-sm">{isDarkMode ? t("light_mode") : t("night_mode")}</span>
               </div>
               <div className={`w-8 h-4 rounded-full relative transition-colors duration-300 ${isDarkMode ? 'bg-yellow-500/20' : 'bg-neutral-200 dark:bg-neutral-700'}`}>
                 <div className={`absolute top-0.5 w-3 h-3 rounded-full transition-all duration-300 ${isDarkMode ? 'right-0.5 bg-yellow-500 shadow-sm' : 'left-0.5 bg-white shadow-sm'}`} />
@@ -88,8 +101,8 @@ export function MenuDrawer({
                 <div className="flex items-center gap-4 text-neutral-600 dark:text-neutral-300">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#D6C19E]"><path d="M4 7h16" /><path d="M4 12h10" /><path d="M4 17h7" /></svg>
                   <div>
-                    <span className="font-semibold text-sm block">Typing Mode</span>
-                    <span className="text-[11px] text-neutral-400 dark:text-neutral-500">Choose how progress is checked</span>
+                    <span className="font-semibold text-sm block">{t("typing_mode")}</span>
+                    <span className="text-[11px] text-neutral-400 dark:text-neutral-500">{t("typing_mode_desc")}</span>
                   </div>
                 </div>
               </div>
@@ -100,7 +113,7 @@ export function MenuDrawer({
                     ? "bg-[#D6C19E] text-white border-[#D6C19E] shadow-sm"
                     : "bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E]/50"}`}
                 >
-                  Letter by Letter
+                  {t("letter_by_letter")}
                 </button>
                 <button
                   onClick={() => onTypingModeChange("word")}
@@ -108,7 +121,7 @@ export function MenuDrawer({
                     ? "bg-[#D6C19E] text-white border-[#D6C19E] shadow-sm"
                     : "bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E]/50"}`}
                 >
-                  Word by Word
+                  {t("word_by_word")}
                 </button>
               </div>
             </div>
@@ -166,10 +179,10 @@ export function MenuDrawer({
 
             <div className="my-4 h-px bg-neutral-100 dark:bg-neutral-800/50 mx-4" />
 
-            <p className="px-4 text-[10px] uppercase font-bold text-neutral-400 tracking-widest mb-2">Support</p>
+            <p className="px-4 text-[10px] uppercase font-bold text-neutral-400 tracking-widest mb-2">{t("support")}</p>
             <button className="flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:text-[#D6C19E]"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
-              <span className="font-semibold text-sm">Contact Us</span>
+              <span className="font-semibold text-sm">{t("contact_us")}</span>
             </button>
           </div>
 

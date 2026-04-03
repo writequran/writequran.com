@@ -6,6 +6,7 @@ import { MistakeRecord, ProgressStats, loadMistakeStats, loadProgressStats, save
 import { getStorage, setStorage } from "@/lib/storage";
 import { ConfirmationModal } from "./ConfirmationModal";
 import { PopConfirm } from "./PopConfirm";
+import { useLanguage } from "@/lib/i18n";
 
 // Helper to prevent verse markers from breaking to the next line
 const preserveMarkerSpacing = (str: string) => {
@@ -199,6 +200,7 @@ function MistakePopover({
   isReviewMode: boolean;
   variant?: "top" | "side";
 }) {
+  const { t } = useLanguage();
   if (!isOpen) return null;
 
   return (
@@ -217,7 +219,7 @@ function MistakePopover({
           className="flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all active:scale-95 text-right w-full whitespace-nowrap"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
-          Reset Session & History
+          {t("reset_session_history")}
         </button>
 
         {isReviewMode ? (
@@ -226,7 +228,7 @@ function MistakePopover({
             className="flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-xl transition-all active:scale-95 text-right w-full font-sans whitespace-nowrap"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-            Exit Review Mode
+            {t("exit_review_mode")}
           </button>
         ) : (
           <button
@@ -234,7 +236,7 @@ function MistakePopover({
             className="flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-xl transition-all active:scale-95 text-right w-full whitespace-nowrap"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.29 7 12 12 20.71 7" /><line x1="12" y1="22" x2="12" y2="12" /></svg>
-            Review Weak Spots
+            {t("review_weak_spots")}
           </button>
         )}
       </div>
@@ -266,6 +268,7 @@ export function TypingArea({
   isDarkMode,
   toggleTheme
 }: TypingAreaProps) {
+  const { t, language } = useLanguage();
   const pageData = useMemo(() => getSurah(surahNumber), [surahNumber]);
   const surahMeta = useMemo(() => getAllSurahsMeta().find(s => s.number === surahNumber), [surahNumber]);
   const surahName = surahMeta?.name;
@@ -1007,7 +1010,7 @@ export function TypingArea({
         <div className="flex flex-col gap-3 w-full items-center">
           {/* PAGE CONTROL */}
           <div className="flex flex-col items-center gap-1 w-full group/ctrl">
-            <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider transition-colors group-hover/ctrl:text-[#D6C19E] select-none">Page</span>
+            <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider transition-colors group-hover/ctrl:text-[#D6C19E] select-none">{t("page")}</span>
             <div className="relative w-full">
               <input
                 type="number"
@@ -1032,7 +1035,7 @@ export function TypingArea({
 
           {/* JUZ CONTROL */}
           <div className="flex flex-col items-center gap-1 w-full group/ctrl">
-            <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider transition-colors group-hover/ctrl:text-[#D6C19E] select-none">Juz</span>
+            <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider transition-colors group-hover/ctrl:text-[#D6C19E] select-none">{t("juz")}</span>
             <div className="relative w-full">
               <input
                 type="number"
@@ -1057,7 +1060,7 @@ export function TypingArea({
 
           {/* AYAH CONTROL */}
           <div className="flex flex-col items-center gap-1 w-full group/ctrl">
-            <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider transition-colors group-hover/ctrl:text-[#D6C19E] select-none">Ayah</span>
+            <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider transition-colors group-hover/ctrl:text-[#D6C19E] select-none">{t("ayah")}</span>
             <div className="relative w-full">
               <input
                 type="number"
@@ -1083,7 +1086,7 @@ export function TypingArea({
         <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-4" />
 
         <div className="flex flex-col items-center gap-1 group/btn">
-          <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors block ${showWeakHeatmap ? 'text-[#D6C19E]' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>weak</span>
+          <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors block ${showWeakHeatmap ? 'text-[#D6C19E]' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>{t("weak")}</span>
 
           <button
             onClick={() => setShowWeakHeatmap(prev => !prev)}
@@ -1096,8 +1099,8 @@ export function TypingArea({
 
         {/* PASSIVE STATS */}
         <div className="flex flex-col gap-6 w-full">
-          <div className="flex flex-col items-center gap-1 text-center">
-            <span className="text-[9px] uppercase font-bold text-green-500 tracking-widest select-none">Done</span>
+          <div className="flex flex-col items-center gap-1 group/done">
+            <span className="text-[9px] uppercase font-bold text-green-500 tracking-widest select-none">{t("done")}</span>
             <div className="flex items-center justify-center w-12 h-12 rounded-full border border-green-500/40 bg-green-50 dark:bg-green-900/10 shadow-sm mt-1">
               <span className="text-[20px] font-bold text-green-600 dark:text-green-400">
                 {((visualTypedCount / (globalCheckString.length || 1)) * 100).toFixed(0)}<span className="text-[10px] ml-0.5 opacity-50">%</span>
@@ -1107,7 +1110,7 @@ export function TypingArea({
 
           <div className={`flex flex-col items-center gap-1 text-center relative group/err min-h-[70px] transition-all duration-300 ${(!isReviewMode && sessionMistakes === 0 && hasWeakSpots) ? 'opacity-60 grayscale hover:grayscale-0 hover:opacity-100' : ''}`}>
             <span className={`text-[9px] uppercase font-bold tracking-widest select-none ${isReviewMode ? 'text-orange-500' : (sessionMistakes > 0 ? 'text-red-500/70' : 'text-neutral-400')}`}>
-              {isReviewMode ? 'Reviewing' : 'Errors'}
+              {isReviewMode ? t("reviewing") : t("errors")}
             </span>
 
             <div className={`flex items-center mt-1 relative ${isReviewMode ? 'flex-col gap-0.5' : 'gap-1.5'}`}>
@@ -1138,7 +1141,7 @@ export function TypingArea({
                 <button
                   onClick={onNextReviewSpot}
                   className="flex items-center justify-center w-7 h-7 rounded-full text-orange-500 hover:bg-orange-100 dark:hover:bg-orange-900/20 transition-all active:scale-90"
-                  title="Next Weak Spot"
+                  title={t("next_weak_spot")}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
                 </button>
@@ -1442,7 +1445,7 @@ export function TypingArea({
                   <button
                     onClick={onNextReviewSpot}
                     className="flex items-center justify-center w-6 h-6 rounded-full text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all active:scale-90"
-                    title="Next Weak Spot"
+                    title={t("next_weak_spot")}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
                   </button>
@@ -1509,13 +1512,13 @@ export function TypingArea({
                 className="px-4 sm:px-6 h-10 sm:h-12 bg-red-50/50 dark:bg-red-900/20 hover:bg-red-100/50 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-medium rounded-lg transition-all border border-red-100 dark:border-red-900/30 active:scale-95 flex items-center gap-2"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
-                <span className="hidden sm:inline">Backspace</span>
+                <span className="hidden sm:inline">{t("backspace")}</span>
               </button>
               <button
                 onClick={() => handleInput(" ")}
                 className="flex-[3] h-10 sm:h-12 bg-neutral-100/50 dark:bg-neutral-800/50 hover:bg-[#D6C19E]/30 dark:hover:bg-[#D6C19E]/20 text-[#2A2826] dark:text-neutral-100 rounded-lg transition-all border border-neutral-200 dark:border-neutral-700 active:scale-95 text-xs font-bold uppercase tracking-widest"
               >
-                SPACE
+                {t("space")}
               </button>
             </div>
           </div>
@@ -1525,36 +1528,36 @@ export function TypingArea({
       {/* DESKTOP-ONLY TOOLBAR */}
       <div className="fixed right-6 top-1/2 -translate-y-1/2 hidden sm:flex flex-col items-center gap-4 bg-white/95 dark:bg-neutral-800/95 backdrop-blur-xl rounded-full shadow-2xl border border-neutral-200/50 dark:border-neutral-800/50 py-6 px-2 z-50 transition-all duration-500 w-[64px]">
         <div className="flex flex-col items-center gap-1 group/btn">
-          <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors block ${visibilityMode === 'hidden' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>hide</span>
+          <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors block ${visibilityMode === 'hidden' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>{t("hide")}</span>
 
           <button
             onClick={() => setVisibilityMode('hidden')}
             className={`flex items-center justify-center w-11 h-11 rounded-full transition-all border border-neutral-400/50 dark:border-neutral-700/50 ${visibilityMode === 'hidden' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
-            title="Hidden"
+            title={t("hidden")}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" y1="2" x2="22" y2="22" /></svg>
           </button>
         </div>
 
         <div className="flex flex-col items-center gap-1 group/btn">
-          <span className={`text-[9px] uppercase font-bold tracking-widest text-center transition-colors block ${visibilityMode === 'ayah' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>ayah</span>
+          <span className={`text-[9px] uppercase font-bold tracking-widest text-center transition-colors block ${visibilityMode === 'ayah' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>{t("ayah_label")}</span>
 
           <button
             onClick={() => setVisibilityMode('ayah')}
             className={`flex items-center justify-center w-11 h-11 rounded-full transition-all border border-neutral-400/50 dark:border-neutral-700/50 ${visibilityMode === 'ayah' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
-            title="Active Ayah"
+            title={t("active_ayah")}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
           </button>
         </div>
 
         <div className="flex flex-col items-center gap-1 group/btn">
-          <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors block ${visibilityMode === 'all' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>all</span>
+          <span className={`text-[9px] uppercase font-bold tracking-widest transition-colors block ${visibilityMode === 'all' ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-400 group-hover/btn:text-neutral-600'}`}>{t("all_label")}</span>
 
           <button
             onClick={() => setVisibilityMode('all')}
             className={`flex items-center justify-center w-11 h-11 rounded-full transition-all border border-neutral-400/50 dark:border-neutral-700/50 ${visibilityMode === 'all' ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
-            title="Show All"
+            title={t("show_all")}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
           </button>
@@ -1565,7 +1568,7 @@ export function TypingArea({
         <button
           onClick={() => setShowKeyboard(!showKeyboard)}
           className={`flex items-center justify-center w-11 h-11 rounded-full transition-all border border-neutral-400/50 dark:border-neutral-700/50 focus:outline-none ${showKeyboard ? 'bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md' : 'text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
-          title="On-Screen Keyboard"
+          title={t("on_screen_keyboard")}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
         </button>
@@ -1573,12 +1576,12 @@ export function TypingArea({
         <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-1 hidden sm:block" />
 
         <div className="flex flex-col items-center gap-1 group/btn relative" data-rewrite-ayah="true">
-          <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400 group-hover/btn:text-neutral-600 transition-colors block">ayah</span>
+          <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400 group-hover/btn:text-neutral-600 transition-colors block">{t("ayah_label")}</span>
 
           <button
             onClick={handleRestartAyah}
             className="flex items-center justify-center w-11 h-11 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all border border-neutral-400/50 dark:border-neutral-700/50 focus:outline-none"
-            title="Rewrite Ayah"
+            title={t("rewrite_ayah")}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18" /><path d="M12 7v5l3 3" /></svg>
           </button>
@@ -1587,19 +1590,19 @@ export function TypingArea({
             isOpen={modalType === "rewrite_ayah"}
             onClose={() => setModalType(null)}
             onConfirm={confirmRestartAyah}
-            title="Rewrite current Ayah?"
-            confirmLabel="Yes"
-            cancelLabel="No"
+            title={t("rewrite_current_ayah_q")}
+            confirmLabel={t("yes")}
+            cancelLabel={t("no")}
           />
         </div>
 
         <div className="flex flex-col items-center gap-1 group/btn">
-          <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400 group-hover/btn:text-neutral-600 transition-colors block">rewrite</span>
+          <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400 group-hover/btn:text-neutral-600 transition-colors block">{t("rewrite")}</span>
 
           <button
             onClick={handleRestart}
             className="flex items-center justify-center w-11 h-11 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all border border-neutral-400/50 dark:border-neutral-700/50 focus:outline-none"
-            title="Rewrite Surah"
+            title={t("rewrite_surah")}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
           </button>
@@ -1609,7 +1612,7 @@ export function TypingArea({
         <button
           onClick={toggleTheme}
           className="flex items-center justify-center w-11 h-11 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all border border-neutral-400/50 dark:border-neutral-700/50 focus:outline-none hidden sm:flex"
-          title="Toggle Night/Day Mode"
+          title={t("toggle_theme")}
         >
           {isDarkMode ? (
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
@@ -1626,8 +1629,8 @@ export function TypingArea({
           confirmReset();
           onClearHistory?.();
         }}
-        title="Reset All Progress?"
-        message="This will clear your current session mistakes and your entire mistake history for this Surah."
+        title={t("reset_all_progress_q")}
+        message={t("reset_all_progress_body")}
       />
 
 
@@ -1636,8 +1639,8 @@ export function TypingArea({
         isOpen={modalType === "rewrite"}
         onClose={() => setModalType(null)}
         onConfirm={confirmRestart}
-        title="Rewrite Surah?"
-        message="This will reset your progress to the beginning of this Surah."
+        title={t("rewrite_surah_q")}
+        message={t("rewrite_surah_body")}
       />
     </div>
   );

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AuthWidget } from "@/components/AuthWidget";
 import { useEffect, useState } from "react";
 import { getStorage, setStorage } from "@/lib/storage";
+import { useLanguage } from "@/lib/i18n";
 
 const splitArabicGraphemes = (text: string) => {
   if (typeof Intl !== "undefined" && "Segmenter" in Intl) {
@@ -37,6 +38,8 @@ export default function LandingPage() {
   const [showMemoModal, setShowMemoModal] = useState(false);
   const [startSurah, setStartSurah] = useState(1);
   const [endSurah, setEndSurah] = useState(114);
+
+  const { t, language, setLanguage } = useLanguage();
 
   useEffect(() => {
     const saved = getStorage('theme');
@@ -123,6 +126,13 @@ export default function LandingPage() {
         </div>
         <div className="flex items-center gap-2 sm:gap-4">
           <button
+            onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
+            className="flex items-center justify-center w-10 h-10 rounded-full text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700"
+            title={t("language_toggle")}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+          </button>
+          <button
             onClick={toggleTheme}
             className="flex items-center justify-center w-10 h-10 rounded-full text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700"
           >
@@ -140,14 +150,14 @@ export default function LandingPage() {
       <main className="flex-1 relative z-10 flex flex-col items-center justify-center px-6 py-8 sm:py-16">
         <div className="text-center max-w-3xl mx-auto mb-16 animate-in slide-in-from-bottom-4 fade-in duration-700">
           <div className="inline-flex items-center justify-center px-4 py-1.5 mb-6 rounded-full border border-[#D6C19E]/30 bg-[#D6C19E]/10 text-sm font-semibold text-[#B18E4E] dark:text-[#D6C19E]">
-            Practice · Memorize · Review
+            {t("practice_memorize_review")}
           </div>
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 text-neutral-800 dark:text-neutral-50 leading-[1.1]">
-            Master the Quran,<br />One Letter at a Time
+            {t("master_the_quran_1")}<br />{t("master_the_quran_2")}
           </h2>
           <div className="mx-auto mt-8 w-full max-w-2xl rounded-[2rem] border border-[#D6C19E]/35 bg-white/80 dark:bg-neutral-900/70 px-5 py-5 sm:px-8 sm:py-6 shadow-[0_18px_60px_rgba(214,193,158,0.14)] backdrop-blur-xl">
             <div className="mb-3 flex items-center justify-between gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#B18E4E] dark:text-[#D6C19E]">
-              <span>Typing Revelation</span>
+              <span>{t("typing_revelation")}</span>
               <span>{currentHeroAyah.surah}</span>
             </div>
             <div
@@ -190,12 +200,12 @@ export default function LandingPage() {
             <div className="mb-8 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300">
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
             </div>
-            <h3 className="mb-3 text-2xl font-bold text-neutral-800 dark:text-neutral-100">Start Writing</h3>
+            <h3 className="mb-3 text-2xl font-bold text-neutral-800 dark:text-neutral-100">{t("start_writing")}</h3>
             <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
-              Practice spelling and building visual memory of the Mushaf by typing verse by verse.
+              {t("start_writing_desc")}
             </p>
             <div className="mt-8 flex items-center text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E] group-hover:gap-2 transition-all">
-              Begin Practice <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+              {t("begin_practice")} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 rtl:rotate-180"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
             </div>
           </Link>
 
@@ -206,12 +216,12 @@ export default function LandingPage() {
             <div className="mb-8 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300">
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /><path d="m15 5 4 4" /></svg>
             </div>
-            <h3 className="mb-3 text-2xl font-bold text-neutral-800 dark:text-neutral-100">Review Mistakes</h3>
+            <h3 className="mb-3 text-2xl font-bold text-neutral-800 dark:text-neutral-100">{t("review_mistakes")}</h3>
             <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
-              Clear your tracked weak spots using spaced repetition. Re-practice exactly where you stumbled.
+              {t("review_mistakes_desc")}
             </p>
             <div className="mt-8 flex items-center text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E] group-hover:gap-2 transition-all">
-              Check Status <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+              {t("check_status")} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 rtl:rotate-180"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
             </div>
           </Link>
 
@@ -222,12 +232,12 @@ export default function LandingPage() {
             <div className="mb-8 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300">
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path d="M12 11h4" /><path d="M12 16h4" /><path d="M8 11h.01" /><path d="M8 16h.01" /></svg>
             </div>
-            <h3 className="mb-3 text-2xl font-bold text-neutral-800 dark:text-neutral-100">Memorization Test</h3>
+            <h3 className="mb-3 text-2xl font-bold text-neutral-800 dark:text-neutral-100">{t("memorization_test")}</h3>
             <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
-              Pick a range of Surahs and jump into random Ayat to test your retention and recall.
+              {t("memorization_test_desc")}
             </p>
             <div className="mt-8 flex items-center text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E] group-hover:gap-2 transition-all">
-              Test Memory <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+              {t("test_memory")} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 rtl:rotate-180"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
             </div>
           </button>
 
@@ -237,18 +247,18 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="relative z-10 w-full text-center py-10 mt-auto text-xs font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500">
         <div className="flex justify-center gap-8 mb-4">
-          <Link href="/privacy" className="hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">Privacy</Link>
-          <Link href="/terms" className="hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">Terms</Link>
-          <Link href="/contact" className="hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">Contact</Link>
+          <Link href="/privacy" className="hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">{t("privacy")}</Link>
+          <Link href="/terms" className="hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">{t("terms")}</Link>
+          <Link href="/contact" className="hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">{t("contact")}</Link>
         </div>
-        <p>© {new Date().getFullYear()} WriteQuran.com All rights reserved.</p>
+        <p>© {new Date().getFullYear()} {t("all_rights_reserved")}</p>
       </footer>
 
       {showMemoModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="w-full max-w-md bg-white dark:bg-neutral-900 rounded-3xl p-6 md:p-8 shadow-2xl border border-[#D6C19E]/30 animate-in fade-in zoom-in duration-200">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-neutral-800 dark:text-neutral-100">Memorization Range</h3>
+              <h3 className="text-xl font-bold text-neutral-800 dark:text-neutral-100">{t("memorization_range")}</h3>
               <button onClick={() => setShowMemoModal(false)} className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
               </button>
@@ -256,7 +266,7 @@ export default function LandingPage() {
 
             <div className="flex flex-col gap-5 mb-8">
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-neutral-600 dark:text-neutral-400">From Surah:</label>
+                <label className="text-sm font-semibold text-neutral-600 dark:text-neutral-400">{t("from_surah")}</label>
                 <input
                   type="number" min="1" max="114" value={startSurah}
                   onChange={(e) => setStartSurah(parseInt(e.target.value) || 1)}
@@ -264,7 +274,7 @@ export default function LandingPage() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-neutral-600 dark:text-neutral-400">To Surah:</label>
+                <label className="text-sm font-semibold text-neutral-600 dark:text-neutral-400">{t("to_surah")}</label>
                 <input
                   type="number" min="1" max="114" value={endSurah}
                   onChange={(e) => setEndSurah(parseInt(e.target.value) || 114)}
@@ -277,7 +287,7 @@ export default function LandingPage() {
               onClick={handleStartMemorization}
               className="w-full py-4 rounded-xl bg-[#D6C19E] hover:bg-[#c2ad8a] text-white font-bold text-lg transition-colors shadow-lg shadow-[#D6C19E]/20"
             >
-              Start Testing
+              {t("start_testing")}
             </button>
           </div>
         </div>

@@ -11,6 +11,7 @@ import Link from "next/link";
 import { getAllSurahsMeta, getSurah, getLocationByPage, getLocationByJuz } from "@/lib/quran-data";
 import { WeakSpot, getNextWeakSpotDueAt, getTrackedWeakSpotsCount, getWeakSpots, markWeakSpotReviewed } from "@/lib/stats";
 import { getStorage, setStorage, getScopedKey, migrateLegacyLocalStorage } from "@/lib/storage";
+import { useLanguage } from "@/lib/i18n";
 
 export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "review" | "memorize" }) {
   const hasInitializedRef = useRef(false);
@@ -21,6 +22,7 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
   const [memorizationRange, setMemorizationRange] = useState({ startSurah: 1, endSurah: 114 });
   const [memorizationTarget, setMemorizationTarget] = useState<{ surahNumber: number; ayahNumber: number; nonce: number } | null>(null);
   const surahs = getAllSurahsMeta();
+  const { t, language, setLanguage } = useLanguage();
 
   useEffect(() => {
     migrateLegacyLocalStorage(); // Safely scrapes unprotected older JSON if applicable
@@ -331,7 +333,7 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
         <button
           onClick={() => setIsMenuOpen(true)}
           className="mr-2 sm:mr-4 p-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors flex items-center justify-center"
-          title="Open Menu"
+          title={t("open_menu")}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
         </button>
@@ -362,7 +364,7 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
             className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-full transition-all border border-neutral-200 dark:border-neutral-700 shadow-sm group"
           >
             <span className="text-[10px] sm:text-sm font-bold text-neutral-700 dark:text-neutral-200 uppercase tracking-widest truncate max-w-[150px] sm:max-w-none">
-              {isMemorizationMode ? "Memorization Test" : `${currentSurah?.number}. ${currentSurah?.englishName}`}
+              {isMemorizationMode ? t("memorization_test") : `${currentSurah?.number}. ${language === 'ar' ? currentSurah?.name : currentSurah?.englishName}`}
             </span>
             {!isMemorizationMode && (
               <svg
@@ -385,17 +387,17 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
               className="flex items-center gap-x-2 px-2.5 py-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-800 rounded-full shadow-sm text-[9px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-tighter"
             >
               <span className="flex items-center gap-1">
-                <span className="text-neutral-400 dark:text-neutral-500">Page</span>
+                <span className="text-neutral-400 dark:text-neutral-500">{t("page")}</span>
                 <span className="text-neutral-700 dark:text-neutral-200">{navInfo.page}</span>
               </span>
               <span className="w-px h-2.5 bg-neutral-100 dark:bg-neutral-700 mx-0.5" />
               <span className="flex items-center gap-1">
-                <span className="text-neutral-400 dark:text-neutral-500">Juz</span>
+                <span className="text-neutral-400 dark:text-neutral-500">{t("juz")}</span>
                 <span className="text-neutral-700 dark:text-neutral-200">{navInfo.juz}</span>
               </span>
               <span className="w-px h-2.5 bg-neutral-100 dark:bg-neutral-700 mx-0.5" />
               <span className="flex items-center gap-1">
-                <span className="text-neutral-400 dark:text-neutral-500">Ayah</span>
+                <span className="text-neutral-400 dark:text-neutral-500">{t("ayah")}</span>
                 <span className="text-neutral-700 dark:text-neutral-200">{navInfo.ayah}</span>
               </span>
             </button>
@@ -422,7 +424,7 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
                     autoFocus
                     type="number"
                     inputMode="numeric"
-                    placeholder={`Enter ${activeNavTab}...`}
+                    placeholder={`${t("enter")} ${t(activeNavTab)}...`}
                     className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#D6C19E] dark:text-neutral-100"
                     value={jumpInput}
                     onChange={(e) => setJumpInput(e.target.value)}
@@ -438,9 +440,9 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
                       handleJumpTo(activeNavTab, parseInt(jumpInput));
                       setIsNavOpen(false);
                     }}
-                    className="absolute right-1 top-1 bottom-1 px-3 bg-[#D6C19E] text-white rounded-lg text-[9px] font-bold"
+                    className="absolute rtl:left-1 ltr:right-1 top-1 bottom-1 px-3 bg-[#D6C19E] text-white rounded-lg text-[9px] font-bold"
                   >
-                    GO
+                    {t("go")}
                   </button>
                 </div>
               </div>
@@ -457,12 +459,12 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
                   <input
                     autoFocus
                     type="text"
-                    placeholder="Search Surah..."
-                    className="w-full pl-9 pr-4 py-2 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#D6C19E] transition-all dark:text-neutral-100"
+                    placeholder={t("search_surah")}
+                    className="w-full px-9 py-2 bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#D6C19E] transition-all dark:text-neutral-100 placeholder:rtl:text-right"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
-                  <svg className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="absolute rtl:right-3 ltr:left-3 top-2.5 w-4 h-4 text-neutral-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
                   </svg>
                 </div>
@@ -486,14 +488,14 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
                         : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
                         }`}
                     >
-                      <span className="text-xs font-mono mr-4 w-5 text-right opacity-50">{s.number}</span>
-                      <span className="text-sm">{s.englishName}</span>
-                      {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#D6C19E]" />}
+                      <span className="text-xs font-mono rtl:ml-4 ltr:mr-4 w-5 text-right opacity-50">{s.number}</span>
+                      <span className="text-sm">{language === 'ar' ? s.name : s.englishName}</span>
+                      {isActive && <div className="rtl:mr-auto ltr:ml-auto w-1.5 h-1.5 rounded-full bg-[#D6C19E]" />}
                     </button>
                   );
                 })}
                 {filteredSurahs.length === 0 && (
-                  <div className="px-6 py-12 text-center text-sm text-neutral-400 italic">No matches found</div>
+                  <div className="px-6 py-12 text-center text-sm text-neutral-400 italic">{t("no_matches")}</div>
                 )}
               </div>
             </div>
@@ -573,28 +575,21 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
       `}</style>
 
       <ConfirmationModal
-        isOpen={modalType === "review"}
-        onClose={() => setModalType(null)}
-        onConfirm={confirmStartReview}
-        title="Review Weak Spots?"
-        message="This will start a review session of your logged mistakes across all Surahs."
-      />
-
-      <ConfirmationModal
         isOpen={modalType === "clear"}
         onClose={() => setModalType(null)}
         onConfirm={confirmClearAll}
-        title="Clear All Mistake History?"
-        message="Are you sure you want to clear ALL mistake history for this account? This cannot be undone."
+        title={t("clear_stats")}
+        message={t("clear_stats_body")}
+        confirmLabel={t("reset_stats")}
       />
 
       <ConfirmationModal
         isOpen={modalType === "no-mistakes"}
         onClose={() => setModalType(null)}
         onConfirm={() => setModalType(null)}
-        title="No Mistakes Yet"
-        message="Keep practicing to build your stats. Once you make a mistake, it will appear here for review."
-        confirmLabel="OK"
+        title={t("no_mistakes")}
+        message={t("no_mistakes_body")}
+        confirmLabel={t("close")}
         showCancel={false}
       />
 
@@ -602,23 +597,28 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
         isOpen={modalType === "review-scheduled"}
         onClose={() => setModalType(null)}
         onConfirm={() => setModalType(null)}
-        title="Review Not Due Yet"
-        message={`Your weak ayat are on a spaced review schedule. ${(() => {
-          const nextDueAt = getNextWeakSpotDueAt();
-          if (!nextDueAt) return "Keep practicing and they will reappear automatically.";
-          return `Next review becomes due on ${new Date(nextDueAt).toLocaleDateString()}.`;
-        })()}`}
-        confirmLabel="OK"
+        title={t("review_scheduled")}
+        message={t("review_scheduled_body")}
+        confirmLabel={t("close")}
         showCancel={false}
+      />
+
+      <ConfirmationModal
+        isOpen={modalType === "review"}
+        onClose={() => setModalType(null)}
+        onConfirm={confirmStartReview}
+        title={t("review_weak_spots")}
+        message={t("review_scheduled_body")}
+        confirmLabel={t("review")}
       />
 
       <ConfirmationModal
         isOpen={modalType === "review-complete"}
         onClose={() => setModalType(null)}
         onConfirm={() => setModalType(null)}
-        title="Review Complete!"
-        message="MashAllah, you've completed your review session."
-        confirmLabel="Finish"
+        title={t("review_queue_completed")}
+        message={t("review_queue_completed_body")}
+        confirmLabel={t("close")}
         showCancel={false}
       />
     </div>

@@ -4,6 +4,7 @@ import { syncCloudToLocal, syncLocalToCloud } from '@/lib/sync-manager';
 import { setActiveUserId } from '@/lib/storage';
 import { createClient } from '@/utils/supabase/client';
 import { getURL } from '@/lib/get-url';
+import { useLanguage } from '@/lib/i18n';
 
 type AuthView = 'signin' | 'signup' | 'forgot' | 'check_email' | 'reset_sent' | 'set_password';
 
@@ -18,6 +19,7 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const authRef = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
 
   const supabase = createClient();
 
@@ -212,7 +214,7 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
         <div className="flex flex-col items-end">
           <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest leading-tight">{user.email.split('@')[0]}</span>
           <button onClick={forceSync} className="text-[10px] font-medium text-[#D6C19E] hover:text-[#c2ad8a] flex items-center gap-1 transition-colors">
-            {syncing ? 'Syncing...' : 'Synced'}
+            {syncing ? t("syncing") : t("synced")}
             <div className={`w-1.5 h-1.5 rounded-full ${syncing ? 'bg-orange-400 animate-pulse' : 'bg-green-500'}`} />
           </button>
         </div>
@@ -220,7 +222,7 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
           onClick={handleLogout}
           disabled={loading}
           className="w-7 h-7 flex items-center justify-center bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-red-300 hover:text-red-500 rounded-full text-neutral-400 transition-all shadow-sm shrink-0"
-          title="Sign Out"
+          title={t("sign_out")}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
         </button>
@@ -233,9 +235,9 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
     <div className="relative">
       <button
         onClick={() => { setIsOpen(!isOpen); if (!isOpen) { resetForm(); setView('signin'); } }}
-        className="px-2 sm:px-4 py-1 sm:py-1.5 text-[10px] sm:text-xs font-bold text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E] dark:hover:border-[#D6C19E] hover:bg-white dark:hover:bg-neutral-900 transition-all rounded-full ml-1 sm:ml-4 mr-0 sm:mr-2 shadow-sm"
+        className="px-2 sm:px-4 py-1 sm:py-1.5 text-[10px] sm:text-xs font-bold text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E] dark:hover:border-[#D6C19E] hover:bg-white dark:hover:bg-neutral-900 transition-all rounded-full ml-1 sm:ml-4 mr-0 sm:mr-2 shadow-sm whitespace-nowrap"
       >
-        Sign In
+        {t("sign_in")}
       </button>
 
       {isOpen && (
@@ -306,10 +308,10 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
           {/* ── Sign in ── */}
           {view === 'signin' && (
             <>
-              <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-3">Sign In to Sync</h3>
+              <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-3">{t("sign_in_to_sync")}</h3>
               <form onSubmit={handleSignIn} className="flex flex-col gap-2">
-                <input required type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
-                <input required type="password" placeholder="Password (min 6)" value={password} onChange={e => setPassword(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
+                <input required type="email" placeholder={t("email")} value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
+                <input required type="password" placeholder={t("password_min_6")} value={password} onChange={e => setPassword(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
                 {error && (
                   <div className="text-xs text-red-500">
                     <p>{error}</p>
@@ -322,14 +324,14 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
                 )}
                 {info && <p className="text-xs text-green-600">{info}</p>}
                 <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
-                  {loading ? 'Signing in...' : 'Sign In'}
+                  {loading ? t("loading") : t("sign_in")}
                 </button>
               </form>
               <button onClick={() => switchView('forgot')} className="w-full text-xs text-neutral-400 mt-2 hover:text-neutral-600 dark:hover:text-neutral-300">
-                Forgot password?
+                {t("forgot_password_q")}
               </button>
               <button onClick={() => switchView('signup')} className="w-full text-xs text-neutral-400 mt-1 hover:text-neutral-600 dark:hover:text-neutral-300">
-                Need an account? Sign up
+                {t("need_account_signup")}
               </button>
             </>
           )}
@@ -337,17 +339,17 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
           {/* ── Sign up ── */}
           {view === 'signup' && (
             <>
-              <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-3">Create Account</h3>
+              <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-3">{t("create_account")}</h3>
               <form onSubmit={handleSignUp} className="flex flex-col gap-2">
-                <input required type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
-                <input required type="password" placeholder="Password (min 6)" value={password} onChange={e => setPassword(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
+                <input required type="email" placeholder={t("email")} value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
+                <input required type="password" placeholder={t("password_min_6")} value={password} onChange={e => setPassword(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
                 {error && <p className="text-xs text-red-500">{error}</p>}
                 <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
-                  {loading ? 'Creating...' : 'Sign Up'}
+                  {loading ? t("loading") : t("sign_up")}
                 </button>
               </form>
               <button onClick={() => switchView('signin')} className="w-full text-xs text-neutral-400 mt-3 hover:text-neutral-600 dark:hover:text-neutral-300">
-                Have an account? Sign in
+                {t("have_account_signin")}
               </button>
             </>
           )}
