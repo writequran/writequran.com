@@ -114,6 +114,7 @@ export default function LandingPage() {
   const currentHeroAyah = heroAyat[activeAyah];
   const currentHeroAyahUnits = splitArabicGraphemes(currentHeroAyah.text);
   const revealProgress = currentHeroAyahUnits.length === 0 ? 0 : typedChars / currentHeroAyahUnits.length;
+  const footerRightsText = t("all_rights_reserved").replace(/writequran\.com\s*/i, "").trim();
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 transition-colors duration-500 font-sans relative overflow-hidden flex flex-col">
@@ -231,7 +232,7 @@ export default function LandingPage() {
             </div>
           </Link>
 
-          <button onClick={() => setShowMemoModal(true)} className="group relative overflow-hidden rounded-3xl bg-white dark:bg-neutral-800/80 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm text-left">
+          <button onClick={() => setShowMemoModal(true)} className={`group relative overflow-hidden rounded-3xl bg-white dark:bg-neutral-800/80 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm ${language === "ar" ? "text-right" : "text-left"}`}>
             <div className={`absolute -top-4 ${language === "ar" ? "-left-4" : "-right-4"} p-6 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-all duration-500 scale-50 group-hover:scale-150 rotate-180 group-hover:rotate-0`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#D6C19E" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
             </div>
@@ -257,7 +258,9 @@ export default function LandingPage() {
           <Link href="/terms" className="hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">{t("terms")}</Link>
           <Link href="/contact" className="hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">{t("contact")}</Link>
         </div>
-        <p>© {new Date().getFullYear()} {t("all_rights_reserved")}</p>
+        <p>
+          © <Link href="/" className="hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">WriteQuran.com</Link> {n(new Date().getFullYear())} {footerRightsText}
+        </p>
       </footer>
 
       {showMemoModal && (
