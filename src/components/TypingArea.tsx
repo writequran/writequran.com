@@ -22,6 +22,7 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
 
   const [cursorPos, setCursorPos] = useState({ top: 0, left: 0, width: 0, height: 0 });
   const targetRef = useRef<HTMLSpanElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (document.documentElement.classList.contains('dark') || window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -61,12 +62,17 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
   }, []);
 
   const updateCursorPos = useCallback(() => {
-    if (targetRef.current && currentIndex < globalCheckString.length) {
+    if (targetRef.current && containerRef.current && currentIndex < globalCheckString.length) {
+      const targetRect = targetRef.current.getBoundingClientRect();
+      const containerRect = containerRef.current.getBoundingClientRect();
+
+      // We anchor relative to the containerRef.current (which is the Mushaf page container)
+      // This is more robust than offsetTop when nested in grids/relative containers.
       setCursorPos({
-        top: targetRef.current.offsetTop,
-        left: targetRef.current.offsetLeft,
-        width: targetRef.current.offsetWidth,
-        height: targetRef.current.offsetHeight,
+        top: targetRect.top - containerRect.top,
+        left: targetRect.left - containerRect.left,
+        width: targetRect.width,
+        height: targetRect.height,
       });
     }
   }, [currentIndex, globalCheckString.length]);
@@ -141,17 +147,15 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const renderTextWithMarkers = (text: string, isTyped: boolean, isBlockActive: boolean) => {
+  const renderTextWithMarkers = (text: string, isTyped: boolean, isBlockActive: boolean, isHint: boolean = false) => {
     if (!text) return null;
     const parts = text.split(/(\u06DD[\u0660-\u0669]+)/g);
 
     return parts.map((part, i) => {
       const isMarker = part.startsWith('\u06DD');
 
-      // Hint mode visibility check (for this specific block)
-      const showHint = visibilityMode === "all" || (visibilityMode === "ayah" && isBlockActive);
-
       if (isMarker) {
+        // Markers are always gold and masked in both layers for perfect visual continuity
         const digits = part.slice(1);
         const markerMaskBackground = "bg-[#FDFBF7] dark:bg-[#121212]";
         const markerColor = "text-[#C1A063]";
@@ -169,18 +173,18 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
       let colorClass = "";
       let maskClass = "";
 
-      if (isTyped) {
-        // FOREGROUND: Strong Black + Page Mask (to hide guide lines beneath typed text)
-        colorClass = "text-[#2A2826] dark:text-neutral-100 font-medium";
-        maskClass = "bg-[#FDFBF7] dark:bg-[#121212]";
-      } else if (showHint) {
-        // HINT: Soft Grey + No Mask (to let guide lines show through)
+      if (isHint) {
+        // HINT LAYER: Stable grey, no mask, intact shaping
         colorClass = "text-neutral-400/60 dark:text-neutral-600/50";
         maskClass = "bg-transparent";
+      } else if (isTyped) {
+        // FOREGROUND REVEALED: Strong black + Page Mask
+        colorClass = "text-[#2A2826] dark:text-neutral-100 font-medium";
+        maskClass = "bg-[#FDFBF7] dark:bg-[#121212]";
       } else {
-        // HIDDEN: Transparent + No Mask
+        // FOREGROUND HIDDEN/TARGET: Transparent (lets hint layer show through)
         colorClass = "text-transparent";
-        maskClass = "bg-transparent";
+        maskClass = "bg-transparent transition-none";
       }
 
       return (
@@ -209,7 +213,10 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
       >
         <div className="absolute inset-2 border-2 border-[#D6C19E] dark:border-neutral-700 opacity-50 pointer-events-none" />
 
-        <div className="w-full text-[2.2rem] leading-[2.8] text-center mushaf-rules relative">
+        <div 
+          ref={containerRef}
+          className="w-full text-[2.2rem] leading-[2.8] text-center mushaf-rules relative"
+        >
           {pageData.preBismillah && (
             <div className="w-full text-[#2A2826] dark:text-neutral-100 flex justify-center mb-4 select-none">
               <span>{pageData.preBismillah}</span>
@@ -225,49 +232,52 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
             const isFinished = currentIndex >= blockEnd;
             const isFuture = currentIndex < blockStart;
 
-            if (isFinished) {
-              return (
-                <span key={blockIndex} className="inline whitespace-normal">
-                  {renderTextWithMarkers(block.displayString, true, isActiveAyah)}
-                  {" "}
-                </span>
-              );
-            }
-
-            if (isFuture) {
-              return (
-                <span key={blockIndex} className="inline whitespace-normal">
-                  {renderTextWithMarkers(block.displayString, false, isActiveAyah)}
-                  {" "}
-                </span>
-              );
-            }
-
-            const localIndex = currentIndex - blockStart;
-            const currentDisplayIndex = block.mapping[localIndex] || 0;
-
-            const typedSpan = block.displayString.slice(0, currentDisplayIndex);
-            const targetSpan = block.displayString.slice(currentDisplayIndex, currentDisplayIndex + 1);
-            const untypedSpan = block.displayString.slice(currentDisplayIndex + 1);
-
-            const ZWJ = '\u200D';
-            const typedWithJ = typedSpan ? typedSpan + ZWJ : "";
-            const targetWithJ = ZWJ + targetSpan + ZWJ;
-            const untypedWithJ = untypedSpan ? ZWJ + untypedSpan : "";
-
-            const showTargetHint = visibilityMode === "all" || (visibilityMode === "ayah" && isActiveAyah);
-            const targetColorClass = showTargetHint ? "text-neutral-400/60 dark:text-neutral-600/50" : "text-transparent";
-
-            const renderTyped = renderTextWithMarkers(typedWithJ, true, isActiveAyah);
-            const renderUntyped = renderTextWithMarkers(untypedWithJ, false, isActiveAyah);
+            const showHint = visibilityMode === "all" || (visibilityMode === "ayah" && isActiveAyah);
 
             return (
-              <span key={blockIndex} className="inline whitespace-normal">
-                {renderTyped}
-                <span ref={targetRef} className={`relative select-none pointer-events-none ${targetColorClass}`}>
-                  {targetWithJ}
+              <span key={blockIndex} className="inline-grid grid-cols-1 grid-rows-1 align-baseline relative">
+                {/* LAYER 1: STABLE HINT (Background) - Static run to provide block bounds */}
+                <span className="col-start-1 row-start-1 pointer-events-none select-none h-fit">
+                  {showHint ? renderTextWithMarkers(block.displayString, false, true, true) : null}
                 </span>
-                {renderUntyped}
+
+                {/* LAYER 2: INTERACTION (Foreground) - Overlay with transparent current parts */}
+                <span className="col-start-1 row-start-1 z-10 h-fit">
+                  {isFinished ? (
+                    renderTextWithMarkers(block.displayString, true, isActiveAyah, false)
+                  ) : isFuture ? (
+                    renderTextWithMarkers(block.displayString, false, isActiveAyah, false)
+                  ) : (
+                    <>
+                      {(() => {
+                        const localIndex = currentIndex - blockStart;
+                        const currentDisplayIndex = block.mapping[localIndex] || 0;
+
+                        const typedSpan = block.displayString.slice(0, currentDisplayIndex);
+                        const targetChar = block.displayString[currentDisplayIndex] || "";
+                        const untypedSpan = block.displayString.slice(currentDisplayIndex + 1);
+
+                        const ZWJ = '\u200D';
+                        const typedWithJ = typedSpan ? typedSpan + ZWJ : "";
+                        const targetWithJ = ZWJ + targetChar + ZWJ;
+                        const untypedWithJ = untypedSpan ? ZWJ + untypedSpan : "";
+
+                        return (
+                          <span className="inline">
+                            {renderTextWithMarkers(typedWithJ, true, isActiveAyah, false)}
+                            <span 
+                              ref={targetRef} 
+                              className="relative text-transparent select-none pointer-events-none inline"
+                            >
+                              {targetWithJ}
+                            </span>
+                            {renderTextWithMarkers(untypedWithJ, false, isActiveAyah, false)}
+                          </span>
+                        );
+                      })()}
+                    </>
+                  )}
+                </span>
                 {" "}
               </span>
             );
@@ -276,12 +286,12 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
           {currentIndex < globalCheckString.length && (
             <div
               className="absolute pointer-events-none flex items-center justify-center transition-all duration-75 text-[2.5rem] leading-[2.6] z-10"
-              /*dynamic cursor for size of letter*/
+              /* dynamic cursor for size of letter */
               style={{
-                top: cursorPos.top,
+                top: cursorPos.top + (cursorPos.height * 0.1),
                 left: cursorPos.left - 5,
                 width: cursorPos.width + 10,
-                height: cursorPos.height,
+                height: cursorPos.height * 0.8,
               }}
             /* fixed cursor width 
             style={{
