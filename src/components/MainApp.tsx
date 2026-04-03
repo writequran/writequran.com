@@ -139,15 +139,13 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
   }, [isMounted]);
 
   useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      setStorage('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      setStorage('theme', 'light');
-    }
-    window.dispatchEvent(new Event('quran-typing-theme-change'));
-  }, [isDarkMode]);
+    const handleThemeEvent = () => {
+      setIsDarkMode(document.documentElement.classList.contains('dark'));
+    };
+    window.addEventListener('quran-typing-theme-change', handleThemeEvent);
+    // ThemeInitializer syncs the DOM on storage changes, we just read the DOM class.
+    return () => window.removeEventListener('quran-typing-theme-change', handleThemeEvent);
+  }, []);
 
   useEffect(() => {
     setStorage("typing_mode", typingMode);
@@ -157,7 +155,17 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
     setStorage("memorization_range", JSON.stringify(memorizationRange));
   }, [memorizationRange]);
 
-  const toggleTheme = () => setIsDarkMode(prev => !prev);
+  const toggleTheme = () => {
+    const next = !isDarkMode;
+    setIsDarkMode(next);
+    setStorage('theme', next ? 'dark' : 'light');
+    if (next) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    window.dispatchEvent(new Event('quran-typing-theme-change'));
+  };
 
   const pickRandomAyahInRange = useCallback((startSurah: number, endSurah: number) => {
     const normalizedStart = Math.min(startSurah, endSurah);

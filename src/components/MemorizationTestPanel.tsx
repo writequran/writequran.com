@@ -59,7 +59,7 @@ export function MemorizationTestPanel({
   onExit,
   onNext,
 }: MemorizationTestPanelProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const surahMeta = useMemo(() => getAllSurahsMeta().find((surah) => surah.number === surahNumber), [surahNumber]);
   const pageData = useMemo(() => getSurah(surahNumber), [surahNumber]);
   const ayahBlock = useMemo(
@@ -158,8 +158,12 @@ export function MemorizationTestPanel({
 
       const targetWord = ayahBlock.checkString.slice(segment.start, segment.end);
       if (char === "Backspace") {
-        if (wordDraft.length === 0) {
+        if (wrongChar) {
           setWrongChar(null);
+          return;
+        }
+
+        if (wordDraft.length === 0) {
           return;
         }
 
@@ -279,12 +283,12 @@ export function MemorizationTestPanel({
       <div className="mb-6 sm:mb-8 rounded-[28px] border border-[#D6C19E]/40 bg-white/90 dark:bg-neutral-900/90 shadow-xl backdrop-blur-sm p-4 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#C1A063]">Memorization Test</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#C1A063]">{t("memorization_test")}</p>
             <h2 className="mt-2 text-xl sm:text-2xl font-bold text-neutral-800 dark:text-neutral-100">
-              {surahMeta?.number}. {surahMeta?.englishName}
+              {surahMeta?.number}. {language === 'ar' ? surahMeta?.name : surahMeta?.englishName}
             </h2>
             <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-              Ayah {ayahBlock.ayahNumber} · {typingMode === "word" ? "Word by Word" : "Letter by Letter"}
+              {t("ayah")} {ayahBlock.ayahNumber} · {typingMode === "word" ? t("word_by_word") : t("letter_by_letter")}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -303,7 +307,7 @@ export function MemorizationTestPanel({
               onClick={onExit}
               className="px-4 py-2.5 rounded-full border border-neutral-200 dark:border-neutral-700 text-sm font-semibold text-neutral-600 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
             >
-              Exit
+              {t("exit")}
             </button>
           </div>
         </div>
@@ -311,12 +315,12 @@ export function MemorizationTestPanel({
 
       {isComplete && (
         <div className="mb-6 rounded-[28px] border border-green-200 dark:border-green-900/60 bg-green-50/90 dark:bg-green-950/30 shadow-lg p-5 sm:p-6">
-          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-green-600 dark:text-green-400">Result</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-green-600 dark:text-green-400">{t("result")}</p>
           <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <div className="text-4xl font-bold text-green-700 dark:text-green-300">{score}%</div>
               <p className="mt-1 text-sm text-green-700/80 dark:text-green-200/80">
-                {mistakeIndices.size} weak position{mistakeIndices.size === 1 ? "" : "s"} · {wrongAttempts} wrong attempt{wrongAttempts === 1 ? "" : "s"}
+                {mistakeIndices.size} {t("weak_positions")} · {wrongAttempts} {t("wrong_attempts")}
               </p>
             </div>
             <div className="flex gap-2">
@@ -324,13 +328,13 @@ export function MemorizationTestPanel({
                 onClick={onNext}
                 className="px-4 py-2.5 rounded-full bg-[#D6C19E] text-white text-sm font-semibold shadow-sm hover:brightness-105 transition-all"
               >
-                New Random Ayah
+                {t("new_random_ayah")}
               </button>
               <button
                 onClick={onExit}
                 className="px-4 py-2.5 rounded-full border border-neutral-200 dark:border-neutral-700 text-sm font-semibold text-neutral-700 dark:text-neutral-200 hover:bg-white/70 dark:hover:bg-neutral-800 transition-all"
               >
-                Finish
+                {t("finish")}
               </button>
             </div>
           </div>
@@ -366,7 +370,7 @@ export function MemorizationTestPanel({
               <span
                 key={localIndex}
                 ref={isTarget ? targetRef : null}
-                className={`inline transition-colors duration-200 ${isTyped || isDraftTyped
+                className={`inline transition-colors duration-200 ${isTyped
                   ? isMistakeTarget
                     ? "text-[#faac23]"
                     : "text-[#2A2826] dark:text-neutral-100"
@@ -420,11 +424,12 @@ export function MemorizationTestPanel({
         <div className="w-full sm:hidden border-b border-neutral-100 dark:border-neutral-800/50 py-1.5 px-1 bg-white/50 dark:bg-neutral-800/50">
           <div className="flex items-center justify-center gap-0 relative">
             <div className="absolute left-1 flex items-center justify-center min-w-[2.5rem] h-8 px-2 rounded-full border border-[#D6C19E]/40 bg-[#D6C19E]/10 shadow-sm">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#9C7B41]">Test</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#9C7B41]">{t("test")}</span>
             </div>
             <button
               onClick={() => setShowKeyboard((value) => !value)}
               className={`flex items-center justify-center w-8 h-8 rounded-full transition-all shrink-0 ${showKeyboard ? "bg-[#D6C19E] text-white dark:text-neutral-900 shadow-sm" : "text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800"}`}
+              title={t("on_screen_keyboard")}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
             </button>
@@ -470,7 +475,7 @@ export function MemorizationTestPanel({
                 className="px-4 sm:px-6 h-10 sm:h-12 bg-red-50/50 dark:bg-red-900/20 hover:bg-red-100/50 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-medium rounded-lg transition-all border border-red-100 dark:border-red-900/30 active:scale-95 flex items-center gap-2"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
-                <span className="hidden sm:inline">Backspace</span>
+                <span className="hidden sm:inline">{t("backspace")}</span>
               </button>
               <button
                 onClick={() => handleInput(" ")}
@@ -487,22 +492,22 @@ export function MemorizationTestPanel({
         <button
           onClick={() => setShowKeyboard((value) => !value)}
           className={`flex items-center justify-center w-11 h-11 rounded-full transition-all ${showKeyboard ? "bg-[#D6C19E] text-white dark:text-neutral-900 shadow-md" : "text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800"}`}
-          title="On-Screen Keyboard"
+          title={t("on_screen_keyboard")}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="M6 8h.01" /><path d="M10 8h.01" /><path d="M14 8h.01" /><path d="M18 8h.01" /><path d="M6 12h.01" /><path d="M18 12h.01" /><path d="M7 16h10" /><path d="M10 12h.01" /><path d="M14 12h.01" /></svg>
         </button>
         <div className="w-8 h-[1px] bg-neutral-400 dark:bg-neutral-600 my-1 hidden sm:block" />
         <div className="flex flex-col items-center gap-1">
           <div className="flex items-center justify-center w-11 h-11 rounded-full border border-[#D6C19E]/40 bg-[#D6C19E]/10 text-[#9C7B41] font-bold text-[10px] uppercase tracking-widest">
-            test
+            {t("test")}
           </div>
-          <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400">mode</span>
+          <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400">{t("mode")}</span>
         </div>
         <div className="flex flex-col items-center gap-1">
           <div className="flex items-center justify-center w-11 h-11 rounded-full border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 font-bold text-sm">
             {wrongAttempts}
           </div>
-          <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400">wrong</span>
+          <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400">{t("wrong")}</span>
         </div>
       </div>
     </div>

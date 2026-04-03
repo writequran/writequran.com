@@ -59,6 +59,12 @@ export default function LandingPage() {
     }
 
     setIsMounted(true);
+
+    const handleThemeEvent = () => {
+      setIsDarkMode(document.documentElement.classList.contains('dark'));
+    };
+    window.addEventListener('quran-typing-theme-change', handleThemeEvent);
+    return () => window.removeEventListener('quran-typing-theme-change', handleThemeEvent);
   }, []);
 
   useEffect(() => {

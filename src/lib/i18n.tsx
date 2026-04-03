@@ -123,6 +123,13 @@ export const translations: Record<Language, Dictionary> = {
     "resume": "Resume",
     "stats": "Stats",
     "weak": "Weak",
+    "result": "Result",
+    "finish": "Finish",
+    "test": "Test",
+    "mode": "Mode",
+    "wrong": "Wrong",
+    "weak_positions": "weak position(s)",
+    "wrong_attempts": "wrong attempt(s)",
 
     // AuthWidget
     "sign_in": "Sign In",
@@ -260,6 +267,13 @@ export const translations: Record<Language, Dictionary> = {
     "resume": "متابعة",
     "stats": "الإحصائيات",
     "weak": "ضعف",
+    "result": "النتيجة",
+    "finish": "إنهاء",
+    "test": "اختبار",
+    "mode": "وضع",
+    "wrong": "خطأ",
+    "weak_positions": "تنبيه ضعف",
+    "wrong_attempts": "محاولة خاطئة",
 
     // AuthWidget
     "sign_in": "تسجيل الدخول",
