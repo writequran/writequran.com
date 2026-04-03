@@ -124,20 +124,20 @@ export default function LandingPage() {
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-[#D6C19E]/10 blur-[120px] rounded-full pointer-events-none" />
 
       {/* Header */}
-      <header className="relative z-50 w-full max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
+      <header className="relative z-50 w-full px-8 py-6 sm:px-10 lg:px-12 flex justify-between items-center">
         <div className="flex items-center gap-3">
           {/* <div className="relative w-10 h-10 rounded-full overflow-hidden shadow-sm border border-[#D6C19E]/30 bg-white dark:bg-neutral-800">
             <Image src="/icon.svg" alt="WriteQuran Logo" fill className="object-contain p-1" />
           </div> */}
           <h1 className="text-xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100 font-gabriela">Write Quran</h1>
         </div>
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-0 sm:gap-0">
           <button
             onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
             className="flex items-center justify-center w-10 h-10 rounded-full text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700"
             title={t("language_toggle")}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /><path d="M2 12h20" /></svg>
           </button>
           <button
             onClick={toggleTheme}
@@ -259,7 +259,7 @@ export default function LandingPage() {
           <Link href="/contact" className="hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">{t("contact")}</Link>
         </div>
         <p>
-          © <Link href="/" className="hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">WriteQuran.com</Link> {n(new Date().getFullYear())} {footerRightsText}
+          © <Link href="/" className="inline-flex items-center text-[#B18E4E] dark:text-[#D6C19E] hover:text-[#9d7a3e] dark:hover:text-[#e3be72] transition-colors">WriteQuran.com</Link> {n(new Date().getFullYear())} {footerRightsText}
         </p>
       </footer>
 
@@ -277,7 +277,7 @@ export default function LandingPage() {
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-neutral-600 dark:text-neutral-400">{t("from_surah")}</label>
                 <input
-                  type="text" inputMode="numeric" 
+                  type="text" inputMode="numeric"
                   value={n(startSurah)}
                   onChange={(e) => {
                     const parsed = parseInt(e.target.value.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d).toString()));
@@ -289,7 +289,7 @@ export default function LandingPage() {
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-neutral-600 dark:text-neutral-400">{t("to_surah")}</label>
                 <input
-                  type="text" inputMode="numeric" 
+                  type="text" inputMode="numeric"
                   value={n(endSurah)}
                   onChange={(e) => {
                     const parsed = parseInt(e.target.value.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d).toString()));
