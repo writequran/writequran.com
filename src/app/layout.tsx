@@ -24,6 +24,9 @@ const scheherazade = Scheherazade_New({
 export const metadata: Metadata = {
   title: "WriteQuran",
   description: "Practice writing and memorizing the Qur'an, letter by letter.",
+  icons: {
+    icon: "/wq.svg",
+  },
 };
 
 export default function RootLayout({
