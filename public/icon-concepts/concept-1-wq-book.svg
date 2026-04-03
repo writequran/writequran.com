@@ -1,0 +1,9 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="1024" rx="164" fill="#D6C19E"/>
+  <rect x="132" y="158" width="760" height="708" rx="84" fill="white" fill-opacity="0.08"/>
+  <path d="M282 290C346 290 398 340 410 404V714C398 678 346 650 282 650C246 650 212 658 182 674V384C212 324 246 290 282 290Z" fill="white"/>
+  <path d="M742 290C678 290 626 340 614 404V714C626 678 678 650 742 650C778 650 812 658 842 674V384C812 324 778 290 742 290Z" fill="white"/>
+  <path d="M512 394V714" stroke="#D6C19E" stroke-width="18" stroke-linecap="round"/>
+  <text x="512" y="575" text-anchor="middle" fill="#D6C19E" font-size="250" font-family="Avenir Next, SF Pro Display, Helvetica, Arial, sans-serif" font-weight="700" letter-spacing="-20">WQ</text>
+  <circle cx="512" cy="204" r="18" fill="white" fill-opacity="0.75"/>
+</svg>

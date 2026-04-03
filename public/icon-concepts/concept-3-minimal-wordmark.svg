@@ -1,0 +1,9 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="1024" rx="164" fill="#D6C19E"/>
+  <rect x="156" y="188" width="712" height="648" rx="96" stroke="white" stroke-opacity="0.34" stroke-width="10"/>
+  <text x="512" y="410" text-anchor="middle" fill="white" font-size="154" font-family="Avenir Next, SF Pro Display, Helvetica, Arial, sans-serif" font-weight="500" letter-spacing="-6">Write</text>
+  <text x="512" y="610" text-anchor="middle" fill="white" font-size="234" font-family="Playfair Display, Georgia, Times New Roman, serif" font-weight="700" letter-spacing="-6">Q</text>
+  <text x="604" y="610" text-anchor="start" fill="white" font-size="200" font-family="Playfair Display, Georgia, Times New Roman, serif" font-weight="600" letter-spacing="-6">uran</text>
+  <path d="M541 304V442" stroke="white" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="541" cy="274" r="13" fill="white"/>
+</svg>

@@ -62,10 +62,10 @@ export default function LandingPage() {
       {/* Header */}
       <header className="relative z-50 w-full max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-full overflow-hidden shadow-sm border border-[#D6C19E]/30 bg-white dark:bg-neutral-800">
+          {/* <div className="relative w-10 h-10 rounded-full overflow-hidden shadow-sm border border-[#D6C19E]/30 bg-white dark:bg-neutral-800">
             <Image src="/icon.svg" alt="WriteQuran Logo" fill className="object-contain p-1" />
-          </div>
-          <h1 className="text-xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100">WriteQuran</h1>
+          </div> */}
+          <h1 className="text-xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100 font-gabriela">Write Quran</h1>
         </div>
         <div className="flex items-center gap-2 sm:gap-4">
           <button

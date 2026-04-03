@@ -327,7 +327,7 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
     <div className="flex flex-col min-h-screen bg-neutral-100 dark:bg-neutral-900 transition-colors duration-300">
       {/* FIXED TOP HEADER */}
       <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 flex items-center px-3 sm:px-6 z-[100] shadow-sm">
-        <button 
+        <button
           onClick={() => setIsMenuOpen(true)}
           className="mr-2 sm:mr-4 p-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors flex items-center justify-center"
           title="Open Menu"
@@ -336,15 +336,15 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
         </button>
 
         <Link href="/" className="hidden sm:flex flex-none sm:flex-1 items-center gap-2.5 group cursor-pointer">
-          <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-sm border border-[#D6C19E]/30">
+          {/* <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-sm border border-[#D6C19E]/30">
             <Image
               src="/icon.svg"
               alt="WriteQuran Logo"
               fill
               className="object-contain"
             />
-          </div>
-          <h1 className="text-lg font-bold text-neutral-800 dark:text-neutral-100 tracking-tight hidden sm:block">WriteQuran</h1>
+          </div> */}
+          <h1 className="text-xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100 font-gabriela">Write Quran</h1>
         </Link>
 
         {/* ABSOLUTE CENTERED SURAH SELECTOR */}
@@ -481,8 +481,8 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
                         setSearchQuery("");
                       }}
                       className={`w-full flex items-center px-5 py-3 transition-colors ${isActive
-                          ? 'bg-[#D6C19E]/10 text-[#D6C19E] font-bold'
-                          : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
+                        ? 'bg-[#D6C19E]/10 text-[#D6C19E] font-bold'
+                        : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
                         }`}
                     >
                       <span className="text-xs font-mono mr-4 w-5 text-right opacity-50">{s.number}</span>
@@ -541,12 +541,12 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
             />
           )}
 
-          <MenuDrawer 
-            isOpen={isMenuOpen} 
-            onClose={() => setIsMenuOpen(false)} 
-            isDarkMode={isDarkMode} 
-            toggleTheme={toggleTheme} 
-            onClearHistory={() => setModalType("clear")} 
+          <MenuDrawer
+            isOpen={isMenuOpen}
+            onClose={() => setIsMenuOpen(false)}
+            isDarkMode={isDarkMode}
+            toggleTheme={toggleTheme}
+            onClearHistory={() => setModalType("clear")}
             typingMode={typingMode}
             onTypingModeChange={setTypingMode}
             memorizationRange={memorizationRange}

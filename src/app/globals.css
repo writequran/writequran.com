@@ -83,6 +83,10 @@
     direction: rtl;
   }
 
+  .font-gabriela {
+    font-family: var(--font-gabriela), serif;
+  }
+
   .ltr {
     direction: ltr;
   }

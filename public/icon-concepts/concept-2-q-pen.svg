@@ -1,0 +1,9 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="1024" rx="164" fill="#D6C19E"/>
+  <circle cx="512" cy="474" r="238" stroke="white" stroke-width="40"/>
+  <path d="M654 640L764 754" stroke="white" stroke-width="40" stroke-linecap="round"/>
+  <path d="M508 250L508 706" stroke="white" stroke-width="14" stroke-linecap="round" stroke-opacity="0.88"/>
+  <path d="M476 222L540 222L522 274C518 289 496 289 492 274L476 222Z" fill="white"/>
+  <path d="M474 708H542" stroke="white" stroke-width="14" stroke-linecap="round" stroke-opacity="0.88"/>
+  <text x="512" y="890" text-anchor="middle" fill="white" font-size="120" font-family="Playfair Display, Georgia, Times New Roman, serif" font-weight="700" letter-spacing="2">Quran</text>
+</svg>
