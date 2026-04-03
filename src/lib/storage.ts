@@ -1,3 +1,5 @@
+const GLOBAL_KEYS = new Set(['theme']);
+
 export function getStoragePrefix() {
   if (typeof window === 'undefined') return 'quran_typing_anon';
   const userId = localStorage.getItem('quran_typing_active_user_id');
@@ -5,7 +7,9 @@ export function getStoragePrefix() {
 }
 
 export function getScopedKey(key: string) {
-  // We keep 'theme' global if we want, but for full isolation as requested, everything is prefixed:
+  if (GLOBAL_KEYS.has(key)) {
+    return `quran_typing_${key}`;
+  }
   return `${getStoragePrefix()}_${key}`;
 }
 

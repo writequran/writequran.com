@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { AuthWidget } from "@/components/AuthWidget";
 import { useEffect, useState } from "react";
 import { getStorage, setStorage } from "@/lib/storage";
@@ -93,6 +92,7 @@ export default function LandingPage() {
     } else {
       document.documentElement.classList.remove('dark');
     }
+    window.dispatchEvent(new Event('quran-typing-theme-change'));
   };
 
   const handleStartMemorization = () => {

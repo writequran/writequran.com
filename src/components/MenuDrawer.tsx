@@ -45,10 +45,10 @@ export function MenuDrawer({
           {/* Header */}
           <div className="p-6 pt-8 border-b border-neutral-100 dark:border-neutral-800/50 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#D6C19E]/20 flex items-center justify-center border border-[#D6C19E]/30 shadow-sm">
+              {/* <div className="w-8 h-8 rounded-full bg-[#D6C19E]/20 flex items-center justify-center border border-[#D6C19E]/30 shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D6C19E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18" /><path d="M12 7v5l3 3" /></svg>
-              </div>
-              <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-100 tracking-tight">WriteQuran</h2>
+              </div> */}
+              <h1 className="text-xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100 font-gabriela">Write Quran</h1>
             </div>
             <button onClick={onClose} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
@@ -74,7 +74,7 @@ export function MenuDrawer({
                 {isDarkMode ? (
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-500"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-500"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>
                 )}
                 <span className="font-semibold text-sm">{isDarkMode ? 'Light Mode' : 'Night Mode'}</span>
               </div>
@@ -113,7 +113,7 @@ export function MenuDrawer({
               </div>
             </div>
 
-            <div className="px-4 py-3.5 rounded-2xl bg-neutral-50/80 dark:bg-neutral-800/70 border border-neutral-100 dark:border-neutral-700/70 mt-1">
+            {/* <div className="px-4 py-3.5 rounded-2xl bg-neutral-50/80 dark:bg-neutral-800/70 border border-neutral-100 dark:border-neutral-700/70 mt-1">
               <div className="flex items-start gap-4 text-neutral-600 dark:text-neutral-300 mb-3">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#D6C19E] mt-0.5"><path d="M9 3H5a2 2 0 0 0-2 2v4" /><path d="M15 3h4a2 2 0 0 1 2 2v4" /><path d="M21 15v4a2 2 0 0 1-2 2h-4" /><path d="M3 15v4a2 2 0 0 0 2 2h4" /><path d="M9 9h6v6H9z" /></svg>
                 <div>
@@ -160,7 +160,7 @@ export function MenuDrawer({
               >
                 {isMemorizationMode ? "New Random Ayah" : "Start Test"}
               </button>
-            </div>
+            </div> */}
 
 
 

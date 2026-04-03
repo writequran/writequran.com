@@ -144,6 +144,7 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
       document.documentElement.classList.remove('dark');
       setStorage('theme', 'light');
     }
+    window.dispatchEvent(new Event('quran-typing-theme-change'));
   }, [isDarkMode]);
 
   useEffect(() => {

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Scheherazade_New, Gabriela } from "next/font/google";
+import { ThemeInitializer } from "@/components/ThemeInitializer";
 import "./globals.css";
 
 const inter = Inter({
@@ -32,6 +33,7 @@ export default function RootLayout({
   return (
     <html lang="ar" translate="no" className={`${inter.variable} ${scheherazade.variable} ${gabriela.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-neutral-50 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-50 font-sans transition-colors duration-300">
+        <ThemeInitializer />
         {children}
       </body>
     </html>
