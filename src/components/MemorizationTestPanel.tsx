@@ -375,7 +375,6 @@ export function MemorizationTestPanel({
               </span>
             );
           })}
-
           {!isComplete && currentIndex < ayahBlock.checkString.length && (
             <div
               className="absolute pointer-events-none flex items-center justify-center transition-all duration-75 text-[2.5rem] leading-[2.6] z-10"

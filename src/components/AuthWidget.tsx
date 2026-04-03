@@ -222,7 +222,7 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
           className="w-7 h-7 flex items-center justify-center bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-red-300 hover:text-red-500 rounded-full text-neutral-400 transition-all shadow-sm shrink-0"
           title="Sign Out"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
         </button>
       </div>
     );
@@ -231,8 +231,8 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
   // ─── Signed-out / auth panel ─────────────────────────────────────────────────
   return (
     <div className="relative">
-      <button 
-        onClick={() => { setIsOpen(!isOpen); if (!isOpen) { resetForm(); setView('signin'); } }} 
+      <button
+        onClick={() => { setIsOpen(!isOpen); if (!isOpen) { resetForm(); setView('signin'); } }}
         className="px-2 sm:px-4 py-1 sm:py-1.5 text-[10px] sm:text-xs font-bold text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E] dark:hover:border-[#D6C19E] hover:bg-white dark:hover:bg-neutral-900 transition-all rounded-full ml-1 sm:ml-4 mr-0 sm:mr-2 shadow-sm"
       >
         Sign In
@@ -241,118 +241,118 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
       {isOpen && (
         <div ref={authRef} className="absolute top-full mt-2 w-72 right-0 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl p-4 z-50">
 
-            {/* ── Check your email ── */}
-            {view === 'check_email' && (
-              <div className="flex flex-col gap-3 text-center">
-                <p className="text-2xl">📬</p>
-                <p className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Check your email</p>
-                <p className="text-xs text-neutral-500">We sent a confirmation link to <strong>{email}</strong>. Click it to complete signup.</p>
-                <button onClick={handleResendConfirmation} disabled={loading} className="text-xs text-[#D6C19E] hover:text-[#c2ad8a] mt-1 transition-colors">
-                  {loading ? 'Resending...' : 'Resend confirmation email'}
-                </button>
+          {/* ── Check your email ── */}
+          {view === 'check_email' && (
+            <div className="flex flex-col gap-3 text-center">
+              <p className="text-2xl">📬</p>
+              <p className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Check your email</p>
+              <p className="text-xs text-neutral-500">We sent a confirmation link to <strong>{email}</strong>. Click it to complete signup.</p>
+              <button onClick={handleResendConfirmation} disabled={loading} className="text-xs text-[#D6C19E] hover:text-[#c2ad8a] mt-1 transition-colors">
+                {loading ? 'Resending...' : 'Resend confirmation email'}
+              </button>
+              {error && <p className="text-xs text-red-500">{error}</p>}
+              {info && <p className="text-xs text-green-600">{info}</p>}
+              <button onClick={() => switchView('signin')} className="text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 mt-1">Back to sign in</button>
+            </div>
+          )}
+
+          {/* ── Set new password (PASSWORD_RECOVERY flow) ── */}
+          {view === 'set_password' && (
+            <>
+              <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-1">Set New Password</h3>
+              <p className="text-xs text-neutral-500 mb-3">Choose a new password for your account.</p>
+              <form onSubmit={handleSetPassword} className="flex flex-col gap-2">
+                <input
+                  required
+                  type="password"
+                  placeholder="New password (min 6)"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200"
+                />
                 {error && <p className="text-xs text-red-500">{error}</p>}
+                <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
+                  {loading ? 'Updating...' : 'Set New Password'}
+                </button>
+              </form>
+            </>
+          )}
+
+          {/* ── Reset email sent ── */}
+          {view === 'reset_sent' && (
+            <div className="flex flex-col gap-3 text-center">
+              <p className="text-2xl">✉️</p>
+              <p className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Reset link sent</p>
+              <p className="text-xs text-neutral-500">Check your inbox at <strong>{email}</strong> for the password reset link.</p>
+              <button onClick={() => switchView('signin')} className="text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 mt-2">Back to sign in</button>
+            </div>
+          )}
+
+          {/* ── Forgot password ── */}
+          {view === 'forgot' && (
+            <>
+              <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-3">Reset Password</h3>
+              <form onSubmit={handleForgotPassword} className="flex flex-col gap-2">
+                <input required type="email" placeholder="Your email address" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
+                {error && <p className="text-xs text-red-500">{error}</p>}
+                <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
+                  {loading ? 'Sending...' : 'Send Reset Link'}
+                </button>
+              </form>
+              <button onClick={() => switchView('signin')} className="w-full text-xs text-neutral-400 mt-3 hover:text-neutral-600 dark:hover:text-neutral-300">Back to sign in</button>
+            </>
+          )}
+
+          {/* ── Sign in ── */}
+          {view === 'signin' && (
+            <>
+              <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-3">Sign In to Sync</h3>
+              <form onSubmit={handleSignIn} className="flex flex-col gap-2">
+                <input required type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
+                <input required type="password" placeholder="Password (min 6)" value={password} onChange={e => setPassword(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
+                {error && (
+                  <div className="text-xs text-red-500">
+                    <p>{error}</p>
+                    {error.includes('confirm') && (
+                      <button type="button" onClick={handleResendConfirmation} disabled={loading} className="text-[#D6C19E] hover:text-[#c2ad8a] underline mt-1 block">
+                        Resend confirmation email
+                      </button>
+                    )}
+                  </div>
+                )}
                 {info && <p className="text-xs text-green-600">{info}</p>}
-                <button onClick={() => switchView('signin')} className="text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 mt-1">Back to sign in</button>
-              </div>
-            )}
-
-            {/* ── Set new password (PASSWORD_RECOVERY flow) ── */}
-            {view === 'set_password' && (
-              <>
-                <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-1">Set New Password</h3>
-                <p className="text-xs text-neutral-500 mb-3">Choose a new password for your account.</p>
-                <form onSubmit={handleSetPassword} className="flex flex-col gap-2">
-                  <input
-                    required
-                    type="password"
-                    placeholder="New password (min 6)"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200"
-                  />
-                  {error && <p className="text-xs text-red-500">{error}</p>}
-                  <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
-                    {loading ? 'Updating...' : 'Set New Password'}
-                  </button>
-                </form>
-              </>
-            )}
-
-            {/* ── Reset email sent ── */}
-            {view === 'reset_sent' && (
-              <div className="flex flex-col gap-3 text-center">
-                <p className="text-2xl">✉️</p>
-                <p className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Reset link sent</p>
-                <p className="text-xs text-neutral-500">Check your inbox at <strong>{email}</strong> for the password reset link.</p>
-                <button onClick={() => switchView('signin')} className="text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 mt-2">Back to sign in</button>
-              </div>
-            )}
-
-            {/* ── Forgot password ── */}
-            {view === 'forgot' && (
-              <>
-                <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-3">Reset Password</h3>
-                <form onSubmit={handleForgotPassword} className="flex flex-col gap-2">
-                  <input required type="email" placeholder="Your email address" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
-                  {error && <p className="text-xs text-red-500">{error}</p>}
-                  <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
-                    {loading ? 'Sending...' : 'Send Reset Link'}
-                  </button>
-                </form>
-                <button onClick={() => switchView('signin')} className="w-full text-xs text-neutral-400 mt-3 hover:text-neutral-600 dark:hover:text-neutral-300">Back to sign in</button>
-              </>
-            )}
-
-            {/* ── Sign in ── */}
-            {view === 'signin' && (
-              <>
-                <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-3">Sign In to Sync</h3>
-                <form onSubmit={handleSignIn} className="flex flex-col gap-2">
-                  <input required type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
-                  <input required type="password" placeholder="Password (min 6)" value={password} onChange={e => setPassword(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
-                  {error && (
-                    <div className="text-xs text-red-500">
-                      <p>{error}</p>
-                      {error.includes('confirm') && (
-                        <button type="button" onClick={handleResendConfirmation} disabled={loading} className="text-[#D6C19E] hover:text-[#c2ad8a] underline mt-1 block">
-                          Resend confirmation email
-                        </button>
-                      )}
-                    </div>
-                  )}
-                  {info && <p className="text-xs text-green-600">{info}</p>}
-                  <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
-                    {loading ? 'Signing in...' : 'Sign In'}
-                  </button>
-                </form>
-                <button onClick={() => switchView('forgot')} className="w-full text-xs text-neutral-400 mt-2 hover:text-neutral-600 dark:hover:text-neutral-300 text-right">
-                  Forgot password?
+                <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
+                  {loading ? 'Signing in...' : 'Sign In'}
                 </button>
-                <button onClick={() => switchView('signup')} className="w-full text-xs text-neutral-400 mt-1 hover:text-neutral-600 dark:hover:text-neutral-300">
-                  Need an account? Sign up
-                </button>
-              </>
-            )}
+              </form>
+              <button onClick={() => switchView('forgot')} className="w-full text-xs text-neutral-400 mt-2 hover:text-neutral-600 dark:hover:text-neutral-300">
+                Forgot password?
+              </button>
+              <button onClick={() => switchView('signup')} className="w-full text-xs text-neutral-400 mt-1 hover:text-neutral-600 dark:hover:text-neutral-300">
+                Need an account? Sign up
+              </button>
+            </>
+          )}
 
-            {/* ── Sign up ── */}
-            {view === 'signup' && (
-              <>
-                <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-3">Create Account</h3>
-                <form onSubmit={handleSignUp} className="flex flex-col gap-2">
-                  <input required type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
-                  <input required type="password" placeholder="Password (min 6)" value={password} onChange={e => setPassword(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
-                  {error && <p className="text-xs text-red-500">{error}</p>}
-                  <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
-                    {loading ? 'Creating...' : 'Sign Up'}
-                  </button>
-                </form>
-                <button onClick={() => switchView('signin')} className="w-full text-xs text-neutral-400 mt-3 hover:text-neutral-600 dark:hover:text-neutral-300">
-                  Have an account? Sign in
+          {/* ── Sign up ── */}
+          {view === 'signup' && (
+            <>
+              <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-3">Create Account</h3>
+              <form onSubmit={handleSignUp} className="flex flex-col gap-2">
+                <input required type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
+                <input required type="password" placeholder="Password (min 6)" value={password} onChange={e => setPassword(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
+                {error && <p className="text-xs text-red-500">{error}</p>}
+                <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
+                  {loading ? 'Creating...' : 'Sign Up'}
                 </button>
-              </>
-            )}
+              </form>
+              <button onClick={() => switchView('signin')} className="w-full text-xs text-neutral-400 mt-3 hover:text-neutral-600 dark:hover:text-neutral-300">
+                Have an account? Sign in
+              </button>
+            </>
+          )}
 
-          </div>
+        </div>
       )}
     </div>
   );

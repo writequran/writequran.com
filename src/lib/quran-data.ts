@@ -76,7 +76,7 @@ export const findCheckIndexByDisplayOffset = (block: MushafBlock, displayOffset:
 
 import quranDataRaw from '../data/quran-uthmani.json';
 
-// Bypass TS index checks for the rapid integration of the cloud dataset
+// Bypass TS index checks for the locally bundled Tanzil-derived dataset
 const quranJson = quranDataRaw as any;
 
 export interface QuranSurahMeta {
@@ -94,6 +94,11 @@ export interface MushafBlock {
   ayahNumber: number;
   page: number;
   juz: number;
+  sajda: false | {
+    id: number;
+    recommended: boolean;
+    obligatory: boolean;
+  };
 }
 
 export interface SurahTypingData {
@@ -148,7 +153,7 @@ export const getSurah = (surahNumber: number): SurahTypingData => {
   for (const ayah of surah.ayahs) {
     let rawText = ayah.text;
     
-    // Explicit Uthmani Basmala sequence prefix explicitly injected by API cloud
+    // Tanzil ships Basmala inline on Ayah 1 for non-Fatihah/non-Tawbah surahs
     const bismillah = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ";
     
     // Exclude Basmala natively for non-Fatihah non-Tawbah Surahs
@@ -161,7 +166,12 @@ export const getSurah = (surahNumber: number): SurahTypingData => {
       }
     }
     
-    // Explicitly pair standard verses manually with official Ayah markers 
+    // Keep sajda sign as a display-only marker that appears before the ayah end marker.
+    if (ayah.sajda) {
+      rawText += ` \u06E9`;
+    }
+
+    // Explicitly pair standard verses manually with official Ayah markers.
     rawText += ` \u06DD${toArabicDigits(ayah.numberInSurah)}`;
 
     const { displayString, checkString, mapping } = prepareTypingData(rawText);
@@ -175,6 +185,7 @@ export const getSurah = (surahNumber: number): SurahTypingData => {
       ayahNumber: ayah.numberInSurah,
       page: ayah.page,
       juz: ayah.juz,
+      sajda: ayah.sajda,
     });
     
     globalCheckString += checkString;
@@ -193,14 +204,15 @@ export const getSurah = (surahNumber: number): SurahTypingData => {
  * Audits the full dataset across three layers:
  *
  *   1. Raw source  — the unmodified ayah text from quran-uthmani.json
- *   2. Display text — raw source + only the two approved display-only transformations:
+ *   2. Display text — raw source + only the approved display-only transformations:
  *                     (a) Basmala separation for non-Fatihah/non-Tawbah surahs
- *                     (b) Ayah-end marker + Arabic-Indic digit appended per ayah
+ *                     (b) Sajda sign appended for sajda ayat
+ *                     (c) Ayah-end marker + Arabic-Indic digit appended per ayah
  *   3. Check string — normalized form (diacritics stripped, Alef variants collapsed)
  *                     used exclusively for keystroke validation, never displayed
  *
  * Does NOT claim byte-for-byte identity with the raw JSON — the display text differs
- * from the raw source by those two intentional approved transformations only.
+ * from the raw source by those intentional approved transformations only.
  */
 export const verifyQuranIntegrity = (): boolean => {
   const meta = getAllSurahsMeta();
@@ -214,12 +226,15 @@ export const verifyQuranIntegrity = (): boolean => {
     for (let i = 0; i < rawSurah.ayahs.length; i++) {
       const rawSource = rawSurah.ayahs[i].text;
 
-      // Build expected display text using only the two approved transformations.
+      // Build expected display text using only the approved display transformations.
       let expectedDisplay = rawSource;
       if (surahMeta.number !== 1 && surahMeta.number !== 9 && i === 0) {
         if (expectedDisplay.startsWith(bismillah)) {
           expectedDisplay = expectedDisplay.slice(bismillah.length).trim();
         }
+      }
+      if (rawSurah.ayahs[i].sajda) {
+        expectedDisplay += ` \u06E9`;
       }
       expectedDisplay += ` \u06DD${toArabicDigits(rawSurah.ayahs[i].numberInSurah)}`;
 
@@ -253,7 +268,7 @@ export const verifyQuranIntegrity = (): boolean => {
   if (passed) {
     console.log("[PASS] All 3 layers verified:");
     console.log("  • Raw source: preserved faithfully as the base");
-    console.log("  • Display text: raw source + Basmala separation + ayah markers (only approved changes)");
+    console.log("  • Display text: raw source + Basmala separation + sajda sign + ayah markers (only approved changes)");
     console.log("  • Check string: normalized subset of display text, never used in display layer");
   }
   return passed;

@@ -1,11 +1,19 @@
 # Qur'an Dataset Origin
 
-The `quran-uthmani.json` file in this directory was sourced from the AlQuran Cloud open data API.
+The `quran-uthmani.json` file in this directory is now sourced directly from the Tanzil project and reshaped locally into the same JSON structure the app already expects.
 
-- **Source API:** AlQuran.cloud V1
-- **Source URL:** `https://api.alquran.cloud/v1/quran/quran-uthmani`
-- **Edition:** Uthmani Script (`quran-uthmani`)
-- **Date Downloaded:** March 25, 2026
+- **Primary Text Source:** Tanzil Uthmani XML export
+- **Primary Metadata Source:** Tanzil Quran Metadata XML
+- **Text Version:** `1.0.2`
+- **Metadata Version:** `1.0`
+- **Source URLs:** `https://tanzil.net/download`, `https://tanzil.net/docs/Quran_Metadata`
+- **Date Rebuilt:** April 3, 2026
+
+## Provenance Notes
+
+- The file name remains `quran-uthmani.json` for compatibility with the existing import path.
+- Tanzil data was converted into the app's current shape so no UI or typing logic changes were required.
+- The Tanzil terms require preserving attribution and linking back to `tanzil.net` when the text is used in an application.
 
 ---
 
