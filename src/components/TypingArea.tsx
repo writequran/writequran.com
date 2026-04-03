@@ -268,7 +268,7 @@ export function TypingArea({
   isDarkMode,
   toggleTheme
 }: TypingAreaProps) {
-  const { t, language } = useLanguage();
+  const { t, language, n } = useLanguage();
   const pageData = useMemo(() => getSurah(surahNumber), [surahNumber]);
   const surahMeta = useMemo(() => getAllSurahsMeta().find(s => s.number === surahNumber), [surahNumber]);
   const surahName = surahMeta?.name;
@@ -1013,18 +1013,20 @@ export function TypingArea({
             <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider transition-colors group-hover/ctrl:text-[#D6C19E] select-none">{t("page")}</span>
             <div className="relative w-full">
               <input
-                type="number"
-                min="1"
-                max="604"
-                className="no-spinner bg-neutral-50 dark:bg-neutral-800/50 hover:bg-white dark:hover:bg-neutral-800 w-12 h-12 flex items-center justify-center text-center text-lg font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-100 dark:border-neutral-800 group-hover/ctrl:border-[#D6C19E]/40 focus:border-[#D6C19E] focus:bg-white dark:focus:bg-neutral-900 focus:outline-none shadow-sm transition-all cursor-pointer" defaultValue={currentBlock?.page || 1}
-                key={`page-${currentBlock?.page}`}
+                type="text"
+                inputMode="numeric"
+                className="no-spinner bg-neutral-50 dark:bg-neutral-800/50 hover:bg-white dark:hover:bg-neutral-800 w-12 h-12 flex items-center justify-center text-center text-lg font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-100 dark:border-neutral-800 group-hover/ctrl:border-[#D6C19E]/40 focus:border-[#D6C19E] focus:bg-white dark:focus:bg-neutral-900 focus:outline-none shadow-sm transition-all cursor-pointer" 
+                defaultValue={n(currentBlock?.page || 1)}
+                key={`page-${currentBlock?.page}-${language}`}
                 onBlur={(e) => {
-                  const val = parseInt(e.target.value);
+                  const enStr = e.target.value.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d).toString());
+                  const val = parseInt(enStr);
                   if (val && val !== currentBlock?.page) onJump('page', val);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    const val = parseInt((e.target as HTMLInputElement).value);
+                    const enStr = (e.target as HTMLInputElement).value.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d).toString());
+                    const val = parseInt(enStr);
                     if (val && val !== currentBlock?.page) onJump('page', val);
                     (e.target as HTMLInputElement).blur();
                   }
@@ -1038,18 +1040,20 @@ export function TypingArea({
             <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider transition-colors group-hover/ctrl:text-[#D6C19E] select-none">{t("juz")}</span>
             <div className="relative w-full">
               <input
-                type="number"
-                min="1"
-                max="30"
-                className="no-spinner bg-neutral-50 dark:bg-neutral-800/50 hover:bg-white dark:hover:bg-neutral-800 w-12 h-12 flex items-center justify-center text-center text-lg font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-100 dark:border-neutral-800 group-hover/ctrl:border-[#D6C19E]/40 focus:border-[#D6C19E] focus:bg-white dark:focus:bg-neutral-900 focus:outline-none shadow-sm transition-all cursor-pointer" defaultValue={currentBlock?.juz || 1}
-                key={`juz-${currentBlock?.juz}`}
+                type="text"
+                inputMode="numeric"
+                className="no-spinner bg-neutral-50 dark:bg-neutral-800/50 hover:bg-white dark:hover:bg-neutral-800 w-12 h-12 flex items-center justify-center text-center text-lg font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-100 dark:border-neutral-800 group-hover/ctrl:border-[#D6C19E]/40 focus:border-[#D6C19E] focus:bg-white dark:focus:bg-neutral-900 focus:outline-none shadow-sm transition-all cursor-pointer" 
+                defaultValue={n(currentBlock?.juz || 1)}
+                key={`juz-${currentBlock?.juz}-${language}`}
                 onBlur={(e) => {
-                  const val = parseInt(e.target.value);
+                  const enStr = e.target.value.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d).toString());
+                  const val = parseInt(enStr);
                   if (val && val !== currentBlock?.juz) onJump('juz', val);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    const val = parseInt((e.target as HTMLInputElement).value);
+                    const enStr = (e.target as HTMLInputElement).value.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d).toString());
+                    const val = parseInt(enStr);
                     if (val && val !== currentBlock?.juz) onJump('juz', val);
                     (e.target as HTMLInputElement).blur();
                   }
@@ -1063,17 +1067,20 @@ export function TypingArea({
             <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider transition-colors group-hover/ctrl:text-[#D6C19E] select-none">{t("ayah")}</span>
             <div className="relative w-full">
               <input
-                type="number"
-                min="1"
-                className="no-spinner bg-neutral-50 dark:bg-neutral-800/50 hover:bg-white dark:hover:bg-neutral-800 w-12 h-12 flex items-center justify-center text-center text-lg font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-100 dark:border-neutral-800 group-hover/ctrl:border-[#D6C19E]/40 focus:border-[#D6C19E] focus:bg-white dark:focus:bg-neutral-900 focus:outline-none shadow-sm transition-all cursor-pointer" defaultValue={currentBlock?.ayahNumber || 1}
-                key={`ayah-${currentBlock?.ayahNumber}`}
+                type="text"
+                inputMode="numeric"
+                className="no-spinner bg-neutral-50 dark:bg-neutral-800/50 hover:bg-white dark:hover:bg-neutral-800 w-12 h-12 flex items-center justify-center text-center text-lg font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-100 dark:border-neutral-800 group-hover/ctrl:border-[#D6C19E]/40 focus:border-[#D6C19E] focus:bg-white dark:focus:bg-neutral-900 focus:outline-none shadow-sm transition-all cursor-pointer" 
+                defaultValue={n(currentBlock?.ayahNumber || 1)}
+                key={`ayah-${currentBlock?.ayahNumber}-${language}`}
                 onBlur={(e) => {
-                  const val = parseInt(e.target.value);
+                  const enStr = e.target.value.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d).toString());
+                  const val = parseInt(enStr);
                   if (val && val !== currentBlock?.ayahNumber) onJump('ayah', val);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    const val = parseInt((e.target as HTMLInputElement).value);
+                    const enStr = (e.target as HTMLInputElement).value.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d).toString());
+                    const val = parseInt(enStr);
                     if (val && val !== currentBlock?.ayahNumber) onJump('ayah', val);
                     (e.target as HTMLInputElement).blur();
                   }
@@ -1103,7 +1110,7 @@ export function TypingArea({
             <span className="text-[9px] uppercase font-bold text-green-500 tracking-widest select-none">{t("done")}</span>
             <div className="flex items-center justify-center w-12 h-12 rounded-full border border-green-500/40 bg-green-50 dark:bg-green-900/10 shadow-sm mt-1">
               <span className="text-[20px] font-bold text-green-600 dark:text-green-400">
-                {((visualTypedCount / (globalCheckString.length || 1)) * 100).toFixed(0)}<span className="text-[10px] ml-0.5 opacity-50">%</span>
+                {n(((visualTypedCount / (globalCheckString.length || 1)) * 100).toFixed(0))}<span className="text-[10px] ml-0.5 opacity-50">%</span>
               </span>
             </div>
           </div>
@@ -1123,7 +1130,7 @@ export function TypingArea({
                   }`}
               >
                 <span className={`font-bold ${isReviewMode ? 'text-sm' : 'text-lg'}`}>
-                  {isReviewMode ? reviewProgress : sessionMistakes}
+                  {n(isReviewMode ? reviewProgress : sessionMistakes)}
                 </span>
               </div>
 
@@ -1368,7 +1375,7 @@ export function TypingArea({
             {/* PROGRESS PERCENTAGE (left) */}
             <div className="absolute left-1 flex items-center justify-center w-8 h-8 rounded-full border border-green-500/40 bg-green-500/5 shadow-sm">
               <span className="text-[10px] font-bold text-green-600 dark:text-green-400">
-                {Math.round((visualTypedCount / (globalCheckString.length || 1)) * 100)}%
+                {n(Math.round((visualTypedCount / (globalCheckString.length || 1)) * 100))}%
               </span>
             </div>
 

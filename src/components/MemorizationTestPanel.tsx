@@ -59,7 +59,7 @@ export function MemorizationTestPanel({
   onExit,
   onNext,
 }: MemorizationTestPanelProps) {
-  const { t, language } = useLanguage();
+  const { t, language, n } = useLanguage();
   const surahMeta = useMemo(() => getAllSurahsMeta().find((surah) => surah.number === surahNumber), [surahNumber]);
   const pageData = useMemo(() => getSurah(surahNumber), [surahNumber]);
   const ayahBlock = useMemo(
@@ -285,10 +285,10 @@ export function MemorizationTestPanel({
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#C1A063]">{t("memorization_test")}</p>
             <h2 className="mt-2 text-xl sm:text-2xl font-bold text-neutral-800 dark:text-neutral-100">
-              {surahMeta?.number}. {language === 'ar' ? surahMeta?.name : surahMeta?.englishName}
+              {n(surahMeta?.number || 0)}. {language === 'ar' ? surahMeta?.name : surahMeta?.englishName}
             </h2>
             <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-              {t("ayah")} {ayahBlock.ayahNumber} · {typingMode === "word" ? t("word_by_word") : t("letter_by_letter")}
+              {t("ayah")} {n(ayahBlock.ayahNumber)} · {typingMode === "word" ? t("word_by_word") : t("letter_by_letter")}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -318,9 +318,9 @@ export function MemorizationTestPanel({
           <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-green-600 dark:text-green-400">{t("result")}</p>
           <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="text-4xl font-bold text-green-700 dark:text-green-300">{score}%</div>
+              <div className="text-4xl font-bold text-green-700 dark:text-green-300">{n(score)}%</div>
               <p className="mt-1 text-sm text-green-700/80 dark:text-green-200/80">
-                {mistakeIndices.size} {t("weak_positions")} · {wrongAttempts} {t("wrong_attempts")}
+                {n(mistakeIndices.size)} {t("weak_positions")} · {n(wrongAttempts)} {t("wrong_attempts")}
               </p>
             </div>
             <div className="flex gap-2">
@@ -445,7 +445,7 @@ export function MemorizationTestPanel({
               )}
             </button>
             <div className="absolute right-1 flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-full border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/30 shadow-sm">
-              <span className="text-[10px] font-bold text-red-600 dark:text-red-400">{wrongAttempts}</span>
+              <span className="text-[10px] font-bold text-red-600 dark:text-red-400">{n(wrongAttempts)}</span>
             </div>
           </div>
         </div>
@@ -505,7 +505,7 @@ export function MemorizationTestPanel({
         </div>
         <div className="flex flex-col items-center gap-1">
           <div className="flex items-center justify-center w-11 h-11 rounded-full border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 font-bold text-sm">
-            {wrongAttempts}
+            {n(wrongAttempts)}
           </div>
           <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400">{t("wrong")}</span>
         </div>

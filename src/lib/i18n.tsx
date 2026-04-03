@@ -299,23 +299,25 @@ export const translations: Record<Language, Dictionary> = {
 };
 
 interface LanguageContextType {
-  language: Language;
-  setLanguage: (lang: Language) => void;
-  t: (key: keyof typeof translations.en) => string;
+  language: "en" | "ar";
+  setLanguage: (lang: "en" | "ar") => void;
+  t: (key: string) => string;
+  n: (num: number | string) => string | number;
 }
 
 const LanguageContext = createContext<LanguageContextType>({
   language: "en",
   setLanguage: () => {},
   t: (key) => key,
+  n: (num) => num,
 });
 
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
-  const [language, setLanguageState] = useState<Language>("en");
+  const [language, setLanguageState] = useState<"en" | "ar">("en");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const saved = getStorage("language") as Language;
+    const saved = getStorage("language") as "en" | "ar";
     if (saved === "en" || saved === "ar") {
       setLanguageState(saved);
       if (saved === "ar") {
@@ -329,7 +331,7 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
     setMounted(true);
   }, []);
 
-  const setLanguage = (lang: Language) => {
+  const setLanguage = (lang: "en" | "ar") => {
     setLanguageState(lang);
     setStorage("language", lang);
     if (lang === "ar") {
@@ -339,23 +341,26 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       document.documentElement.dir = "ltr";
       document.documentElement.lang = "en";
     }
-    // We emit an event so independent components (like AuthWidget sometimes out of React tree updates or Layout) can react
     window.dispatchEvent(new Event('language-change'));
   };
 
-  const t = (key: keyof typeof translations.en) => {
-    return translations[language][key] || translations.en[key] || key;
+  const t = (key: string): string => {
+    return (translations[language] as any)[key] || (translations.en as any)[key] || key;
+  };
+
+  const n = (num: number | string): string | number => {
+    if (language === "ar") {
+      return num.toString().replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[parseInt(d)]);
+    }
+    return num;
   };
 
   if (!mounted) {
-    // Avoid hydration mismatch by rendering children directly,
-    // though the locale might be mismatched for a split second,
-    // or return null to avoid flash. But returning children is safer for layouts.
     return <>{children}</>;
   }
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, n }}>
       {children}
     </LanguageContext.Provider>
   );

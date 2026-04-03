@@ -22,7 +22,7 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
   const [memorizationRange, setMemorizationRange] = useState({ startSurah: 1, endSurah: 114 });
   const [memorizationTarget, setMemorizationTarget] = useState<{ surahNumber: number; ayahNumber: number; nonce: number } | null>(null);
   const surahs = getAllSurahsMeta();
-  const { t, language, setLanguage } = useLanguage();
+  const { t, language, n } = useLanguage();
 
   useEffect(() => {
     migrateLegacyLocalStorage(); // Safely scrapes unprotected older JSON if applicable
@@ -74,6 +74,23 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLDivElement>(null);
+
+  const getPersistedMemorizationRange = useCallback(() => {
+    const savedMemorizationRange = getStorage("memorization_range");
+    if (!savedMemorizationRange) {
+      return memorizationRange;
+    }
+
+    try {
+      const parsed = JSON.parse(savedMemorizationRange) as { startSurah?: number; endSurah?: number };
+      return {
+        startSurah: Math.min(114, Math.max(1, parsed.startSurah || memorizationRange.startSurah)),
+        endSurah: Math.min(114, Math.max(1, parsed.endSurah || memorizationRange.endSurah)),
+      };
+    } catch {
+      return memorizationRange;
+    }
+  }, [memorizationRange]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -152,8 +169,9 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
   }, [typingMode]);
 
   useEffect(() => {
+    if (!isMounted) return;
     setStorage("memorization_range", JSON.stringify(memorizationRange));
-  }, [memorizationRange]);
+  }, [isMounted, memorizationRange]);
 
   const toggleTheme = () => {
     const next = !isDarkMode;
@@ -194,7 +212,8 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
   }, []);
 
   const startMemorizationTest = useCallback(() => {
-    const next = pickRandomAyahInRange(memorizationRange.startSurah, memorizationRange.endSurah);
+    const effectiveRange = getPersistedMemorizationRange();
+    const next = pickRandomAyahInRange(effectiveRange.startSurah, effectiveRange.endSurah);
     if (!next) return;
 
     setReviewQueue([]);
@@ -210,7 +229,7 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
       ayahNumber: next.ayahNumber,
       nonce: Date.now(),
     });
-  }, [memorizationRange.endSurah, memorizationRange.startSurah, pickRandomAyahInRange]);
+  }, [getPersistedMemorizationRange, pickRandomAyahInRange]);
 
   const exitMemorizationTest = useCallback(() => {
     setMemorizationTarget(null);
@@ -372,7 +391,11 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
             className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-full transition-all border border-neutral-200 dark:border-neutral-700 shadow-sm group"
           >
             <span className="text-[10px] sm:text-sm font-bold text-neutral-700 dark:text-neutral-200 uppercase tracking-widest truncate max-w-[150px] sm:max-w-none">
-              {isMemorizationMode ? t("memorization_test") : `${currentSurah?.number}. ${language === 'ar' ? currentSurah?.name : currentSurah?.englishName}`}
+              {isMemorizationMode ? t("memorization_test") : (
+                <span>
+                  {n(surahNumber)}. {language === 'ar' ? currentSurah?.name : currentSurah?.englishName}
+                </span>
+              )}
             </span>
             {!isMemorizationMode && (
               <svg
@@ -396,17 +419,17 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
             >
               <span className="flex items-center gap-1">
                 <span className="text-neutral-400 dark:text-neutral-500">{t("page")}</span>
-                <span className="text-neutral-700 dark:text-neutral-200">{navInfo.page}</span>
+                <span className="text-neutral-700 dark:text-neutral-200">{n(navInfo.page)}</span>
               </span>
               <span className="w-px h-2.5 bg-neutral-100 dark:bg-neutral-700 mx-0.5" />
               <span className="flex items-center gap-1">
                 <span className="text-neutral-400 dark:text-neutral-500">{t("juz")}</span>
-                <span className="text-neutral-700 dark:text-neutral-200">{navInfo.juz}</span>
+                <span className="text-neutral-700 dark:text-neutral-200">{n(navInfo.juz)}</span>
               </span>
               <span className="w-px h-2.5 bg-neutral-100 dark:bg-neutral-700 mx-0.5" />
               <span className="flex items-center gap-1">
                 <span className="text-neutral-400 dark:text-neutral-500">{t("ayah")}</span>
-                <span className="text-neutral-700 dark:text-neutral-200">{navInfo.ayah}</span>
+                <span className="text-neutral-700 dark:text-neutral-200">{n(navInfo.ayah)}</span>
               </span>
             </button>
 
@@ -496,7 +519,7 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
                         : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
                         }`}
                     >
-                      <span className="text-xs font-mono rtl:ml-4 ltr:mr-4 w-5 text-right opacity-50">{s.number}</span>
+                      <span className="text-xs font-mono rtl:ml-4 ltr:mr-4 w-5 text-right opacity-50">{n(s.number)}</span>
                       <span className="text-sm">{language === 'ar' ? s.name : s.englishName}</span>
                       {isActive && <div className="rtl:mr-auto ltr:ml-auto w-1.5 h-1.5 rounded-full bg-[#D6C19E]" />}
                     </button>

@@ -39,7 +39,7 @@ export default function LandingPage() {
   const [startSurah, setStartSurah] = useState(1);
   const [endSurah, setEndSurah] = useState(114);
 
-  const { t, language, setLanguage } = useLanguage();
+  const { t, language, setLanguage, n } = useLanguage();
 
   useEffect(() => {
     const saved = getStorage('theme');
@@ -164,7 +164,7 @@ export default function LandingPage() {
           <div className="mx-auto mt-8 w-full max-w-2xl rounded-[2rem] border border-[#D6C19E]/35 bg-white/80 dark:bg-neutral-900/70 px-5 py-5 sm:px-8 sm:py-6 shadow-[0_18px_60px_rgba(214,193,158,0.14)] backdrop-blur-xl">
             <div className="mb-3 flex items-center justify-between gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#B18E4E] dark:text-[#D6C19E]">
               <span>{t("typing_revelation")}</span>
-              <span>{currentHeroAyah.surah}</span>
+              <span>{language === 'ar' ? `${n(currentHeroAyah.surah.split(':')[0])}:${n(currentHeroAyah.surah.split(':')[1])}` : currentHeroAyah.surah}</span>
             </div>
             <div
               className="quran-text rtl min-h-[3.6rem] text-[1.65rem] leading-[2.2] sm:min-h-[4.6rem] sm:text-[2.35rem] sm:leading-[2.5] text-neutral-800 dark:text-neutral-100"
@@ -200,7 +200,7 @@ export default function LandingPage() {
         <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 animate-in slide-in-from-bottom-8 fade-in duration-1000 delay-150">
 
           <Link href="/write" className="group relative overflow-hidden rounded-3xl bg-white dark:bg-neutral-800/80 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm">
-            <div className="absolute -top-4 -right-4 p-6 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-all duration-500 scale-50 group-hover:scale-150 rotate-[-15deg] group-hover:rotate-0">
+            <div className={`absolute -top-4 ${language === "ar" ? "-left-4" : "-right-4"} p-6 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-all duration-500 scale-50 group-hover:scale-150 ${language === "ar" ? "rotate-[15deg]" : "rotate-[-15deg]"} group-hover:rotate-0`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#D6C19E" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
             </div>
             <div className="mb-8 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300">
@@ -216,7 +216,7 @@ export default function LandingPage() {
           </Link>
 
           <Link href="/review" className="group relative overflow-hidden rounded-3xl bg-white dark:bg-neutral-800/80 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm">
-            <div className="absolute -top-4 -right-4 p-6 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-all duration-500 scale-50 group-hover:scale-150 rotate-[15deg] group-hover:rotate-0">
+            <div className={`absolute -top-4 ${language === "ar" ? "-left-4" : "-right-4"} p-6 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-all duration-500 scale-50 group-hover:scale-150 ${language === "ar" ? "rotate-[-15deg]" : "rotate-[15deg]"} group-hover:rotate-0`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#D6C19E" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><path d="M16 13H8" /><path d="M16 17H8" /><path d="M10 9H8" /></svg>
             </div>
             <div className="mb-8 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300">
@@ -232,7 +232,7 @@ export default function LandingPage() {
           </Link>
 
           <button onClick={() => setShowMemoModal(true)} className="group relative overflow-hidden rounded-3xl bg-white dark:bg-neutral-800/80 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm text-left">
-            <div className="absolute -top-4 -right-4 p-6 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-all duration-500 scale-50 group-hover:scale-150 rotate-180 group-hover:rotate-0">
+            <div className={`absolute -top-4 ${language === "ar" ? "-left-4" : "-right-4"} p-6 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-all duration-500 scale-50 group-hover:scale-150 rotate-180 group-hover:rotate-0`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#D6C19E" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
             </div>
             <div className="mb-8 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300">
@@ -274,16 +274,24 @@ export default function LandingPage() {
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-neutral-600 dark:text-neutral-400">{t("from_surah")}</label>
                 <input
-                  type="number" min="1" max="114" value={startSurah}
-                  onChange={(e) => setStartSurah(parseInt(e.target.value) || 1)}
+                  type="text" inputMode="numeric" 
+                  value={n(startSurah)}
+                  onChange={(e) => {
+                    const parsed = parseInt(e.target.value.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d).toString()));
+                    setStartSurah(parsed || 1);
+                  }}
                   className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800/50 text-neutral-800 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-[#D6C19E] focus:border-transparent transition-all"
                 />
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-neutral-600 dark:text-neutral-400">{t("to_surah")}</label>
                 <input
-                  type="number" min="1" max="114" value={endSurah}
-                  onChange={(e) => setEndSurah(parseInt(e.target.value) || 114)}
+                  type="text" inputMode="numeric" 
+                  value={n(endSurah)}
+                  onChange={(e) => {
+                    const parsed = parseInt(e.target.value.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d).toString()));
+                    setEndSurah(parsed || 114);
+                  }}
                   className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800/50 text-neutral-800 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-[#D6C19E] focus:border-transparent transition-all"
                 />
               </div>
