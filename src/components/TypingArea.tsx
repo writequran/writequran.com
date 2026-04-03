@@ -236,9 +236,9 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
 
             return (
               <span key={blockIndex} className="inline-grid grid-cols-1 grid-rows-1 align-baseline relative">
-                {/* LAYER 1: STABLE HINT (Background) - Static run to provide block bounds */}
-                <span className="col-start-1 row-start-1 pointer-events-none select-none h-fit">
-                  {showHint ? renderTextWithMarkers(block.displayString, false, true, true) : null}
+                {/* LAYER 1: STABLE HINT (Background) - Always rendered to provide a stable layout scaffold */}
+                <span className={`col-start-1 row-start-1 pointer-events-none select-none h-fit transition-opacity duration-500 ${showHint ? 'opacity-100' : 'opacity-0'}`}>
+                  {renderTextWithMarkers(block.displayString, false, true, true)}
                 </span>
 
                 {/* LAYER 2: INTERACTION (Foreground) - Overlay with transparent current parts */}
@@ -286,12 +286,12 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
           {currentIndex < globalCheckString.length && (
             <div
               className="absolute pointer-events-none flex items-center justify-center transition-all duration-75 text-[2.5rem] leading-[2.6] z-10"
-              /* dynamic cursor for size of letter */
+              /* clean cursor alignment matching targetRef box exactly */
               style={{
-                top: cursorPos.top + (cursorPos.height * 0.1),
-                left: cursorPos.left - 5,
-                width: cursorPos.width + 10,
-                height: cursorPos.height * 0.8,
+                top: cursorPos.top,
+                left: cursorPos.left,
+                width: cursorPos.width,
+                height: cursorPos.height,
               }}
             /* fixed cursor width 
             style={{
