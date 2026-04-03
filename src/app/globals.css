@@ -24,15 +24,69 @@
   --font-quran: "KFGQPC_Uthman_Taha_Naskh", "me_quran", var(--font-quran), "Scheherazade New", "Amiri Quran", "Traditional Arabic", serif;
 }
 
+@keyframes flicker {
+
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+
+  40% {
+    opacity: 1;
+  }
+
+  70% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes bloom {
+
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes bloom {
+
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes flicker {
+
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @layer utilities {
   .rtl {
     direction: rtl;
   }
+
   .ltr {
     direction: ltr;
   }
+
   .quran-text {
     /* KFGQPC_Uthman_Taha_Naskh is first — it is the industry standard for
        100% accurate Quranic typography, specifically Medina Mushaf clusters:
@@ -44,7 +98,7 @@
     font-family: "KFGQPC_Uthman_Taha_Naskh", "me_quran", "Scheherazade New", "Amiri Quran", "Traditional Arabic", serif;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
-    
+
     /* Do NOT set font-feature-settings — it overrides the font's internal
        OpenType mark/mkmk tables which anchor diacritics to base glyphs. */
     font-variant-ligatures: common-ligatures;
@@ -54,24 +108,48 @@
      Row height = font-size (2.2rem) * line-height (2.8) = 6.16rem.
      The background-position-y offset ensures the rule sits precisely under the baseline. */
   .mushaf-rules {
-    background-image: repeating-linear-gradient(
-      to bottom,
-      transparent,
-      transparent calc(6.16rem - 1px),
-      var(--mushaf-rule) calc(6.16rem - 1px),
-      var(--mushaf-rule) 6.16rem
-    );
+    background-image: repeating-linear-gradient(to bottom,
+        transparent,
+        transparent calc(6.16rem - 1px),
+        var(--mushaf-rule) calc(6.16rem - 1px),
+        var(--mushaf-rule) 6.16rem);
     background-size: 100% 6.16rem;
     /* Adjust this offset if the rule strikes through the letters in your browser */
     background-position-y: 5.1rem;
     background-repeat: repeat-y;
   }
+
+  .animate-flicker {
+    animation: flicker 1.8s ease-in-out infinite;
+  }
+
+  .animate-flicker-delay {
+    animation: flicker 1.8s ease-in-out infinite 0.2s;
+  }
+
+  .animate-bloom {
+    animation: bloom 1.6s ease-in-out infinite;
+  }
 }
 
 :root {
-  --mushaf-rule: rgba(214, 193, 158, 0.4); /* Day mode: Muted beige */
+  --mushaf-rule: rgba(214, 193, 158, 0.4);
+  /* Day mode: Muted beige */
 }
 
 .dark {
-  --mushaf-rule: rgba(56, 56, 56, 0.6);   /* Night mode: Subtle dark gray */
+  --mushaf-rule: rgba(56, 56, 56, 0.547);
+  /* Night mode: Subtle dark gray */
+}
+
+.cursor-theme {
+  --cursor-pillar: #94702e;
+  --cursor-bar: #b88931;
+  --cursor-glow: rgba(184, 137, 49, 0.14);
+}
+
+.cursor-theme-dark {
+  --cursor-pillar: #f2d182;
+  --cursor-bar: #ffd98f;
+  --cursor-glow: rgba(255, 217, 143, 0.48);
 }

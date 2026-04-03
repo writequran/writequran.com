@@ -175,7 +175,7 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
         maskClass = "bg-[#FDFBF7] dark:bg-[#121212]";
       } else if (showHint) {
         // HINT: Soft Grey + No Mask (to let guide lines show through)
-        colorClass = "text-neutral-200/40 dark:text-neutral-800/30";
+        colorClass = "text-neutral-400/60 dark:text-neutral-600/50";
         maskClass = "bg-transparent";
       } else {
         // HIDDEN: Transparent + No Mask
@@ -256,7 +256,7 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
             const untypedWithJ = untypedSpan ? ZWJ + untypedSpan : "";
 
             const showTargetHint = visibilityMode === "all" || (visibilityMode === "ayah" && isActiveAyah);
-            const targetColorClass = showTargetHint ? "text-neutral-200/40 dark:text-neutral-800/30" : "text-transparent";
+            const targetColorClass = showTargetHint ? "text-neutral-400/60 dark:text-neutral-600/50" : "text-transparent";
 
             const renderTyped = renderTextWithMarkers(typedWithJ, true, isActiveAyah);
             const renderUntyped = renderTextWithMarkers(untypedWithJ, false, isActiveAyah);
@@ -276,17 +276,94 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
           {currentIndex < globalCheckString.length && (
             <div
               className="absolute pointer-events-none flex items-center justify-center transition-all duration-75 text-[2.5rem] leading-[2.6] z-10"
+              /*dynamic cursor for size of letter*/
               style={{
                 top: cursorPos.top,
-                left: cursorPos.left,
-                width: cursorPos.width,
+                left: cursorPos.left - 5,
+                width: cursorPos.width + 10,
                 height: cursorPos.height,
               }}
+            /* fixed cursor width 
+            style={{
+              top: cursorPos.top,
+              left: cursorPos.left + cursorPos.width / 2 - 15,
+              width: 30,
+              height: cursorPos.height,
+            }}*/
             >
               {wrongChar ? (
-                <span className="text-red-500">{wrongChar}</span>
+                <>
+                  {/* LEFT PILLAR — error state (stronger red) */}
+                  <span
+                    className="absolute top-[10%] bottom-[10%] left-[2px] w-[2px] rounded-full animate-flicker"
+                    style={{
+                      background: "linear-gradient(to bottom, transparent, #ff2d2d, #ff4d4d, transparent)",
+                      boxShadow: "0 0 8px rgba(255,45,45,0.45)"
+                    }}
+                  />
+
+                  {/* RIGHT PILLAR — error state (stronger red) */}
+                  <span
+                    className="absolute top-[10%] bottom-[10%] right-[2px] w-[2px] rounded-full animate-flicker"
+                    style={{
+                      background: "linear-gradient(to bottom, transparent, #ff2d2d, #ff4d4d, transparent)",
+                      boxShadow: "0 0 8px rgba(255,45,45,0.45)"
+                    }}
+                  />
+
+                  {/* BOTTOM BAR / FLOOR — error state (stronger red) */}
+                  <span
+                    className="absolute -bottom-1 left-0 right-0 h-[5px] rounded-full"
+                    style={{
+                      background: "#ff3b3b",
+                      boxShadow: "0 0 12px 3px rgba(255,59,59,0.50)"
+                    }}
+                  />
+
+                  {/* WRONG LETTER — shown above the cursor */}
+                  <span className="relative z-10 text-red-600 dark:text-red-400 font-medium">
+                    {wrongChar}
+                  </span>
+                </>
               ) : (
-                <span className="absolute bottom-2 left-0 right-0 h-[3px] bg-[#D6C19E] animate-pulse rounded-full" />
+                <>
+                  {/* LEFT PILLAR — normal state */}
+                  <span
+                    className="absolute top-[10%] bottom-[10%] left-[2px] w-[2px] rounded-full animate-flicker"
+                    style={{
+                      background: isDarkMode
+                        ? "linear-gradient(to bottom, transparent, #F4D58D, transparent)"
+                        : "linear-gradient(to bottom, transparent, #D8BA72, transparent)",
+                      boxShadow: isDarkMode
+                        ? "0 0 6px rgba(244,213,141,0.42)"
+                        : "0 0 5px rgba(216,186,114,0.30)"
+                    }}
+                  />
+
+                  {/* RIGHT PILLAR — normal state */}
+                  <span
+                    className="absolute top-[10%] bottom-[10%] right-[2px] w-[2px] rounded-full animate-flicker"
+                    style={{
+                      background: isDarkMode
+                        ? "linear-gradient(to bottom, transparent, #F4D58D, transparent)"
+                        : "linear-gradient(to bottom, transparent, #D8BA72, transparent)",
+                      boxShadow: isDarkMode
+                        ? "0 0 6px rgba(244,213,141,0.42)"
+                        : "0 0 5px rgba(216,186,114,0.30)"
+                    }}
+                  />
+
+                  {/* BOTTOM BAR / FLOOR — normal state */}
+                  <span
+                    className="absolute -bottom-1 left-0 right-0 h-[5px] rounded-full"
+                    style={{
+                      background: isDarkMode ? "#FFD98A" : "#E3C57A",
+                      boxShadow: isDarkMode
+                        ? "inset 0 0 0 1px rgba(255,255,255,0.75), 0 0 12px 2px rgba(255,217,138,0.50)"
+                        : "inset 0 0 0 1px rgba(255,255,255,0.95), 0 2px 7px rgba(55,42,14,0.34)"
+                    }}
+                  />
+                </>
               )}
             </div>
           )}
@@ -299,7 +376,7 @@ export function TypingArea({ surahNumber }: TypingAreaProps) {
       />
 
       {/* ARABIC ON-SCREEN KEYBOARD */}
-      <div 
+      <div
         className={`fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-[700px] bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-800 p-4 pb-6 transition-all duration-300 transform z-40 ${showKeyboard ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0 pointer-events-none'}`}
         dir="rtl"
       >
