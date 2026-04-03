@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getAllSurahsMeta, getSurah } from "@/lib/quran-data";
+import { useLanguage } from "@/lib/i18n";
 
 interface MemorizationTestPanelProps {
   surahNumber: number;
@@ -58,6 +59,7 @@ export function MemorizationTestPanel({
   onExit,
   onNext,
 }: MemorizationTestPanelProps) {
+  const { t } = useLanguage();
   const surahMeta = useMemo(() => getAllSurahsMeta().find((surah) => surah.number === surahNumber), [surahNumber]);
   const pageData = useMemo(() => getSurah(surahNumber), [surahNumber]);
   const ayahBlock = useMemo(
@@ -474,7 +476,7 @@ export function MemorizationTestPanel({
                 onClick={() => handleInput(" ")}
                 className="flex-[3] h-10 sm:h-12 bg-neutral-100/50 dark:bg-neutral-800/50 hover:bg-[#D6C19E]/30 dark:hover:bg-[#D6C19E]/20 text-[#2A2826] dark:text-neutral-100 rounded-lg transition-all border border-neutral-200 dark:border-neutral-700 active:scale-95 text-xs font-bold uppercase tracking-widest"
               >
-                SPACE
+                {t("space")}
               </button>
             </div>
           </div>

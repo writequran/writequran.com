@@ -46,7 +46,7 @@ export const translations: Record<Language, Dictionary> = {
     "word_by_word": "Word by Word",
     "support": "SUPPORT",
     "contact_us": "Contact Us",
-    "language_toggle": "Language / اللغة",
+    "language_toggle": "Arabic / العربية",
 
     // Components & Modals
     "search_surah": "Search Surah...",
@@ -70,7 +70,7 @@ export const translations: Record<Language, Dictionary> = {
     "reviewing": "Reviewing",
     "errors": "Errors",
     "next_weak_spot": "Next Weak Spot",
-    "space": "SPACE",
+    "space": "English",
     "backspace": "Backspace",
     "hide": "hide",
     "hidden": "Hidden",
@@ -207,7 +207,7 @@ export const translations: Record<Language, Dictionary> = {
     "reviewing": "مراجعة",
     "errors": "أخطاء",
     "next_weak_spot": "الخطأ التالي",
-    "space": "مسافة",
+    "space": "العربية",
     "backspace": "حذف",
     "hide": "إخفاء",
     "hidden": "مخفي",
