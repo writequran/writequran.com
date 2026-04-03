@@ -76,6 +76,19 @@
   }
 }
 
+@keyframes landing-caret {
+
+  0%,
+  45% {
+    opacity: 1;
+  }
+
+  55%,
+  100% {
+    opacity: 0.14;
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @layer utilities {
@@ -139,6 +152,10 @@
 
   .animate-bloom {
     animation: bloom 1.6s ease-in-out infinite;
+  }
+
+  .animate-landing-caret {
+    animation: landing-caret 1s steps(1, end) infinite;
   }
 
   /* Hide number input spinners */

@@ -6,9 +6,34 @@ import { AuthWidget } from "@/components/AuthWidget";
 import { useEffect, useState } from "react";
 import { getStorage, setStorage } from "@/lib/storage";
 
+const splitArabicGraphemes = (text: string) => {
+  if (typeof Intl !== "undefined" && "Segmenter" in Intl) {
+    return [...new Intl.Segmenter("ar", { granularity: "grapheme" }).segment(text)].map((part) => part.segment);
+  }
+
+  return Array.from(text);
+};
+
 export default function LandingPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const heroAyat = [
+    {
+      surah: "96:1",
+      text: "ٱقْرَأْ بِٱسْمِ رَبِّكَ ٱلَّذِى خَلَقَ",
+    },
+    {
+      surah: "68:1",
+      text: "نٓۚ وَٱلْقَلَمِ وَمَا يَسْطُرُونَ",
+    },
+    {
+      surah: "73:4",
+      text: "وَرَتِّلِ ٱلْقُرْءَانَ تَرْتِيلًا",
+    },
+  ] as const;
+  const [activeAyah, setActiveAyah] = useState(0);
+  const [typedChars, setTypedChars] = useState(0);
+  const [isHoldingAyah, setIsHoldingAyah] = useState(false);
 
   const [showMemoModal, setShowMemoModal] = useState(false);
   const [startSurah, setStartSurah] = useState(1);
@@ -34,6 +59,31 @@ export default function LandingPage() {
     setIsMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const currentAyah = heroAyat[activeAyah];
+    const currentAyahUnits = splitArabicGraphemes(currentAyah.text);
+
+    if (typedChars < currentAyahUnits.length) {
+      setIsHoldingAyah(false);
+      const typeTimer = window.setTimeout(() => {
+        setTypedChars((current) => current + 1);
+      }, typedChars === 0 ? 500 : 100);
+
+      return () => window.clearTimeout(typeTimer);
+    }
+
+    setIsHoldingAyah(true);
+    const holdTimer = window.setTimeout(() => {
+      setActiveAyah((current) => (current + 1) % heroAyat.length);
+      setTypedChars(0);
+      setIsHoldingAyah(false);
+    }, 2400);
+
+    return () => window.clearTimeout(holdTimer);
+  }, [activeAyah, typedChars, isMounted]);
+
   const toggleTheme = () => {
     const next = !isDarkMode;
     setIsDarkMode(next);
@@ -51,6 +101,10 @@ export default function LandingPage() {
   };
 
   if (!isMounted) return <div className="min-h-screen bg-[#FDFBF7] dark:bg-neutral-900 transition-colors duration-500" />;
+
+  const currentHeroAyah = heroAyat[activeAyah];
+  const currentHeroAyahUnits = splitArabicGraphemes(currentHeroAyah.text);
+  const revealProgress = currentHeroAyahUnits.length === 0 ? 0 : typedChars / currentHeroAyahUnits.length;
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 transition-colors duration-500 font-sans relative overflow-hidden flex flex-col">
@@ -91,6 +145,36 @@ export default function LandingPage() {
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 text-neutral-800 dark:text-neutral-50 leading-[1.1]">
             Master the Quran,<br />One Letter at a Time
           </h2>
+          <div className="mx-auto mt-8 w-full max-w-2xl rounded-[2rem] border border-[#D6C19E]/35 bg-white/80 dark:bg-neutral-900/70 px-5 py-5 sm:px-8 sm:py-6 shadow-[0_18px_60px_rgba(214,193,158,0.14)] backdrop-blur-xl">
+            <div className="mb-3 flex items-center justify-between gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#B18E4E] dark:text-[#D6C19E]">
+              <span>Typing Revelation</span>
+              <span>{currentHeroAyah.surah}</span>
+            </div>
+            <div
+              className="quran-text rtl min-h-[3.6rem] text-[1.65rem] leading-[2.2] sm:min-h-[4.6rem] sm:text-[2.35rem] sm:leading-[2.5] text-neutral-800 dark:text-neutral-100"
+              dir="rtl"
+            >
+              <span className="relative inline-block max-w-full whitespace-nowrap">
+                <span className="opacity-0">{currentHeroAyah.text}</span>
+                <span
+                  className="absolute inset-y-0 right-0 overflow-hidden whitespace-nowrap transition-[max-width] duration-150 ease-out"
+                  style={{ maxWidth: `${Math.max(0, Math.min(100, revealProgress * 100))}%` }}
+                  aria-hidden="true"
+                >
+                  {currentHeroAyah.text}
+                </span>
+                <span
+                  className={`absolute top-[0.4em] w-[2px] rounded-full bg-[#C5963D] dark:bg-[#E3BE72] ${isHoldingAyah ? 'opacity-0' : 'animate-landing-caret'}`}
+                  style={{
+                    right: `${Math.max(0, Math.min(100, revealProgress * 100))}%`,
+                    height: "1.5em",
+                    transform: "translateX(50%)",
+                  }}
+                  aria-hidden="true"
+                />
+              </span>
+            </div>
+          </div>
           {/* <p className="text-lg md:text-xl text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
             A premium, distraction-free environment to practice writing, reviewing mistakes, 
             and reinforcing your memorization.
