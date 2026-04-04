@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/lib/i18n";
-import { getMilestoneProgress, loadProgressStats } from "@/lib/stats";
+import { getMilestoneProgress, getSurahFinalProgressState } from "@/lib/stats";
 import { getAllSurahsMeta, getSurah } from "@/lib/quran-data";
 import { getStorage, setStorage } from "@/lib/storage";
 
@@ -92,23 +92,19 @@ export default function ProgressPage() {
     setIsDarkMode(initialDark);
     if (initialDark) document.documentElement.classList.add('dark');
 
-    const progressStats = loadProgressStats();
     const allSurahs = getAllSurahsMeta();
 
     // Process stats dynamically so we do not block UI render immediately
     const computedStats = allSurahs.map(surah => {
-      let progressPercent = 0;
       let ayahCount = 0;
+      let progressPercent = 0;
       try {
-        ayahCount = getSurah(surah.number).blocks.length;
-      } catch (e) { }
-      if (progressStats[surah.number]) {
-        try {
-          const sData = getSurah(surah.number);
-          if (sData.globalCheckString.length > 0) {
-            progressPercent = (progressStats[surah.number].highestIndexReached / sData.globalCheckString.length) * 100;
-          }
-        } catch (e) { }
+        const sData = getSurah(surah.number);
+        ayahCount = sData.blocks.length;
+        progressPercent = getSurahFinalProgressState(surah.number).progressPercent;
+      } catch (e) {
+        ayahCount = 0;
+        progressPercent = 0;
       }
       return {
         number: surah.number,

@@ -18,6 +18,8 @@ export interface ProgressStats {
   lastPracticed: number;
 }
 
+const getTypedIndicesStorageKey = (surahNumber: number) => `typed_indices_${surahNumber}`;
+
 export const loadMistakeStats = (): Record<string, MistakeRecord> => {
   if (typeof window === 'undefined') return {};
   try {
@@ -46,6 +48,52 @@ export const loadProgressStats = (): Record<number, ProgressStats> => {
 export const saveProgressStats = (stats: Record<number, ProgressStats>) => {
   setStorage('progress_stats', JSON.stringify(stats));
   if (typeof window !== "undefined") import('./sync-manager').then(m => m.debouncedSyncLocalToCloud());
+};
+
+export interface SurahFinalProgressState {
+  typedCount: number;
+  totalLetters: number;
+  completedAyat: number;
+  progressPercent: number;
+  isCompleted: boolean;
+}
+
+export const getSurahFinalProgressState = (surahNumber: number): SurahFinalProgressState => {
+  const surahData = getSurah(surahNumber);
+  let typedIndices = new Set<number>();
+
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = getStorage(getTypedIndicesStorageKey(surahNumber));
+      typedIndices = saved ? new Set<number>(JSON.parse(saved)) : new Set<number>();
+    } catch {
+      typedIndices = new Set<number>();
+    }
+  }
+
+  const totalLetters = surahData.globalCheckString.length;
+  const typedCount = Array.from(typedIndices).filter((index) => index >= 0 && index < totalLetters).length;
+
+  let completedAyat = 0;
+  for (const block of surahData.blocks) {
+    let fullyTyped = true;
+    const blockEnd = block.globalCheckOffset + block.checkString.length;
+    for (let i = block.globalCheckOffset; i < blockEnd; i++) {
+      if (!typedIndices.has(i)) {
+        fullyTyped = false;
+        break;
+      }
+    }
+    if (fullyTyped) completedAyat++;
+  }
+
+  return {
+    typedCount,
+    totalLetters,
+    completedAyat,
+    progressPercent: totalLetters > 0 ? (typedCount / totalLetters) * 100 : 0,
+    isCompleted: totalLetters > 0 && typedCount >= totalLetters,
+  };
 };
 
 export interface WeakSpot {
@@ -194,23 +242,14 @@ export const getMilestoneProgress = (): MilestoneProgress => {
   let totalLettersTyped = 0;
 
   for (const surahId in progressStats) {
-    const stats = progressStats[surahId];
     const surahNumber = parseInt(surahId, 10);
-    
-    totalLettersTyped += stats.highestIndexReached;
-    
+
     try {
-      const surahData = getSurah(surahNumber);
-      
-      let ayatCompletedInSurah = 0;
-      for (const block of surahData.blocks) {
-        if (stats.highestIndexReached >= block.globalCheckOffset + block.checkString.length) {
-          ayatCompletedInSurah++;
-        }
-      }
-      totalCompletedAyat += ayatCompletedInSurah;
-      
-      if (stats.highestIndexReached >= surahData.globalCheckString.length) {
+      const finalState = getSurahFinalProgressState(surahNumber);
+      totalLettersTyped += finalState.typedCount;
+      totalCompletedAyat += finalState.completedAyat;
+
+      if (finalState.isCompleted) {
         if (firstCompletedSurahNumber === null || surahNumber < firstCompletedSurahNumber) {
           firstCompletedSurahNumber = surahNumber;
         }

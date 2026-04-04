@@ -395,6 +395,23 @@ export function TypingArea({
     setStatsVersion(prev => prev + 1);
   }, []);
 
+  const syncProgressSnapshot = useCallback((nextTypedIndices: Set<number>) => {
+    const progressStats = globalProgressRef.current;
+    const p = progressStats[surahNumber] || {
+      surahNumber,
+      highestIndexReached: 0,
+      totalMistakeEvents: 0,
+      totalWrongAttempts: 0,
+      lastPracticed: Date.now()
+    };
+
+    p.highestIndexReached = nextTypedIndices.size;
+    p.lastPracticed = Date.now();
+    progressStats[surahNumber] = p;
+    saveProgressStats(progressStats);
+    return p;
+  }, [surahNumber]);
+
   const currentBlock = useMemo(() => {
     return blocks.find((b: any) =>
       currentIndex >= b.globalCheckOffset &&
@@ -600,10 +617,12 @@ export function TypingArea({
   };
 
   const confirmRestart = () => {
+    const nextTypedIndices = new Set<number>();
     setCurrentIndex(0);
     setWrongChar(null);
-    setTypedIndices(new Set());
+    setTypedIndices(nextTypedIndices);
     setWordDrafts({});
+    syncProgressSnapshot(nextTypedIndices);
     setTimeout(updateCursorPos, 100);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -611,18 +630,16 @@ export function TypingArea({
   const confirmRestartAyah = () => {
     if (!rewriteAyahTarget) return;
     const { startIdx, limit } = rewriteAyahTarget;
+    const nextTypedIndices = new Set(typedIndices);
+    for (const idx of Array.from(nextTypedIndices)) {
+      if (idx >= startIdx && idx < limit) {
+        nextTypedIndices.delete(idx);
+      }
+    }
 
     setCurrentIndex(startIdx);
     setWrongChar(null);
-    setTypedIndices(prev => {
-      const next = new Set(prev);
-      for (const idx of Array.from(next)) {
-        if (idx >= startIdx && idx < limit) {
-          next.delete(idx);
-        }
-      }
-      return next;
-    });
+    setTypedIndices(nextTypedIndices);
 
     setWordDrafts(prev => {
       const next = { ...prev };
@@ -645,6 +662,7 @@ export function TypingArea({
       return next;
     });
 
+    syncProgressSnapshot(nextTypedIndices);
     setTimeout(updateCursorPos, 100);
   };
 
@@ -702,21 +720,7 @@ export function TypingArea({
         setCurrentIndex(nextIndex);
         setWrongChar(null);
 
-        const progressStats = globalProgressRef.current;
-        const p = progressStats[surahNumber] || {
-          surahNumber,
-          highestIndexReached: 0,
-          totalMistakeEvents: 0,
-          totalWrongAttempts: 0,
-          lastPracticed: Date.now()
-        };
-
-        if (nextIndex > p.highestIndexReached) {
-          p.highestIndexReached = nextIndex;
-        }
-        p.lastPracticed = Date.now();
-        progressStats[surahNumber] = p;
-        saveProgressStats(progressStats);
+        syncProgressSnapshot(nextTypedIndices);
         return;
       }
 
@@ -766,6 +770,7 @@ export function TypingArea({
         return prev;
       });
 
+      p.highestIndexReached = typedIndices.size;
       p.lastPracticed = Date.now();
       progress[surahNumber] = p;
       saveMistakeStats(mistakes);
@@ -778,12 +783,11 @@ export function TypingArea({
       if (wrongChar) {
         setWrongChar(null);
       } else {
+        const nextTypedIndices = new Set(typedIndices);
+        nextTypedIndices.delete(Math.max(0, currentIndex - 1));
         setCurrentIndex((prev) => Math.max(0, prev - 1));
-        setTypedIndices(prev => {
-          const next = new Set(prev);
-          next.delete(Math.max(0, currentIndex - 1));
-          return next;
-        });
+        setTypedIndices(nextTypedIndices);
+        syncProgressSnapshot(nextTypedIndices);
         setWrongChar(null);
       }
       return;
@@ -795,30 +799,12 @@ export function TypingArea({
     if (!expectedChar) return;
 
     if (char === expectedChar) {
-      setTypedIndices(prev => {
-        const next = new Set(prev);
-        next.add(currentIndex);
-        return next;
-      });
+      const nextTypedIndices = new Set(typedIndices);
+      nextTypedIndices.add(currentIndex);
+      setTypedIndices(nextTypedIndices);
       setCurrentIndex((prev) => {
-        const next = findNextUntypedIndex(new Set([...typedIndices, currentIndex]), prev + 1, globalCheckString.length);
-        const progressStats = globalProgressRef.current;
-        const p = progressStats[surahNumber] || {
-          surahNumber,
-          highestIndexReached: 0,
-          totalMistakeEvents: 0,
-          totalWrongAttempts: 0,
-          lastPracticed: Date.now()
-        };
-
-        if (next > p.highestIndexReached) {
-          p.highestIndexReached = next;
-        }
-        p.lastPracticed = Date.now();
-
-        progressStats[surahNumber] = p;
-        saveProgressStats(progressStats);
-
+        const next = findNextUntypedIndex(nextTypedIndices, prev + 1, globalCheckString.length);
+        syncProgressSnapshot(nextTypedIndices);
         return next;
       });
       setWrongChar(null);
@@ -861,6 +847,7 @@ export function TypingArea({
         return prev;
       });
 
+      p.highestIndexReached = typedIndices.size;
       p.lastPracticed = Date.now();
 
       progress[surahNumber] = p;
@@ -868,7 +855,7 @@ export function TypingArea({
       saveProgressStats(progress);
       setStatsVersion(prev => prev + 1);
     }
-  }, [activeWordSegment, currentBlock, currentIndex, globalCheckString, surahNumber, typedIndices, typingMode, wordDrafts, wordSegments, wrongChar]);
+  }, [activeWordSegment, currentBlock, currentIndex, globalCheckString, surahNumber, syncProgressSnapshot, typedIndices, typingMode, wordDrafts, wordSegments, wrongChar]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
