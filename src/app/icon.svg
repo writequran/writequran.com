@@ -1,6 +1,0 @@
-<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="64" cy="64" r="64" fill="#D6C19E"/>
-  <path d="M64 100C45.3333 100 28 92 28 76V36C40 36 56 42.6667 64 48C72 42.6667 88 36 100 36V76C100 92 82.6667 100 64 100Z" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M64 48V100" stroke="white" stroke-width="4" stroke-linecap="round"/>
-  <text x="64" y="78" fill="white" font-family="serif" font-size="28" font-weight="bold" text-anchor="middle" direction="rtl">القرآن</text>
-</svg>

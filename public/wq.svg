@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="32"
+   height="32"
+   viewBox="0 0 8.4666662 8.4666662"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   sodipodi:docname="wq.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#000000"
+     bordercolor="#000000"
+     borderopacity="0.24705882"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="19.649462"
+     inkscape:cx="14.14797"
+     inkscape:cy="17.150597"
+     inkscape:window-width="1512"
+     inkscape:window-height="945"
+     inkscape:window-x="1373"
+     inkscape:window-y="37"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg1"
+     showguides="false" />
+  <defs
+     id="defs1">
+    <linearGradient
+       id="linearGradient5"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop6" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop7" />
+    </linearGradient>
+    <inkscape:path-effect
+       effect="fillet_chamfer"
+       id="path-effect2"
+       is_visible="true"
+       lpeversion="1"
+       nodesatellites_param="F,0,0,1,0,1.2798567,0,1 @ F,0,0,1,0,1.2631484,0,1 @ F,0,0,1,0,1.4469398,0,1 @ F,0,0,1,0,1.563898,0,1"
+       radius="0"
+       unit="px"
+       method="auto"
+       mode="F"
+       chamfer_steps="1"
+       flexible="false"
+       use_knot_distance="true"
+       apply_no_radius="true"
+       apply_with_radius="true"
+       only_selected="false"
+       hide_knots="false" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5"
+       id="linearGradient7"
+       x1="0.48521072"
+       y1="5.0348558"
+       x2="7.2349496"
+       y2="5.0348558"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <path
+     style="fill:#ffffff;fill-opacity:1;stroke-width:2.56652;stroke-dasharray:none"
+     id="rect1"
+     width="8.4544058"
+     height="8.4544058"
+     x="0.016708301"
+     y="0.0167083"
+     inkscape:path-effect="#path-effect2"
+     sodipodi:type="rect"
+     d="M 1.296565,0.0167083 H 7.2079657 A 1.2631484,1.2631484 45 0 1 8.4711141,1.2798567 V 7.0241743 A 1.4469398,1.4469398 135 0 1 7.0241743,8.4711141 H 1.5806063 A 1.563898,1.563898 45 0 1 0.0167083,6.9072161 V 1.296565 A 1.2798567,1.2798567 135 0 1 1.296565,0.0167083 Z" />
+  <text
+     xml:space="preserve"
+     style="font-style:italic;font-size:2.19713px;font-family:'System Font';-inkscape-font-specification:'System Font Italic';letter-spacing:0.0423333px;word-spacing:0px;writing-mode:lr-tb;direction:ltr;fill:url(#linearGradient7);stroke-width:1.16152;stroke-dasharray:none"
+     x="0.40831152"
+     y="5.5951242"
+     id="text3"
+     transform="scale(1.099436,0.90955726)"><tspan
+       sodipodi:role="line"
+       id="tspan3"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.19713px;font-family:Gabriela;-inkscape-font-specification:Gabriela;letter-spacing:0.0423333px;word-spacing:0px;fill:#000000;fill-opacity:0.306306;stroke-width:1.16152;stroke-dasharray:none"
+       x="0.40831152"
+       y="5.5951242"
+       dx="0"><tspan
+         style="fill:#000000;fill-opacity:1;stroke-width:1.16152;stroke-dasharray:none"
+         id="tspan7">Qu</tspan><tspan
+         style="writing-mode:lr-tb;opacity:1;fill:#000000;fill-opacity:0.317032;paint-order:markers fill stroke"
+         id="tspan8">ran</tspan></tspan></text>
+  <text
+     xml:space="preserve"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.26831px;font-family:Oldenburg;-inkscape-font-specification:Oldenburg;letter-spacing:-0.0079375px;writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke-width:1.6764;stroke-dasharray:none"
+     x="2.4244962"
+     y="3.3341749"
+     id="text1"
+     transform="scale(0.9875681,1.0125884)"><tspan
+       sodipodi:role="line"
+       id="tspan1"
+       style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-family:'Roboto Mono';-inkscape-font-specification:'Roboto Mono Medium';letter-spacing:-0.0079375px;stroke-width:1.6764;stroke-dasharray:none"
+       x="2.4244962"
+       y="3.3341749">write</tspan></text>
+  <rect
+     style="opacity:1;fill:#e8af00;fill-opacity:1;stroke-width:1.24735;stroke-dasharray:none;paint-order:markers fill stroke"
+     id="rect11"
+     width="0.095645942"
+     height="2.0589924"
+     x="3.7939558"
+     y="3.5731385" />
+</svg>

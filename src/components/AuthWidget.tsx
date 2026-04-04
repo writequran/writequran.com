@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { syncCloudToLocal, syncLocalToCloud } from '@/lib/sync-manager';
 import { setActiveUserId } from '@/lib/storage';
 import { createClient } from '@/utils/supabase/client';
@@ -20,8 +21,17 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
   const [info, setInfo] = useState<string | null>(null);
   const authRef = useRef<HTMLDivElement>(null);
   const { t, language } = useLanguage();
+  const searchParams = useSearchParams();
 
   const supabase = createClient();
+
+  useEffect(() => {
+    if (searchParams?.get("update_password") === "true") {
+      setIsOpen(true);
+      setView("set_password");
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user: u } }) => {
@@ -155,7 +165,7 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
     e.preventDefault();
     setLoading(true); setError(null);
     const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${getURL()}/auth/callback`,
+      redirectTo: `${getURL()}/auth/callback?next=${encodeURIComponent('/?update_password=true')}`,
     });
     setLoading(false);
     if (err) { setError(err.message); return; }
