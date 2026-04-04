@@ -7,9 +7,11 @@ import { createClient } from '@/utils/supabase/client';
 import { getURL } from '@/lib/get-url';
 import { useLanguage } from '@/lib/i18n';
 
+import { Suspense } from 'react';
+
 type AuthView = 'signin' | 'signup' | 'forgot' | 'check_email' | 'reset_sent' | 'set_password';
 
-export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
+function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState<AuthView>('signin');
@@ -367,5 +369,13 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
         </div>
       )}
     </div>
+  );
+}
+
+export function AuthWidget(props: { onAuthChange?: () => void }) {
+  return (
+    <Suspense fallback={<div className="w-8 h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 animate-pulse shrink-0 ml-1 sm:ml-4 mr-0 sm:mr-2" />}>
+      <AuthWidgetContent onAuthChange={props.onAuthChange || (() => {})} />
+    </Suspense>
   );
 }
