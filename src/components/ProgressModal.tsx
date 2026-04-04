@@ -25,11 +25,10 @@ function MilestoneCard({
   progressPercent: number;
 }) {
   return (
-    <div className={`rounded-3xl border px-5 py-5 transition-colors ${
-      achieved
+    <div className={`rounded-3xl border px-5 py-5 transition-colors ${achieved
         ? "border-emerald-200 bg-emerald-50/90 dark:border-emerald-800/70 dark:bg-emerald-900/20"
         : "border-neutral-200 bg-neutral-50/80 dark:border-neutral-700 dark:bg-neutral-800/80"
-    }`}>
+      }`}>
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-[10px] uppercase tracking-[0.22em] font-bold text-neutral-400 dark:text-neutral-500">
@@ -38,11 +37,10 @@ function MilestoneCard({
           <h3 className="mt-2 text-base font-semibold text-neutral-800 dark:text-neutral-100">{title}</h3>
           <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{description}</p>
         </div>
-        <div className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] ${
-          achieved
+        <div className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] ${achieved
             ? "bg-emerald-600 text-white"
             : "bg-neutral-200 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300"
-        }`}>
+          }`}>
           {achieved ? "Unlocked" : "Locked"}
         </div>
       </div>
@@ -54,9 +52,8 @@ function MilestoneCard({
         </div>
         <div className="mt-3 h-2 rounded-full bg-neutral-200 dark:bg-neutral-700 overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all duration-500 ${
-              achieved ? "bg-emerald-500" : "bg-[#D6C19E]"
-            }`}
+            className={`h-full rounded-full transition-all duration-500 ${achieved ? "bg-emerald-500" : "bg-[#D6C19E]"
+              }`}
             style={{ width: `${Math.max(0, Math.min(progressPercent, 100))}%` }}
           />
         </div>
