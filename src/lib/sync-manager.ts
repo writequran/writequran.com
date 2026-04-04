@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/client';
 import { getStorage, setStorage } from './storage';
-import { MistakeRecord, ProgressStats } from './stats';
+import { MistakeRecord, ProgressStats, getSurahFinalProgressState } from './stats';
 
 /**
  * Top-level Orchestrator: Pushes Local to Cloud.
@@ -48,6 +48,8 @@ export async function syncLocalToCloud() {
       // Ignore parse errors, default to empty
     }
 
+    const finalState = getSurahFinalProgressState(parseInt(surah, 10));
+
     return {
       user_id: user.id,
       surah_number: parseInt(surah, 10),
@@ -55,7 +57,9 @@ export async function syncLocalToCloud() {
       total_mistake_events: progressStats[surah].totalMistakeEvents,
       total_wrong_attempts: progressStats[surah].totalWrongAttempts,
       last_practiced: new Date(progressStats[surah].lastPracticed).toISOString(),
-      typed_indices: typedIndicesArray
+      typed_indices: typedIndicesArray,
+      completed_ayat_count: finalState.completedAyat,
+      is_completed: finalState.isCompleted
     };
   });
 
