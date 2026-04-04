@@ -15,6 +15,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState<AuthView>('signin');
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,7 +29,37 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   const supabase = createClient();
 
   useEffect(() => {
+    const hash = typeof window !== 'undefined' ? window.location.hash.replace(/^#/, '') : '';
+    const hashParams = new URLSearchParams(hash);
+    const accessToken = hashParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token');
+    const type = hashParams.get('type');
+
+    if (type === 'recovery' && accessToken && refreshToken) {
+      supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      }).then(({ error }) => {
+        if (error) {
+          setError(error.message || 'Recovery link is invalid or expired.');
+          setIsRecoveryMode(false);
+          setIsOpen(true);
+          setView('signin');
+          return;
+        }
+
+        resetForm();
+        setError(null);
+        setIsRecoveryMode(true);
+        setIsOpen(true);
+        setView('set_password');
+        window.history.replaceState(null, "", window.location.pathname);
+      });
+      return;
+    }
+
     if (searchParams?.get("update_password") === "true") {
+      setIsRecoveryMode(true);
       setIsOpen(true);
       setView("set_password");
       window.history.replaceState(null, "", window.location.pathname);
@@ -58,6 +89,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
         // User clicked the reset link and has a valid recovery session.
         // Show the set-new-password form immediately — do NOT redirect to sign-in.
         resetForm();
+        setIsRecoveryMode(true);
         setView('set_password');
         setIsOpen(true);
       }
@@ -76,6 +108,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      if (isRecoveryMode && view === 'set_password') return;
       if (authRef.current && !authRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
@@ -86,7 +119,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
       document.removeEventListener("mousedown", handleClickOutside);
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen]);
+  }, [isOpen, isRecoveryMode, view]);
 
   const resetForm = () => {
     setEmail('');
@@ -167,7 +200,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
     e.preventDefault();
     setLoading(true); setError(null);
     const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${getURL()}/auth/callback?next=${encodeURIComponent('/?update_password=true')}`,
+      redirectTo: `${getURL()}/auth/callback?next=/?update_password=true`,
     });
     setLoading(false);
     if (err) { setError(err.message); return; }
@@ -206,8 +239,10 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
     await supabase.auth.signOut();
     setActiveUserId(null);
     setUser(null);
+    setIsRecoveryMode(false);
     resetForm();
     setView('signin');
+    setIsOpen(false);
     setInfo('Password updated! Sign in with your new password.');
     onAuthChange();
   };
@@ -219,8 +254,10 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
     setSyncing(false);
   };
 
+  const isRecoveryPasswordFlow = isRecoveryMode && view === 'set_password';
+
   // ─── Signed-in state ────────────────────────────────────────────────────────
-  if (user) {
+  if (user && !isRecoveryPasswordFlow) {
     return (
       <div className="flex items-center gap-3 ml-4 mr-2">
         <div className="flex flex-col items-end">
@@ -246,10 +283,20 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   return (
     <div className="relative">
       <button
-        onClick={() => { setIsOpen(!isOpen); if (!isOpen) { resetForm(); setView('signin'); } }}
+        onClick={() => { 
+          setIsOpen(!isOpen); 
+          if (!isOpen) { 
+            if (isRecoveryMode) {
+              setView('set_password');
+            } else {
+              resetForm(); 
+              setView('signin'); 
+            }
+          } 
+        }}
         className="px-2 sm:px-4 py-1 sm:py-1.5 text-[10px] sm:text-xs font-bold text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E] dark:hover:border-[#D6C19E] hover:bg-white dark:hover:bg-neutral-900 transition-all rounded-full ml-1 sm:ml-4 mr-0 sm:mr-2 shadow-sm whitespace-nowrap"
       >
-        {t("sign_in")}
+        {isRecoveryPasswordFlow ? "Set Password" : t("sign_in")}
       </button>
 
       {isOpen && (
@@ -287,6 +334,13 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
                 {error && <p className="text-xs text-red-500">{error}</p>}
                 <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
                   {loading ? 'Updating...' : 'Set New Password'}
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => { setIsRecoveryMode(false); setIsOpen(false); setView('signin'); }} 
+                  className="w-full text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 mt-2"
+                >
+                  Cancel
                 </button>
               </form>
             </>
