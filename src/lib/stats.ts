@@ -71,8 +71,18 @@ export const getSurahFinalProgressState = (surahNumber: number): SurahFinalProgr
     }
   }
 
-  const totalLetters = surahData.globalCheckString.length;
-  const typedCount = Array.from(typedIndices).filter((index) => index >= 0 && index < totalLetters).length;
+  let totalLetters = 0;
+  let typedCount = 0;
+
+  for (let i = 0; i < surahData.globalCheckString.length; i++) {
+    const char = surahData.globalCheckString[i];
+    if (char !== ' ' && char !== '\u200C') {
+      totalLetters++;
+      if (typedIndices.has(i)) {
+        typedCount++;
+      }
+    }
+  }
 
   let completedAyat = 0;
   for (const block of surahData.blocks) {
