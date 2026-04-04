@@ -54,7 +54,21 @@ export async function GET(request: NextRequest) {
   })
 
   const buildRedirect = (path: string) => {
-    const res = NextResponse.redirect(`${siteUrl}${path}`)
+    let redirectUrl: URL;
+    try {
+      redirectUrl = new URL(path, siteUrl)
+    } catch (e) {
+      redirectUrl = new URL('/', siteUrl)
+    }
+
+    // Preserve original query parameters (like update_password)
+    searchParams.forEach((value, key) => {
+      if (!['code', 'token_hash', 'type', 'next'].includes(key)) {
+        redirectUrl.searchParams.set(key, value)
+      }
+    })
+
+    const res = NextResponse.redirect(redirectUrl.href)
     cookiesToSet.forEach(({ name, value, options }) => {
       res.cookies.set({ name, value, ...options } as any)
     })
