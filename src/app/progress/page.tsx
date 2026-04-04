@@ -65,7 +65,7 @@ export default function ProgressPage() {
   const { t, language, n, setLanguage } = useLanguage();
   const [isMounted, setIsMounted] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [surahStats, setSurahStats] = useState<{ number: number; name: string; englishName: string; progress: number; ayahCount: number }[]>([]);
+  const [surahStats, setSurahStats] = useState<{ number: number; name: string; englishName: string; progress: number; ayahCount: number; typedCount: number; totalLetters: number }[]>([]);
 
   const milestones = useMemo(() => {
     if (!isMounted) return null;
@@ -98,20 +98,29 @@ export default function ProgressPage() {
     const computedStats = allSurahs.map(surah => {
       let ayahCount = 0;
       let progressPercent = 0;
+      let typedCount = 0;
+      let totalLetters = 0;
       try {
         const sData = getSurah(surah.number);
+        const finalState = getSurahFinalProgressState(surah.number);
         ayahCount = sData.blocks.length;
-        progressPercent = getSurahFinalProgressState(surah.number).progressPercent;
+        progressPercent = finalState.progressPercent;
+        typedCount = finalState.typedCount;
+        totalLetters = finalState.totalLetters;
       } catch (e) {
         ayahCount = 0;
         progressPercent = 0;
+        typedCount = 0;
+        totalLetters = 0;
       }
       return {
         number: surah.number,
         name: surah.name,
         englishName: surah.englishName,
         progress: progressPercent,
-        ayahCount
+        ayahCount,
+        typedCount,
+        totalLetters
       };
     });
 
@@ -247,22 +256,29 @@ export default function ProgressPage() {
                 >
                   <div className="flex justify-between items-start mb-0">
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className={`flex items-center justify-center min-w-10 h-10 px-3 rounded-full text-xs font-bold ${
-                        isCompleted
+                      <div className={`flex items-center justify-center min-w-10 h-10 px-3 rounded-full text-xs font-bold ${isCompleted
                           ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-200"
                           : isStarted
                             ? "bg-[#D6C19E]/20 dark:bg-[#D6C19E]/25 text-[#B18E4E] dark:text-[#E3BE72]"
                             : "bg-neutral-100 dark:bg-neutral-700/90 text-neutral-500 dark:text-neutral-300"
-                      }`}>
+                        }`}>
                         {n(surah.number)}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h4 className="text-xl font-bold text-neutral-800 dark:text-neutral-100 font-quran truncate">
-                          {language === "ar" ? surah.name : surah.englishName}
-                        </h4>
-                        <p className="mt-0.5 text-[11px] font-semibold tracking-wide text-neutral-400 dark:text-neutral-500">
-                          {n(surah.ayahCount)} {language === "ar" ? "آيات" : "Ayahs"}
-                        </p>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <h4 className="text-xl font-bold text-neutral-800 dark:text-neutral-100 font-quran truncate">
+                              {language === "ar" ? surah.name : surah.englishName}
+                            </h4>
+                            <p className="mt-0.5 text-[11px] font-semibold tracking-wide text-neutral-400 dark:text-neutral-500">
+                              {n(surah.ayahCount)} {language === "ar" ? "آيات" : "Ayahs"}
+                            </p>
+                          </div>
+                          <span className="shrink-0 self-center pt-1 text-sm font-bold tracking-wide">
+                            <span className="text-emerald-600 dark:text-emerald-400">{n(surah.typedCount)}</span>
+                            <span className="text-neutral-700 dark:text-neutral-200">/{n(surah.totalLetters)}</span>
+                          </span>
+                        </div>
                       </div>
                     </div>
                     {isCompleted && (
