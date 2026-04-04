@@ -19,7 +19,7 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const authRef = useRef<HTMLDivElement>(null);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const supabase = createClient();
 
@@ -241,7 +241,7 @@ export function AuthWidget({ onAuthChange }: { onAuthChange: () => void }) {
       </button>
 
       {isOpen && (
-        <div ref={authRef} className="absolute top-full mt-2 w-72 right-0 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl p-4 z-50">
+        <div ref={authRef} className={`absolute top-full mt-2 w-72 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl p-4 z-50 ${language === 'ar' ? 'left-0' : 'right-0'}`}>
 
           {/* ── Check your email ── */}
           {view === 'check_email' && (

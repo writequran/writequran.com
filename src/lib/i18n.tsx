@@ -326,7 +326,7 @@ export const translations: Record<Language, Dictionary> = {
     "check_email": "تحقق من بريدك لفتح الرابط!",
     "continue": "متابعة",
     "email": "البريد الإلكتروني",
-    "password_min_6": "كلمة المرور (6 حروف على الأقل)",
+    "password_min_6": "كلمة المرور (٦ حروف على الأقل)",
     "forgot_password_q": "نسيت كلمة المرور؟",
     "need_account_signup": "ليس لديك حساب؟ إنشاء حساب",
     "have_account_signin": "لديك حساب بالفعل؟ تسجيل الدخول",
