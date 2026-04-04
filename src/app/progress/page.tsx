@@ -251,14 +251,20 @@ export default function ProgressPage() {
                 >
                   <div className="flex justify-between items-start mb-0">
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="flex items-center justify-center min-w-10 h-10 px-3 rounded-full bg-neutral-100 dark:bg-neutral-700/90 text-xs font-bold text-neutral-500 dark:text-neutral-300">
+                      <div className={`flex items-center justify-center min-w-10 h-10 px-3 rounded-full text-xs font-bold ${
+                        isCompleted
+                          ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-200"
+                          : isStarted
+                            ? "bg-[#D6C19E]/20 dark:bg-[#D6C19E]/25 text-[#B18E4E] dark:text-[#E3BE72]"
+                            : "bg-neutral-100 dark:bg-neutral-700/90 text-neutral-500 dark:text-neutral-300"
+                      }`}>
                         {n(surah.number)}
                       </div>
-                      <div className="flex items-center justify-between gap-3 min-w-0 flex-1">
+                      <div className="min-w-0 flex-1">
                         <h4 className="text-xl font-bold text-neutral-800 dark:text-neutral-100 font-quran truncate">
                           {language === "ar" ? surah.name : surah.englishName}
                         </h4>
-                        <p className="shrink-0 text-right text-[11px] font-semibold tracking-wide text-neutral-400 dark:text-neutral-500">
+                        <p className="mt-0.5 text-[11px] font-semibold tracking-wide text-neutral-400 dark:text-neutral-500">
                           {n(surah.ayahCount)} {language === "ar" ? "آيات" : "Ayahs"}
                         </p>
                       </div>
