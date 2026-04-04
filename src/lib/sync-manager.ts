@@ -38,14 +38,26 @@ export async function syncLocalToCloud() {
 
   // 3. Surah Progress
   const progressStats: Record<string, ProgressStats> = JSON.parse(getStorage('progress_stats') || '{}');
-  const progressUpserts = Object.keys(progressStats).map(surah => ({
-    user_id: user.id,
-    surah_number: parseInt(surah, 10),
-    highest_index_reached: progressStats[surah].highestIndexReached,
-    total_mistake_events: progressStats[surah].totalMistakeEvents,
-    total_wrong_attempts: progressStats[surah].totalWrongAttempts,
-    last_practiced: new Date(progressStats[surah].lastPracticed).toISOString()
-  }));
+  const progressUpserts = Object.keys(progressStats).map(surah => {
+    // Collect specific typed indices for true-letter-retention across devices
+    let typedIndicesArray: number[] = [];
+    try {
+      const savedIndices = getStorage(`typed_indices_${surah}`);
+      if (savedIndices) typedIndicesArray = JSON.parse(savedIndices);
+    } catch {
+      // Ignore parse errors, default to empty
+    }
+
+    return {
+      user_id: user.id,
+      surah_number: parseInt(surah, 10),
+      highest_index_reached: progressStats[surah].highestIndexReached,
+      total_mistake_events: progressStats[surah].totalMistakeEvents,
+      total_wrong_attempts: progressStats[surah].totalWrongAttempts,
+      last_practiced: new Date(progressStats[surah].lastPracticed).toISOString(),
+      typed_indices: typedIndicesArray
+    };
+  });
 
   if (progressUpserts.length > 0) {
     await supabase.from('surah_progress').upsert(progressUpserts, { onConflict: 'user_id,surah_number' });
@@ -117,6 +129,8 @@ export async function syncCloudToLocal() {
   if (surahRes.data) {
     surahRes.data.forEach(row => {
       const s = row.surah_number.toString();
+      let shouldUpdateLocalIndices = false;
+
       if (!localProgress[s]) {
         localProgress[s] = {
           surahNumber: row.surah_number,
@@ -125,11 +139,34 @@ export async function syncCloudToLocal() {
           totalWrongAttempts: row.total_wrong_attempts,
           lastPracticed: new Date(row.last_practiced).getTime()
         };
+        shouldUpdateLocalIndices = true;
       } else {
         localProgress[s].highestIndexReached = Math.max(localProgress[s].highestIndexReached, row.highest_index_reached);
         localProgress[s].totalMistakeEvents = Math.max(localProgress[s].totalMistakeEvents, row.total_mistake_events);
         localProgress[s].totalWrongAttempts = Math.max(localProgress[s].totalWrongAttempts, row.total_wrong_attempts);
         localProgress[s].lastPracticed = Math.max(localProgress[s].lastPracticed, new Date(row.last_practiced).getTime());
+        
+        // If exact index count array is larger from cloud, we trust cloud as max authority for specific strokes
+        if (row.typed_indices && Array.isArray(row.typed_indices) && row.typed_indices.length > localProgress[s].highestIndexReached) {
+          shouldUpdateLocalIndices = true;
+        }
+      }
+
+      // Safely orchestrate array merges so true letter metrics survive device migration
+      if (row.typed_indices && Array.isArray(row.typed_indices)) {
+        try {
+          const cloudSet = new Set<number>(row.typed_indices);
+          const localStored = getStorage(`typed_indices_${s}`);
+          const localSet = localStored ? new Set<number>(JSON.parse(localStored)) : new Set<number>();
+          
+          if (cloudSet.size > localSet.size || shouldUpdateLocalIndices) {
+            // Unify them safely natively
+            const mergedArray = Array.from(new Set([...Array.from(cloudSet), ...Array.from(localSet)])).sort((a, b) => a - b);
+            setStorage(`typed_indices_${s}`, JSON.stringify(mergedArray));
+          }
+        } catch {
+          // Fallback if parsing massively corrupts
+        }
       }
     });
     setStorage('progress_stats', JSON.stringify(localProgress));
