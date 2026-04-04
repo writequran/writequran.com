@@ -1,5 +1,4 @@
 import { createServerClient } from '@supabase/ssr'
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 
 /**
@@ -44,22 +43,29 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${siteUrl}/?auth_error=confirmation_failed`)
   }
 
+  const cookiesToSet: Array<{ name: string; value: string; options: object }> = []
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookies: {
+      getAll: () => request.cookies.getAll(),
+      setAll: (cookies) => cookies.forEach(({ name, value, options }) =>
+        cookiesToSet.push({ name, value, options })
+      ),
+    },
+  })
+
+  const buildRedirect = (path: string) => {
+    const res = NextResponse.redirect(`${siteUrl}${path}`)
+    cookiesToSet.forEach(({ name, value, options }) => {
+      res.cookies.set({ name, value, ...options } as any)
+    })
+    return res
+  }
+
   // ── PRIMARY: code flow (official {{ .ConfirmationURL }} → redirect_to) ────────
   // Supabase verifies the email on their side, then bounces the user here with ?code=
   // We exchange it for a real session and set the auth cookie on the response.
   if (code) {
     console.log('[auth/callback] PRIMARY path: exchangeCodeForSession')
-
-    const cookiesToSet: Array<{ name: string; value: string; options: object }> = []
-
-    const supabase = createServerClient(supabaseUrl, supabaseKey, {
-      cookies: {
-        getAll: () => request.cookies.getAll(),
-        setAll: (cookies) => cookies.forEach(({ name, value, options }) =>
-          cookiesToSet.push({ name, value, options })
-        ),
-      },
-    })
 
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
@@ -73,13 +79,8 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('[auth/callback] exchangeCodeForSession SUCCEEDED | user:', data.user?.id)
-
-    const res = NextResponse.redirect(`${siteUrl}${next}`)
-    cookiesToSet.forEach(({ name, value, options }) => {
-      res.cookies.set({ name, value, ...options } as any)
-    })
     console.log('[auth/callback] Session cookies written:', cookiesToSet.map(c => c.name))
-    return res
+    return buildRedirect(next)
   }
 
   // ── FALLBACK: token_hash flow ─────────────────────────────────────────────────
@@ -89,7 +90,6 @@ export async function GET(request: NextRequest) {
   if (token_hash && type) {
     console.log('[auth/callback] FALLBACK path: verifyOtp | type:', type)
 
-    const supabase = createClient(supabaseUrl, supabaseKey)
     const { data, error } = await supabase.auth.verifyOtp({
       token_hash,
       type: type as any,
@@ -105,7 +105,8 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('[auth/callback] verifyOtp SUCCEEDED | user confirmed:', data.user?.id)
-    return NextResponse.redirect(`${siteUrl}${next}`)
+    console.log('[auth/callback] Session cookies written:', cookiesToSet.map(c => c.name))
+    return buildRedirect(next)
   }
 
   // ── Neither param present ─────────────────────────────────────────────────────
