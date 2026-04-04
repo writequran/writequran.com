@@ -200,7 +200,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
     e.preventDefault();
     setLoading(true); setError(null);
     const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${getURL()}/auth/callback?next=/?update_password=true`,
+      redirectTo: `${getURL()}/?update_password=true`,
     });
     setLoading(false);
     if (err) { setError(err.message); return; }
