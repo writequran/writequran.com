@@ -103,7 +103,18 @@ export function MemorizationTestPanel({
   }, [typedIndices, typingMode, wordSegments]);
 
   const currentSegment = currentSegmentIndex >= 0 ? wordSegments[currentSegmentIndex] : null;
-  const score = Math.round((ayahBlock.checkString.length / Math.max(ayahBlock.checkString.length + wrongAttempts, 1)) * 100);
+  const trueAyahLength = useMemo(() => {
+    let total = 0;
+    for (let i = 0; i < ayahBlock.checkString.length; i++) {
+      const char = ayahBlock.checkString[i];
+      if (char !== ' ' && char !== '\u200C') {
+        total++;
+      }
+    }
+    return total;
+  }, [ayahBlock.checkString]);
+
+  const score = Math.round((trueAyahLength / Math.max(trueAyahLength + wrongAttempts, 1)) * 100);
   const currentTargetWord = currentSegment
     ? ayahBlock.checkString.slice(currentSegment.start, currentSegment.end)
     : "";

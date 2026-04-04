@@ -926,8 +926,18 @@ export function TypingArea({
     });
   };
 
-  const typedCount = typedIndices.size;
-  const visualTypedCount = typedCount;
+  const [trueTypedCount, trueTotalLetters] = useMemo(() => {
+    let tCount = 0;
+    let total = 0;
+    for (let i = 0; i < globalCheckString.length; i++) {
+        const char = globalCheckString[i];
+        if (char !== ' ' && char !== '\u200C') {
+            total++;
+            if (typedIndices.has(i)) tCount++;
+        }
+    }
+    return [tCount, total];
+  }, [globalCheckString, typedIndices]);
   const blockClusterMeta = useMemo(() => blocks.map((block) => buildBlockClusterMeta(block)), [blocks]);
 
   const weakHeatmapData = useMemo(() => {
@@ -1097,7 +1107,7 @@ export function TypingArea({
             <span className="text-[9px] uppercase font-bold text-green-500 tracking-widest select-none">{t("done")}</span>
             <div className="flex items-center justify-center w-12 h-12 rounded-full border border-green-500/40 bg-green-50 dark:bg-green-900/10 shadow-sm mt-1">
               <span className="text-[20px] font-bold text-green-600 dark:text-green-400">
-                {n(((visualTypedCount / (globalCheckString.length || 1)) * 100).toFixed(0))}<span className="text-[10px] ml-0.5 opacity-50">%</span>
+                {n(Math.floor((trueTypedCount / (trueTotalLetters || 1)) * 100))}<span className="text-[10px] ml-0.5 opacity-50">%</span>
               </span>
             </div>
           </div>
@@ -1146,7 +1156,7 @@ export function TypingArea({
         </div>
       </div>
 
-      {typedCount === globalCheckString.length && globalCheckString.length > 0 && (
+      {typedIndices.size === globalCheckString.length && globalCheckString.length > 0 && (
         <div className="my-8 flex flex-col items-center animate-in fade-in duration-500">
           <p className="text-3xl font-medium text-green-700 dark:text-green-500 quran-text tracking-normal border-b-2 border-green-500/30 pb-4">
             صَدَقَ اللّٰهُ الْعَظِيمُ
@@ -1362,7 +1372,7 @@ export function TypingArea({
             {/* PROGRESS PERCENTAGE (left) */}
             <div className="absolute left-1 flex items-center justify-center w-8 h-8 rounded-full border border-green-500/40 bg-green-500/5 shadow-sm">
               <span className="text-[10px] font-bold text-green-600 dark:text-green-400">
-                {n(Math.round((visualTypedCount / (globalCheckString.length || 1)) * 100))}%
+                {n(Math.floor((trueTypedCount / (trueTotalLetters || 1)) * 100))}%
               </span>
             </div>
 

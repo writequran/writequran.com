@@ -184,11 +184,8 @@ export default function ProgressPage() {
       <main className="relative z-10 max-w-6xl mx-auto px-6 py-8 sm:py-12 sm:px-10 lg:px-12 flex flex-col gap-16 pb-24">
 
         {/* Page Title section */}
-        <section className="text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6 animate-in slide-in-from-bottom-4 fade-in duration-700">
-          <div>
-            <div className="inline-flex items-center justify-center px-4 py-1.5 mb-4 rounded-full border border-[#D6C19E]/30 bg-[#D6C19E]/10 text-xs font-bold uppercase tracking-widest text-[#B18E4E] dark:text-[#D6C19E]">
-              {t("my_progress") || "My Progress"}
-            </div>
+        <section className="text-center flex flex-col items-center justify-center gap-6 animate-in slide-in-from-bottom-4 fade-in duration-700">
+          <div className="text-center">
             <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-50 mb-4">
               {t("my_progress_desc") || "See your milestones and journey."}
             </h2>
@@ -233,8 +230,13 @@ export default function ProgressPage() {
             <h3 className="text-2xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100">
               {t("surah_progress") || "Surah Progress"}
             </h3>
-            <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-800 px-4 py-1.5 rounded-full shadow-sm border border-neutral-100 dark:border-neutral-700">
-              {n(surahStats.filter(s => s.progress === 100).length)} / {n(114)} {t("completed") || "Completed"}
+            <span className="text-sm font-semibold bg-white dark:bg-neutral-800 px-4 py-1.5 rounded-full shadow-sm border border-neutral-100 dark:border-neutral-700">
+              <span dir="ltr" className="inline-flex items-center gap-1">
+              <span className="text-emerald-500 dark:text-emerald-300 drop-shadow-[0_0_10px_rgba(110,231,183,0.45)] dark:drop-shadow-[0_0_14px_rgba(167,243,208,0.75)]">
+                {n(surahStats.filter(s => s.progress === 100).length)}
+              </span>
+              <span className="text-neutral-500 dark:text-neutral-400"> / {n(114)}</span>
+              </span>
             </span>
           </div>
 
@@ -257,10 +259,10 @@ export default function ProgressPage() {
                   <div className="flex justify-between items-start mb-0">
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className={`flex items-center justify-center min-w-10 h-10 px-3 rounded-full text-xs font-bold ${isCompleted
-                          ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-200"
-                          : isStarted
-                            ? "bg-[#D6C19E]/20 dark:bg-[#D6C19E]/25 text-[#B18E4E] dark:text-[#E3BE72]"
-                            : "bg-neutral-100 dark:bg-neutral-700/90 text-neutral-500 dark:text-neutral-300"
+                        ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-200"
+                        : isStarted
+                          ? "bg-[#D6C19E]/20 dark:bg-[#D6C19E]/25 text-[#B18E4E] dark:text-[#E3BE72]"
+                          : "bg-neutral-100 dark:bg-neutral-700/90 text-neutral-500 dark:text-neutral-300"
                         }`}>
                         {n(surah.number)}
                       </div>
@@ -275,7 +277,12 @@ export default function ProgressPage() {
                             </p>
                           </div>
                           <span className="shrink-0 self-center pt-1 text-sm font-bold tracking-wide">
-                            <span className="text-emerald-600 dark:text-emerald-400">{n(surah.typedCount)}</span>
+                            <span className={isStarted
+                              ? "text-emerald-600 dark:text-emerald-400 drop-shadow-[0_0_8px_rgba(110,231,183,0.35)] dark:drop-shadow-[0_0_12px_rgba(167,243,208,0.6)]"
+                              : "text-emerald-600 dark:text-emerald-400"
+                            }>
+                              {n(surah.typedCount)}
+                            </span>
                             <span className="text-neutral-700 dark:text-neutral-200">/{n(surah.totalLetters)}</span>
                           </span>
                         </div>
