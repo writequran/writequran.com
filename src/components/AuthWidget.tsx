@@ -9,15 +9,16 @@ import { useLanguage } from '@/lib/i18n';
 
 import { Suspense } from 'react';
 
-type AuthView = 'signin' | 'signup' | 'forgot' | 'check_email' | 'reset_sent' | 'set_password';
+type AuthView = 'signin' | 'signup' | 'forgot' | 'check_email' | 'reset_sent' | 'set_password' | 'set_username';
 
 function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
-  const [user, setUser] = useState<{ id: string; email: string } | null>(null);
+  const [user, setUser] = useState<{ id: string; email: string; username?: string | null } | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState<AuthView>('signin');
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,13 +70,19 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user: u } }) => {
       if (u) {
-        setUser({ id: u.id, email: u.email || '' });
+        const checkUsername = u.user_metadata?.username;
+        setUser({ id: u.id, email: u.email || '', username: checkUsername });
         setActiveUserId(u.id);
         setSyncing(true);
         syncCloudToLocal().finally(() => {
           setSyncing(false);
           onAuthChange();
         });
+        
+        if (!checkUsername) {
+          setIsOpen(true);
+          setView('set_username');
+        }
       }
     });
 
@@ -109,6 +116,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isRecoveryMode && view === 'set_password') return;
+      if (user && !user.username && view === 'set_username') return; // Keep open for prompt
       if (authRef.current && !authRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
@@ -124,6 +132,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   const resetForm = () => {
     setEmail('');
     setPassword('');
+    setUsername('');
     setError(null);
     setInfo(null);
   };
@@ -149,10 +158,19 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
       return;
     }
     if (!data.user) { setError('Sign in failed. Please try again.'); return; }
+    
+    const signedInUsername = data.user.user_metadata?.username;
     setActiveUserId(data.user.id);
-    setUser({ id: data.user.id, email: data.user.email || '' });
-    setIsOpen(false);
-    resetForm();
+    setUser({ id: data.user.id, email: data.user.email || '', username: signedInUsername });
+    
+    if (!signedInUsername) {
+      setView('set_username');
+      setIsOpen(true);
+    } else {
+      setIsOpen(false);
+      resetForm();
+    }
+    
     setSyncing(true);
     await syncCloudToLocal();
     setSyncing(false);
@@ -162,10 +180,15 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true); setError(null);
+    if (username.trim().length < 3) {
+      setError('Username must be at least 3 characters.');
+      setLoading(false); return;
+    }
     const { data, error: err } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        data: { username: username.trim() },
         emailRedirectTo: `${getURL()}/auth/callback`,
       },
     });
@@ -183,7 +206,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
     if (data.session) {
       // Email confirmation disabled in Supabase — user is immediately signed in
       setActiveUserId(data.user!.id);
-      setUser({ id: data.user!.id, email: data.user!.email || '' });
+      setUser({ id: data.user!.id, email: data.user!.email || '', username: username.trim() });
       setIsOpen(false);
       resetForm();
       setSyncing(true);
@@ -247,6 +270,27 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
     onAuthChange();
   };
 
+  const handleSetUsername = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (username.trim().length < 3) { setError('Username must be at least 3 characters.'); return; }
+    setLoading(true); setError(null);
+    // This updates raw_user_meta_data and securely triggers our db migration on_auth_user_updated
+    const { error: err } = await supabase.auth.updateUser({ data: { username: username.trim() } });
+    setLoading(false);
+    if (err) {
+      // Very likely a uniqueness constraint collision from user_profiles trigger if taken
+      setError(err.message.includes('duplicate key') ? 'Username is already taken.' : 'Failed to save username. Try again.');
+      return;
+    }
+    const cleanUsername = username.trim();
+    setUser(prev => prev ? { ...prev, username: cleanUsername } : null);
+    setInfo('Username set successfully!');
+    setTimeout(() => {
+      setIsOpen(false);
+      resetForm();
+    }, 1500);
+  };
+
   const forceSync = async () => {
     if (syncing) return;
     setSyncing(true);
@@ -255,13 +299,16 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   };
 
   const isRecoveryPasswordFlow = isRecoveryMode && view === 'set_password';
+  const forcesSetUsernameFlow = user && !user.username;
 
   // ─── Signed-in state ────────────────────────────────────────────────────────
-  if (user && !isRecoveryPasswordFlow) {
+  if (user && !isRecoveryPasswordFlow && !forcesSetUsernameFlow) {
     return (
       <div className="flex items-center gap-3 ml-4 mr-2">
         <div className="flex flex-col items-end">
-          <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest leading-tight">{user.email.split('@')[0]}</span>
+          <span className="text-[10px] font-bold text-neutral-400 capitalize tracking-widest leading-tight">
+            {user.username || user.email.split('@')[0]}
+          </span>
           <button onClick={forceSync} className="text-[10px] font-medium text-[#D6C19E] hover:text-[#c2ad8a] flex items-center gap-1 transition-colors">
             {syncing ? t("syncing") : t("synced")}
             <div className={`w-1.5 h-1.5 rounded-full ${syncing ? 'bg-orange-400 animate-pulse' : 'bg-green-500'}`} />
@@ -296,7 +343,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
         }}
         className="px-2 sm:px-4 py-1 sm:py-1.5 text-[10px] sm:text-xs font-bold text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E] dark:hover:border-[#D6C19E] hover:bg-white dark:hover:bg-neutral-900 transition-all rounded-full ml-1 sm:ml-4 mr-0 sm:mr-2 shadow-sm whitespace-nowrap"
       >
-        {isRecoveryPasswordFlow ? "Set Password" : t("sign_in")}
+        {forcesSetUsernameFlow ? "Set Username" : (isRecoveryPasswordFlow ? "Set Password" : t("sign_in"))}
       </button>
 
       {isOpen && (
@@ -315,6 +362,29 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
               {info && <p className="text-xs text-green-600">{info}</p>}
               <button onClick={() => switchView('signin')} className="text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 mt-1">Back to sign in</button>
             </div>
+          )}
+
+          {/* ── Set Username for existing users ── */}
+          {view === 'set_username' && (
+            <>
+              <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-1">Set Your Username</h3>
+              <p className="text-xs text-neutral-500 mb-3">To join the global leaderboard, you must choose a unique public username.</p>
+              <form onSubmit={handleSetUsername} className="flex flex-col gap-2">
+                <input
+                  required
+                  type="text"
+                  placeholder="Username (e.g. musa42)"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200"
+                />
+                {error && <p className="text-xs text-red-500">{error}</p>}
+                {info && <p className="text-xs text-green-600">{info}</p>}
+                <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
+                  {loading ? 'Saving...' : 'Save Username'}
+                </button>
+              </form>
+            </>
           )}
 
           {/* ── Set new password (PASSWORD_RECOVERY flow) ── */}
@@ -407,6 +477,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
             <>
               <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-3">{t("create_account")}</h3>
               <form onSubmit={handleSignUp} className="flex flex-col gap-2">
+                <input required type="text" placeholder="Unique Username" value={username} onChange={e => setUsername(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
                 <input required type="email" placeholder={t("email")} value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
                 <input required type="password" placeholder={t("password_min_6")} value={password} onChange={e => setPassword(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
                 {error && <p className="text-xs text-red-500">{error}</p>}

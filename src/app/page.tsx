@@ -266,6 +266,22 @@ export default function LandingPage() {
             </div>
           </Link>
 
+          <Link href="/leaderboard" className={`group relative overflow-hidden rounded-3xl bg-white dark:bg-neutral-800/80 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm ${language === "ar" ? "text-right" : "text-left"}`}>
+            <div className={`absolute -top-4 ${language === "ar" ? "-left-4" : "-right-4"} p-6 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-all duration-500 scale-50 group-hover:scale-150 ${language === "ar" ? "rotate-[15deg]" : "rotate-[-15deg]"} group-hover:rotate-0`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#D6C19E" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            </div>
+            <div className="mb-8 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            </div>
+            <h3 className="mb-3 text-2xl font-bold text-neutral-800 dark:text-neutral-100">{t("leaderboard")}</h3>
+            <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
+              {t("leaderboard_desc")}
+            </p>
+            <div className="mt-8 flex items-center text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E] group-hover:gap-2 transition-all">
+              {t("view_rankings")} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 rtl:rotate-180"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+            </div>
+          </Link>
+
         </div>
       </main>
 

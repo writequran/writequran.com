@@ -50,6 +50,9 @@ export const translations: Record<Language, Dictionary> = {
     "from_surah": "From Surah:",
     "to_surah": "To Surah:",
     "start_testing": "Start Testing",
+    "leaderboard": "Global Leaderboard",
+    "leaderboard_desc": "See top players worldwide sorted by typed letters and surahs.",
+    "view_rankings": "View Rankings",
 
     // Drawers and Navigation
     "write_quran": "Write Quran",
@@ -213,6 +216,9 @@ export const translations: Record<Language, Dictionary> = {
     "from_surah": "من سورة:",
     "to_surah": "إلى سورة:",
     "start_testing": "ابدأ الاختبار",
+    "leaderboard": "المتصدرون عالمياً",
+    "leaderboard_desc": "شاهد أفضل اللاعبين مرتبين حسب الحروف والسور المكتملة.",
+    "view_rankings": "عرض التصنيف",
 
     // Drawers and Navigation
     "write_quran": "Write Quran",
