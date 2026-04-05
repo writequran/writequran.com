@@ -9,6 +9,7 @@ import { getStorage, setStorage } from "@/lib/storage";
 import { loadActivityHistory } from "@/lib/stats";
 
 interface LeaderboardProfile {
+  global_rank: number;
   user_id: string;
   username: string;
   public_display_name: string;
@@ -19,6 +20,16 @@ interface LeaderboardProfile {
   accuracy_percentage: number;
   streak_active: number;
   hifz_score: number;
+}
+
+interface PublicProfileMeta {
+  user_id: string;
+  username: string;
+  public_display_name: string;
+  created_at: string;
+  streak_last_active_date: string | null;
+  last_practiced_at: string | null;
+  global_rank: number | null;
 }
 
 type ActivityCell = {
@@ -61,6 +72,7 @@ export default function LeaderboardProfilePage() {
   const [isMounted, setIsMounted] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [profile, setProfile] = useState<LeaderboardProfile | null>(null);
+  const [profileMeta, setProfileMeta] = useState<PublicProfileMeta | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [activeUsername, setActiveUsername] = useState<string | null>(null);
@@ -95,16 +107,26 @@ export default function LeaderboardProfilePage() {
       }
 
       const supabase = createClient();
-      const { data, error } = await supabase.rpc("get_leaderboard_profile", {
-        profile_username: decodeURIComponent(username),
-      });
+      const [profileRes, metaRes] = await Promise.all([
+        supabase.rpc("get_leaderboard_profile", {
+          profile_username: decodeURIComponent(username),
+        }),
+        supabase.rpc("get_public_profile_meta", {
+          profile_username: decodeURIComponent(username),
+        }),
+      ]);
 
-      if (error) {
-        setLoadError(error.message || "Failed to load player profile.");
+      if (profileRes.error) {
+        setLoadError(profileRes.error.message || "Failed to load player profile.");
       } else {
-        const nextProfile = Array.isArray(data) ? data[0] : null;
+        const nextProfile = Array.isArray(profileRes.data) ? profileRes.data[0] : null;
         setProfile(nextProfile || null);
         setDisplayNameInput(nextProfile?.public_display_name || "");
+      }
+
+      if (!metaRes.error) {
+        const nextMeta = Array.isArray(metaRes.data) ? metaRes.data[0] : null;
+        setProfileMeta(nextMeta || null);
       }
 
       setLoading(false);
@@ -135,13 +157,16 @@ export default function LeaderboardProfilePage() {
     return <div className="min-h-screen bg-[#FDFBF7] dark:bg-neutral-900 transition-colors duration-500" />;
   }
 
-  const statCards = profile ? [
+  const primaryStatCards = profile ? [
     { label: t("rating"), value: n(profile.hifz_score) },
-    { label: t("typed_letters"), value: n(profile.total_letters_typed) },
-    { label: t("completed_surahs"), value: n(profile.total_completed_surahs) },
     { label: t("completed_ayat"), value: n(profile.total_ayat_completed) },
-    { label: t("practiced_surahs"), value: n(profile.total_surahs_practiced) },
+    { label: t("typed_letters"), value: n(profile.total_letters_typed) },
     { label: t("accuracy"), value: `${n(profile.accuracy_percentage)}%` },
+  ] : [];
+
+  const secondaryStatCards = profile ? [
+    { label: t("completed_surahs"), value: n(profile.total_completed_surahs) },
+    { label: t("practiced_surahs"), value: n(profile.total_surahs_practiced) },
     { label: t("streak"), value: n(profile.streak_active) },
   ] : [];
 
@@ -249,6 +274,28 @@ export default function LeaderboardProfilePage() {
   };
 
   const visibleDisplayName = profile?.public_display_name || (profile ? maskUsername(profile.username) : "");
+  const formatProfileDate = (value?: string | null, mode: "long" | "month" = "long") => {
+    if (!value) return null;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+    return new Intl.DateTimeFormat(language === "ar" ? "ar" : "en", {
+      year: "numeric",
+      month: mode === "month" ? "long" : "short",
+      ...(mode === "long" ? { day: "numeric" } : {}),
+    }).format(date);
+  };
+  const joinedDateLabel = formatProfileDate(profileMeta?.created_at, "month");
+  const lastActiveLabel = formatProfileDate(profileMeta?.last_practiced_at || profileMeta?.streak_last_active_date, "long");
+  const identitySummary = profile ? [
+    profileMeta?.global_rank ? `${t("rank")} #${n(profileMeta.global_rank)}` : null,
+    joinedDateLabel ? `${t("joined")} ${joinedDateLabel}` : null,
+    lastActiveLabel ? `${t("last_active")} ${lastActiveLabel}` : null,
+  ].filter(Boolean) : [];
+  const recentActivitySummary = profile ? (
+    profile.streak_active > 0 && lastActiveLabel
+      ? `${t("recent_activity_summary_active")} ${lastActiveLabel}. ${t("current_streak_summary")} ${n(profile.streak_active)} ${t("days_label")}.`
+      : `${t("recent_activity_summary_progress")} ${n(profile.total_surahs_practiced)} ${t("practiced_surahs").toLowerCase()} · ${n(profile.total_ayat_completed)} ${t("completed_ayat").toLowerCase()}.`
+  ) : "";
 
   const handleSaveDisplayName = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -326,21 +373,59 @@ export default function LeaderboardProfilePage() {
           <div className="p-12 text-center text-neutral-500 dark:text-neutral-400 font-medium">{t("player_not_found")}</div>
         ) : (
           <>
-            <section className="text-center flex flex-col items-center justify-center gap-4 animate-in slide-in-from-bottom-4 fade-in duration-700">
-              <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] mb-2 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 21a8 8 0 1 0-12 0" /><circle cx="12" cy="7" r="4" /></svg>
+            <section className="animate-in slide-in-from-bottom-4 fade-in duration-700">
+              <div className="rounded-[2rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-7 sm:py-7 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] backdrop-blur-xl">
+                <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+                  <div className="flex items-start gap-4 sm:gap-5">
+                    <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] shadow-sm shrink-0">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 21a8 8 0 1 0-12 0" /><circle cx="12" cy="7" r="4" /></svg>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.28em] text-neutral-400 dark:text-neutral-500">
+                        {t("player_profile")}
+                      </p>
+                      <h2 className="mt-2 text-4xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-50 break-all">
+                        {visibleDisplayName}
+                      </h2>
+                      {isOwnProfile ? (
+                        <p className="mt-2 text-sm font-semibold text-neutral-400 dark:text-neutral-500">
+                          @{profile.username}
+                        </p>
+                      ) : null}
+                      {identitySummary.length > 0 ? (
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {identitySummary.map((item) => (
+                            <span
+                              key={item}
+                              className="rounded-full border border-[#D6C19E]/25 bg-[#F8F1E6]/85 dark:bg-neutral-900/65 dark:border-[#D6C19E]/20 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#B18E4E] dark:text-[#D6C19E]"
+                            >
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                  <div className="flex items-start justify-start md:justify-end">
+                    <div className="rounded-[1.5rem] border border-[#D6C19E]/30 bg-[#F8F1E6]/85 dark:bg-neutral-900/70 dark:border-[#D6C19E]/20 px-5 py-4 min-w-[7rem] text-center shadow-sm">
+                      <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#B18E4E] dark:text-[#D6C19E]">
+                        {t("rank")}
+                      </div>
+                      <div className="mt-2 text-3xl font-black text-neutral-900 dark:text-neutral-50">
+                        {profileMeta?.global_rank ? `#${n(profileMeta.global_rank)}` : "—"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-5 rounded-[1.5rem] border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4">
+                  <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-neutral-400 dark:text-neutral-500">
+                    {t("recent_activity")}
+                  </div>
+                  <p className="mt-2 text-sm sm:text-base font-semibold leading-relaxed text-neutral-700 dark:text-neutral-200">
+                    {recentActivitySummary}
+                  </p>
+                </div>
               </div>
-              <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.28em] text-neutral-400 dark:text-neutral-500">
-                {t("player_profile")}
-              </p>
-              <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-50 break-all">
-                {visibleDisplayName}
-              </h2>
-              {isOwnProfile ? (
-                <p className="text-sm font-semibold text-neutral-400 dark:text-neutral-500">
-                  @{profile.username}
-                </p>
-              ) : null}
             </section>
 
             {isOwnProfile && (
@@ -383,7 +468,7 @@ export default function LeaderboardProfilePage() {
             )}
 
             <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-in slide-in-from-bottom-6 fade-in duration-900">
-              {statCards.map((card) => (
+              {primaryStatCards.map((card) => (
                 <div
                   key={card.label}
                   className="rounded-[1.75rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] backdrop-blur-xl"
@@ -391,7 +476,23 @@ export default function LeaderboardProfilePage() {
                   <div className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.24em] text-neutral-400 dark:text-neutral-500">
                     {card.label}
                   </div>
-                  <div className="mt-3 text-2xl sm:text-3xl font-black text-neutral-900 dark:text-neutral-50">
+                  <div className="mt-3 text-3xl sm:text-4xl font-black text-neutral-900 dark:text-neutral-50">
+                    {card.value}
+                  </div>
+                </div>
+              ))}
+            </section>
+
+            <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-in slide-in-from-bottom-7 fade-in duration-950">
+              {secondaryStatCards.map((card) => (
+                <div
+                  key={card.label}
+                  className="rounded-[1.5rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/80 dark:bg-neutral-800/55 px-5 py-4 shadow-[0_8px_24px_rgb(0,0,0,0.03)] dark:shadow-[0_8px_24px_rgb(0,0,0,0.16)] backdrop-blur-xl"
+                >
+                  <div className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.24em] text-neutral-400 dark:text-neutral-500">
+                    {card.label}
+                  </div>
+                  <div className="mt-2 text-2xl font-black text-neutral-900 dark:text-neutral-50">
                     {card.value}
                   </div>
                 </div>
