@@ -11,6 +11,7 @@ interface LeaderboardEntry {
   global_rank: number;
   user_id: string;
   username: string;
+  public_display_name: string;
   total_letters_typed: number;
   total_surahs_practiced: number;
   total_completed_surahs: number;
@@ -28,6 +29,14 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeUsername, setActiveUsername] = useState<string | null>(null);
+
+  const maskUsername = (value: string) => {
+    if (!value) return "User";
+    if (value.length <= 2) return `${value[0] || "U"}***`;
+    if (value.length <= 5) return `${value.slice(0, 2)}***`;
+    return `${value.slice(0, 3)}***${value.slice(-1)}`;
+  };
 
   const fetchLeaderboard = useCallback(async () => {
     setLoading(true);
@@ -42,6 +51,7 @@ export default function LeaderboardPage() {
           global_rank: entry.global_rank,
           user_id: entry.user_id,
           username: entry.username,
+          public_display_name: entry.public_display_name,
           total_letters_typed: entry.total_letters_typed,
           total_surahs_practiced: entry.total_surahs_practiced,
           total_completed_surahs: entry.total_completed_surahs,
@@ -62,6 +72,7 @@ export default function LeaderboardPage() {
     setIsDarkMode(initialDark);
     if (initialDark) document.documentElement.classList.add("dark");
     setIsMounted(true);
+    setActiveUsername(getStorage("active_username"));
 
     fetchLeaderboard();
 
@@ -200,8 +211,15 @@ export default function LeaderboardPage() {
                       </span>
                     </div>
                     <div className="col-span-6 sm:col-span-6 min-w-0">
-                      <div className="font-extrabold text-neutral-800 dark:text-neutral-100 truncate text-lg">
-                        {leader.username}
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="font-extrabold text-neutral-800 dark:text-neutral-100 truncate text-lg">
+                          {leader.public_display_name || maskUsername(leader.username)}
+                        </div>
+                        {activeUsername && activeUsername.toLowerCase() === leader.username.toLowerCase() ? (
+                          <span className="shrink-0 rounded-full bg-[#D6C19E]/18 dark:bg-[#D6C19E]/12 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#B18E4E] dark:text-[#D6C19E]">
+                            {t("you")}
+                          </span>
+                        ) : null}
                       </div>
                     </div>
                     <div className="col-span-4 sm:col-span-4 text-right">

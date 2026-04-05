@@ -11,6 +11,7 @@ import { loadActivityHistory } from "@/lib/stats";
 interface LeaderboardProfile {
   user_id: string;
   username: string;
+  public_display_name: string;
   total_letters_typed: number;
   total_surahs_practiced: number;
   total_completed_surahs: number;
@@ -65,6 +66,9 @@ export default function LeaderboardProfilePage() {
   const [activeUsername, setActiveUsername] = useState<string | null>(null);
   const [activityHistory, setActivityHistory] = useState<Record<string, number>>({});
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [displayNameInput, setDisplayNameInput] = useState("");
+  const [displayNameLoading, setDisplayNameLoading] = useState(false);
+  const [displayNameMessage, setDisplayNameMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const saved = getStorage("theme");
@@ -100,6 +104,7 @@ export default function LeaderboardProfilePage() {
       } else {
         const nextProfile = Array.isArray(data) ? data[0] : null;
         setProfile(nextProfile || null);
+        setDisplayNameInput(nextProfile?.public_display_name || "");
       }
 
       setLoading(false);
@@ -236,6 +241,45 @@ export default function LeaderboardProfilePage() {
     return "bg-[#B18E4E] dark:bg-[#D6C19E] shadow-[0_0_16px_rgba(177,142,78,0.28)] dark:shadow-[0_0_18px_rgba(214,193,158,0.3)]";
   };
 
+  const maskUsername = (value: string) => {
+    if (!value) return "User";
+    if (value.length <= 2) return `${value[0] || "U"}***`;
+    if (value.length <= 5) return `${value.slice(0, 2)}***`;
+    return `${value.slice(0, 3)}***${value.slice(-1)}`;
+  };
+
+  const visibleDisplayName = profile?.public_display_name || (profile ? maskUsername(profile.username) : "");
+
+  const handleSaveDisplayName = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profile) return;
+    const cleaned = displayNameInput.trim();
+    if (cleaned.length < 3) {
+      setDisplayNameMessage(t("public_display_name_error"));
+      return;
+    }
+
+    setDisplayNameLoading(true);
+    setDisplayNameMessage(null);
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("user_profiles")
+      .update({ public_display_name: cleaned })
+      .eq("id", profile.user_id);
+
+    setDisplayNameLoading(false);
+
+    if (error) {
+      const duplicateError = error.message?.toLowerCase().includes("duplicate")
+        || error.message?.toLowerCase().includes("unique");
+      setDisplayNameMessage(duplicateError ? t("public_display_name_taken") : (error.message || t("public_display_name_failed")));
+      return;
+    }
+
+    setProfile((prev) => (prev ? { ...prev, public_display_name: cleaned } : prev));
+    setDisplayNameMessage(t("public_display_name_saved"));
+  };
+
   return (
     <div className="min-h-screen bg-[#FDFBF7] dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 font-sans transition-colors duration-500 overflow-x-hidden">
       <div className="fixed top-0 left-0 w-full h-[50vh] bg-gradient-to-b from-[#D6C19E]/10 to-transparent pointer-events-none" />
@@ -290,9 +334,53 @@ export default function LeaderboardProfilePage() {
                 {t("player_profile")}
               </p>
               <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-50 break-all">
-                {profile.username}
+                {visibleDisplayName}
               </h2>
+              {isOwnProfile ? (
+                <p className="text-sm font-semibold text-neutral-400 dark:text-neutral-500">
+                  @{profile.username}
+                </p>
+              ) : null}
             </section>
+
+            {isOwnProfile && (
+              <section className="animate-in slide-in-from-bottom-5 fade-in duration-800">
+                <div className="rounded-[1.75rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] backdrop-blur-xl">
+                  <div className="mb-4">
+                    <h3 className="text-lg font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
+                      {t("public_display_name")}
+                    </h3>
+                    <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                      {t("public_display_name_desc")}
+                    </p>
+                  </div>
+                  <form onSubmit={handleSaveDisplayName} className="flex flex-col sm:flex-row gap-3 sm:items-center">
+                    <input
+                      type="text"
+                      value={displayNameInput}
+                      onChange={(e) => setDisplayNameInput(e.target.value)}
+                      placeholder={t("public_display_name_placeholder")}
+                      className="flex-1 rounded-2xl bg-neutral-50 dark:bg-neutral-900/80 border border-neutral-200 dark:border-neutral-700 px-4 py-3 text-sm font-semibold text-neutral-800 dark:text-neutral-100 outline-none focus:border-[#D6C19E]"
+                    />
+                    <button
+                      type="submit"
+                      disabled={displayNameLoading}
+                      className="rounded-2xl bg-[#D6C19E] hover:bg-[#c2ad8a] disabled:opacity-70 text-white px-5 py-3 text-sm font-bold transition-colors"
+                    >
+                      {displayNameLoading ? t("loading") : t("save_display_name")}
+                    </button>
+                  </form>
+                  {displayNameMessage ? (
+                    <p className={`mt-3 text-sm font-medium ${displayNameMessage === t("public_display_name_taken")
+                      ? "text-red-500 dark:text-red-400"
+                      : "text-[#B18E4E] dark:text-[#D6C19E]"
+                      }`}>
+                      {displayNameMessage}
+                    </p>
+                  ) : null}
+                </div>
+              </section>
+            )}
 
             <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-in slide-in-from-bottom-6 fade-in duration-900">
               {statCards.map((card) => (
