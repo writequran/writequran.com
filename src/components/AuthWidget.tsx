@@ -310,20 +310,20 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   // ─── Signed-in state ────────────────────────────────────────────────────────
   if (user && !isRecoveryPasswordFlow && !forcesSetUsernameFlow) {
     return (
-      <div className="flex items-center gap-3 ml-4 mr-2">
-        <div className="flex flex-col items-end">
-          <span className="text-[10px] font-bold text-neutral-400 capitalize tracking-widest leading-tight">
+      <div className="flex items-center gap-1.5 sm:gap-3 ml-1 sm:ml-4 mr-0 sm:mr-2 min-w-0">
+        <div className="flex flex-col items-end min-w-0">
+          <span className="max-w-[4.75rem] sm:max-w-none truncate text-[9px] sm:text-[10px] font-bold text-neutral-400 capitalize tracking-[0.08em] sm:tracking-widest leading-tight">
             {user.username || user.email.split('@')[0]}
           </span>
-          <button onClick={forceSync} className="text-[10px] font-medium text-[#D6C19E] hover:text-[#c2ad8a] flex items-center gap-1 transition-colors">
-            {syncing ? t("syncing") : t("synced")}
+          <button onClick={forceSync} className="text-[9px] sm:text-[10px] font-medium text-[#D6C19E] hover:text-[#c2ad8a] flex items-center justify-end gap-1 transition-colors">
+            <span className="hidden sm:inline">{syncing ? t("syncing") : t("synced")}</span>
             <div className={`w-1.5 h-1.5 rounded-full ${syncing ? 'bg-orange-400 animate-pulse' : 'bg-green-500'}`} />
           </button>
         </div>
         <button
           onClick={handleLogout}
           disabled={loading}
-          className="w-7 h-7 flex items-center justify-center bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-red-300 hover:text-red-500 rounded-full text-neutral-400 transition-all shadow-sm shrink-0"
+          className="w-8 h-8 sm:w-7 sm:h-7 flex items-center justify-center bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-red-300 hover:text-red-500 rounded-full text-neutral-400 transition-all shadow-sm shrink-0"
           title={t("sign_out")}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>

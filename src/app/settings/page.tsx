@@ -309,7 +309,10 @@ export default function SettingsPage() {
                   ? "bg-[#D6C19E] border-[#D6C19E]/80"
                   : "bg-neutral-200 dark:bg-neutral-700 border-neutral-300 dark:border-neutral-600"
                   }`}>
-                  <div className={`h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.18)] transition-transform duration-200 ${item.enabled ? "translate-x-5" : "translate-x-0"}`} />
+                  <div className={`h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.18)] transition-transform duration-200 ${item.enabled
+                    ? (language === "ar" ? "-translate-x-5" : "translate-x-5")
+                    : "translate-x-0"
+                    }`} />
                 </div>
               </div>
             </button>

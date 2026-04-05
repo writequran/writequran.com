@@ -1,5 +1,6 @@
 import { getAllSurahsMeta, getSurah } from './quran-data';
 import { getStorage, setStorage } from './storage';
+import type { Language } from './i18n';
 
 export interface MistakeRecord {
   surahNumber: number;
@@ -258,7 +259,7 @@ const aggregateWeakSpotStats = () => {
   })).sort((a, b) => b.score - a.score);
 };
 
-export const getReviewAnalytics = (): ReviewAnalytics => {
+export const getReviewAnalytics = (language: Language = 'en'): ReviewAnalytics => {
   const mistakes = loadMistakeStats();
   const reviewStates = loadWeakSpotReviewStates();
   const weakSpots = aggregateWeakSpotStats();
@@ -285,10 +286,13 @@ export const getReviewAnalytics = (): ReviewAnalytics => {
     .map(([surahNumber, data]) => {
       const numericSurahNumber = Number(surahNumber);
       const surah = surahMetaByNumber.get(numericSurahNumber);
+      const surahName = language === 'ar'
+        ? (surah?.name || `سورة ${numericSurahNumber}`)
+        : (surah?.englishName || `Surah ${numericSurahNumber}`);
       return {
-        label: `${numericSurahNumber}. ${surah?.englishName || `Surah ${numericSurahNumber}`}`,
+        label: `${numericSurahNumber}. ${surahName}`,
         score: data.score,
-        meta: `${data.ayat.size} ayat`,
+        meta: `${data.ayat.size} ${language === 'ar' ? 'آية' : 'ayah'}`,
       };
     })
     .sort((a, b) => b.score - a.score)
@@ -299,14 +303,14 @@ export const getReviewAnalytics = (): ReviewAnalytics => {
     .map((spot) => ({
       label: `${spot.surahNumber}:${spot.ayahNumber}`,
       score: spot.score,
-      meta: `${spot.score} difficulty`,
+      meta: language === 'ar' ? `${spot.score} صعوبة` : `${spot.score} difficulty`,
     }));
 
   const hardestLetters = Object.entries(hardestLettersMap)
     .map(([letter, data]) => ({
-      label: letter === " " ? "Space" : letter,
+      label: letter === " " ? (language === 'ar' ? "مسافة" : "Space") : letter,
       score: data.score,
-      meta: `${data.count} slips`,
+      meta: language === 'ar' ? `${data.count} زلات` : `${data.count} slips`,
     }))
     .sort((a, b) => b.score - a.score)
     .slice(0, 6);

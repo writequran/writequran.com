@@ -24,19 +24,19 @@ function MilestoneCard({
 }) {
   const { t } = useLanguage();
   return (
-    <div className={`rounded-3xl border px-6 py-6 transition-colors duration-200 ${achieved
+    <div className={`rounded-[1.2rem] sm:rounded-3xl border px-3 py-3 sm:px-6 sm:py-6 transition-colors duration-200 ${achieved
       ? "border-emerald-200 bg-emerald-50/80 dark:border-emerald-800/60 dark:bg-emerald-900/15"
       : "border-neutral-200 bg-neutral-50/60 dark:border-neutral-700/50 dark:bg-neutral-800/40"
       }`}>
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.22em] font-bold text-neutral-400 dark:text-neutral-500">
+          <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.14em] sm:tracking-[0.22em] font-bold text-neutral-400 dark:text-neutral-500">
             {t("milestone") || "Milestone"}
           </p>
-          <h3 className="mt-2 text-base font-semibold text-neutral-800 dark:text-neutral-100">{title}</h3>
-          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">{description}</p>
+          <h3 className="mt-1 text-[1rem] sm:text-base font-semibold text-neutral-800 dark:text-neutral-100 leading-tight">{title}</h3>
+          <p className="mt-1 hidden sm:block text-[13px] sm:text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">{description}</p>
         </div>
-        <div className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] ${achieved
+        <div className={`shrink-0 rounded-full px-2 py-1 sm:px-3 sm:py-1.5 text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.08em] sm:tracking-[0.18em] ${achieved
           ? "bg-emerald-600 text-white shadow-sm"
           : "bg-neutral-200/80 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400"
           }`}>
@@ -44,12 +44,12 @@ function MilestoneCard({
         </div>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-3 sm:mt-6">
         <div className="flex items-end justify-between gap-3">
-          <span className="text-3xl font-bold text-neutral-900 dark:text-neutral-50 tracking-tight">{value}</span>
-          <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">{target}</span>
+          <span className="text-[1.7rem] sm:text-3xl font-bold text-neutral-900 dark:text-neutral-50 tracking-tight leading-none">{value}</span>
+          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.06em] sm:tracking-wider text-neutral-400 dark:text-neutral-500">{target}</span>
         </div>
-        <div className="mt-4 h-1.5 rounded-full bg-neutral-200 dark:bg-neutral-700/80 overflow-hidden">
+        <div className="mt-2.5 sm:mt-4 h-1.5 rounded-full bg-neutral-200 dark:bg-neutral-700/80 overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-1000 ${achieved ? "bg-gradient-to-r from-emerald-500 to-emerald-400" : "bg-gradient-to-r from-[#D6C19E] to-[#C1A063]"
               }`}
@@ -88,8 +88,8 @@ export default function ProgressPage() {
 
   const reviewAnalytics = useMemo(() => {
     if (!isMounted) return null;
-    return getReviewAnalytics();
-  }, [isMounted, analyticsVersion]);
+    return getReviewAnalytics(language);
+  }, [isMounted, analyticsVersion, language]);
 
   useEffect(() => {
     const saved = getStorage('theme');
@@ -256,8 +256,8 @@ export default function ProgressPage() {
                   {t("no_review_data")}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-                  <div className="rounded-2xl border border-[#D6C19E]/25 bg-[#F8F1E6]/85 dark:bg-neutral-900/65 dark:border-[#D6C19E]/20 px-4 py-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-4 items-stretch">
+                  <div className="rounded-2xl border border-[#D6C19E]/25 bg-[#F8F1E6]/85 dark:bg-neutral-900/65 dark:border-[#D6C19E]/20 px-4 py-4 min-h-[220px] h-[220px] xl:col-span-3 xl:min-h-[280px] xl:h-[280px] flex flex-col">
                     <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#B18E4E] dark:text-[#D6C19E]">
                       {t("review_success_rate")}
                     </div>
@@ -266,6 +266,14 @@ export default function ProgressPage() {
                     </div>
                     <div className="mt-2 text-xs font-medium text-neutral-500 dark:text-neutral-400">
                       {n(reviewAnalytics.successfulReviewCount)} / {n(reviewAnalytics.reviewedCount)} {t("reviewed_weak_spots").toLowerCase()}
+                    </div>
+                    <div className="mt-auto pt-6">
+                      <div className="h-2 rounded-full bg-neutral-200/80 dark:bg-neutral-700/70 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-[#D6C19E] to-[#B18E4E] dark:from-[#E3BE72] dark:to-[#D6C19E] transition-all duration-700"
+                          style={{ width: `${Math.max(0, Math.min(reviewAnalytics.reviewSuccessRate, 100))}%` }}
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -276,21 +284,25 @@ export default function ProgressPage() {
                   ].map((group) => (
                     <div
                       key={group.key}
-                      className="rounded-2xl border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4"
+                      className="rounded-2xl border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4 min-h-[220px] h-[220px] xl:col-span-3 xl:min-h-[280px] xl:h-[280px] flex flex-col"
                     >
                       <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-neutral-400 dark:text-neutral-500">
                         {t(group.key)}
                       </div>
-                      <div className="mt-3 flex flex-col gap-2">
-                        {group.items.length > 0 ? group.items.slice(0, 4).map((item, index) => (
+                      <div className="mt-3 flex flex-col gap-2 overflow-y-auto pr-1 min-h-0">
+                        {group.items.length > 0 ? group.items.map((item, index) => (
                           <div key={`${group.key}-${item.label}-${index}`} className="flex items-start justify-between gap-3">
                             <div className="min-w-0">
                               <div className="text-sm font-bold text-neutral-800 dark:text-neutral-100 truncate">
-                                {item.label}
+                                {language === "ar"
+                                  ? item.label.replace(/\d+/g, (match) => String(n(Number(match))))
+                                  : item.label}
                               </div>
                               {item.meta ? (
                                 <div className="text-[11px] text-neutral-500 dark:text-neutral-400 truncate">
-                                  {item.meta}
+                                  {language === "ar"
+                                    ? item.meta.replace(/\d+/g, (match) => String(n(Number(match))))
+                                    : item.meta}
                                 </div>
                               ) : null}
                             </div>

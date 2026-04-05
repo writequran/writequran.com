@@ -125,28 +125,30 @@ export default function LandingPage() {
       <div className="absolute top-0 left-0 w-full h-[50vh] bg-gradient-to-b from-[#D6C19E]/12 to-transparent pointer-events-none" />
 
       {/* Header */}
-      <header className="relative z-50 w-full px-8 py-6 sm:px-10 lg:px-12 flex justify-between items-center">
-        <div className="flex items-center gap-3">
+      <header className="relative z-50 w-full px-4 py-4 sm:px-10 sm:py-6 lg:px-12 flex justify-between items-center">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             onClick={() => setIsMenuOpen(true)}
-            className="mr-1 sm:mr-2 p-2 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors flex items-center justify-center"
+            className="p-2 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors flex items-center justify-center shrink-0"
             title={t("open_menu")}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
           </button>
-          <h1 className="text-xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100 font-gabriela">Write Quran</h1>
+          <h1 className="text-[0.95rem] leading-none sm:text-xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100 font-gabriela whitespace-nowrap">
+            Write Quran
+          </h1>
         </div>
-        <div className="flex items-center gap-0 sm:gap-0">
+        <div className="flex items-center gap-0.5 sm:gap-0">
           <button
             onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
-            className="flex items-center justify-center w-10 h-10 rounded-full text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700"
+            className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700"
             title={t("language_toggle")}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /><path d="M2 12h20" /></svg>
           </button>
           <button
             onClick={toggleTheme}
-            className="flex items-center justify-center w-10 h-10 rounded-full text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700"
+            className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700"
           >
             {isDarkMode ? (
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
@@ -159,21 +161,23 @@ export default function LandingPage() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 relative z-10 flex flex-col items-center justify-center px-6 py-8 sm:py-16">
-        <div className="text-center max-w-3xl mx-auto mb-16 animate-in slide-in-from-bottom-4 fade-in duration-700">
-          <div className="inline-flex items-center justify-center px-4 py-1.5 mb-6 rounded-full border border-[#D6C19E]/30 bg-[#D6C19E]/10 text-sm font-semibold text-[#B18E4E] dark:text-[#D6C19E]">
+      <main className="flex-1 relative z-10 flex flex-col items-center justify-center px-4 py-6 sm:px-6 sm:py-16">
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-16 animate-in slide-in-from-bottom-4 fade-in duration-700">
+          <div className="inline-flex items-center justify-center px-3 py-1 sm:px-4 sm:py-1.5 mb-4 sm:mb-6 rounded-full border border-[#D6C19E]/30 bg-[#D6C19E]/10 text-xs sm:text-sm font-semibold text-[#B18E4E] dark:text-[#D6C19E]">
             {t("practice_memorize_review")}
           </div>
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 text-neutral-800 dark:text-neutral-50 leading-[1.1]">
-            {t("master_the_quran_1")}<br />{t("master_the_quran_2")}
+          <h2 className="text-[2.35rem] sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-4 sm:mb-6 text-neutral-800 dark:text-neutral-50 leading-[1.04] sm:leading-[1.1]">
+            <span>{t("master_the_quran_1").replace(/,\s*$/, "")}</span>
+            <br />
+            <span className="text-[0.72em] sm:text-[1em] whitespace-nowrap">{t("master_the_quran_2")}</span>
           </h2>
-          <div className="mx-auto mt-8 w-full max-w-2xl rounded-[2rem] border border-[#D6C19E]/35 bg-white/80 dark:bg-neutral-900/70 px-5 py-5 sm:px-8 sm:py-6 shadow-[0_18px_60px_rgba(214,193,158,0.14)] backdrop-blur-xl">
-            <div className="mb-3 flex items-center justify-between gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#B18E4E] dark:text-[#D6C19E]">
+          <div className="mx-auto mt-5 sm:mt-8 w-full max-w-2xl rounded-[1.5rem] sm:rounded-[2rem] border border-[#D6C19E]/35 bg-white/80 dark:bg-neutral-900/70 px-4 py-3.5 sm:px-8 sm:py-6 shadow-[0_18px_60px_rgba(214,193,158,0.14)] backdrop-blur-xl">
+            <div className="mb-2.5 sm:mb-3 flex items-center justify-between gap-3 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.18em] sm:tracking-[0.28em] text-[#B18E4E] dark:text-[#D6C19E]">
               <span>{t("typing_revelation")}</span>
               <span>{language === 'ar' ? `${n(currentHeroAyah.surah.split(':')[0])}:${n(currentHeroAyah.surah.split(':')[1])}` : currentHeroAyah.surah}</span>
             </div>
             <div
-              className="quran-text rtl min-h-[3.6rem] text-[1.65rem] leading-[2.2] sm:min-h-[4.6rem] sm:text-[2.35rem] sm:leading-[2.5] text-neutral-800 dark:text-neutral-100"
+              className="quran-text rtl min-h-[2.65rem] text-[1.3rem] leading-[1.9] sm:min-h-[4.6rem] sm:text-[2.35rem] sm:leading-[2.5] text-neutral-800 dark:text-neutral-100"
               dir="rtl"
             >
               <span className="relative inline-block max-w-full whitespace-nowrap">
@@ -203,64 +207,72 @@ export default function LandingPage() {
           </p> */}
         </div>
 
-        <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 xl:gap-5 animate-in slide-in-from-bottom-8 fade-in duration-1000 delay-150">
+        <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5 sm:gap-4 xl:gap-5 animate-in slide-in-from-bottom-8 fade-in duration-1000 delay-150">
 
-          <Link href="/write" className="group relative overflow-hidden rounded-3xl bg-white dark:bg-neutral-800/80 p-5 sm:p-6 lg:p-8 xl:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm">
+          <Link href="/write" className="group relative overflow-hidden rounded-[1.5rem] sm:rounded-3xl bg-white dark:bg-neutral-800/80 p-3.5 sm:p-6 lg:p-8 xl:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm">
             <div className={`absolute -top-4 ${language === "ar" ? "-left-4" : "-right-4"} p-6 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-all duration-500 scale-50 group-hover:scale-150 ${language === "ar" ? "rotate-[15deg]" : "rotate-[-15deg]"} group-hover:rotate-0`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#D6C19E" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
             </div>
-            <div className="mb-4 sm:mb-6 xl:mb-4 inline-flex h-12 w-12 xl:h-11 xl:w-11 items-center justify-center rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
+            <div className="mb-3 sm:mb-6 xl:mb-4 flex items-center gap-3 sm:block">
+              <div className="inline-flex h-11 w-11 sm:h-12 sm:w-12 xl:h-11 xl:w-11 items-center justify-center rounded-xl sm:rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
+              </div>
+              <h3 className="mb-0 sm:mb-1.5 text-[1.18rem] sm:text-xl xl:text-lg font-bold text-neutral-800 dark:text-neutral-100 whitespace-nowrap">{t("start_writing")}</h3>
             </div>
-            <h3 className="mb-2 text-xl xl:text-lg font-bold text-neutral-800 dark:text-neutral-100">{t("start_writing")}</h3>
-            <p className="text-sm xl:text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
+            <p className="text-[13px] sm:text-sm xl:text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
               {t("start_writing_desc")}
             </p>
-            <div className="mt-4 sm:mt-6 xl:mt-4 flex items-center text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E] group-hover:gap-2 transition-all">
+            <div className="mt-2.5 sm:mt-6 xl:mt-4 flex items-center text-[13px] sm:text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E] group-hover:gap-2 transition-all">
               {t("begin_practice")} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 rtl:rotate-180"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
             </div>
           </Link>
 
-          <Link href="/review" className="group relative overflow-hidden rounded-3xl bg-white dark:bg-neutral-800/80 p-5 sm:p-6 lg:p-8 xl:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm">
+          <Link href="/review" className="group relative overflow-hidden rounded-[1.5rem] sm:rounded-3xl bg-white dark:bg-neutral-800/80 p-3.5 sm:p-6 lg:p-8 xl:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm">
             <div className={`absolute -top-4 ${language === "ar" ? "-left-4" : "-right-4"} p-6 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-all duration-500 scale-50 group-hover:scale-150 ${language === "ar" ? "rotate-[-15deg]" : "rotate-[15deg]"} group-hover:rotate-0`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#D6C19E" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><path d="M16 13H8" /><path d="M16 17H8" /><path d="M10 9H8" /></svg>
             </div>
-            <div className="mb-4 sm:mb-6 xl:mb-4 inline-flex h-12 w-12 xl:h-11 xl:w-11 items-center justify-center rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /><path d="m15 5 4 4" /></svg>
+            <div className="mb-3 sm:mb-6 xl:mb-4 flex items-center gap-3 sm:block">
+              <div className="inline-flex h-11 w-11 sm:h-12 sm:w-12 xl:h-11 xl:w-11 items-center justify-center rounded-xl sm:rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /><path d="m15 5 4 4" /></svg>
+              </div>
+              <h3 className="mb-0 sm:mb-1.5 text-[1.18rem] sm:text-xl xl:text-lg font-bold text-neutral-800 dark:text-neutral-100 whitespace-nowrap">{t("review_mistakes")}</h3>
             </div>
-            <h3 className="mb-2 text-xl xl:text-lg font-bold text-neutral-800 dark:text-neutral-100">{t("review_mistakes")}</h3>
-            <p className="text-sm xl:text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
+            <p className="text-[13px] sm:text-sm xl:text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
               {t("review_mistakes_desc")}
             </p>
-            <div className="mt-4 sm:mt-6 xl:mt-4 flex items-center text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E] group-hover:gap-2 transition-all">
+            <div className="mt-2.5 sm:mt-6 xl:mt-4 flex items-center text-[13px] sm:text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E] group-hover:gap-2 transition-all">
               {t("check_status")} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 rtl:rotate-180"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
             </div>
           </Link>
 
-          <button onClick={() => setShowMemoModal(true)} className={`group relative overflow-hidden rounded-3xl bg-white dark:bg-neutral-800/80 p-5 sm:p-6 lg:p-8 xl:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm ${language === "ar" ? "text-right" : "text-left"}`}>
+          <button onClick={() => setShowMemoModal(true)} className={`group relative overflow-hidden rounded-[1.5rem] sm:rounded-3xl bg-white dark:bg-neutral-800/80 p-3.5 sm:p-6 lg:p-8 xl:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm ${language === "ar" ? "text-right" : "text-left"}`}>
             <div className={`absolute -top-4 ${language === "ar" ? "-left-4" : "-right-4"} p-6 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-all duration-500 scale-50 group-hover:scale-150 rotate-180 group-hover:rotate-0`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#D6C19E" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
             </div>
-            <div className="mb-4 sm:mb-6 xl:mb-4 inline-flex h-12 w-12 xl:h-11 xl:w-11 items-center justify-center rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path d="M12 11h4" /><path d="M12 16h4" /><path d="M8 11h.01" /><path d="M8 16h.01" /></svg>
+            <div className="mb-3 sm:mb-6 xl:mb-4 flex items-center gap-3 sm:block">
+              <div className="inline-flex h-11 w-11 sm:h-12 sm:w-12 xl:h-11 xl:w-11 items-center justify-center rounded-xl sm:rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path d="M12 11h4" /><path d="M12 16h4" /><path d="M8 11h.01" /><path d="M8 16h.01" /></svg>
+              </div>
+              <h3 className="mb-0 sm:mb-1.5 text-[1.18rem] sm:text-xl xl:text-lg font-bold text-neutral-800 dark:text-neutral-100 whitespace-nowrap">{t("memorization_test")}</h3>
             </div>
-            <h3 className="mb-2 text-xl xl:text-lg font-bold text-neutral-800 dark:text-neutral-100">{t("memorization_test")}</h3>
-            <p className="text-sm xl:text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
+            <p className="text-[13px] sm:text-sm xl:text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
               {t("memorization_test_desc")}
             </p>
-            <div className="mt-4 sm:mt-6 xl:mt-4 flex items-center text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E] group-hover:gap-2 transition-all">
+            <div className="mt-2.5 sm:mt-6 xl:mt-4 flex items-center text-[13px] sm:text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E] group-hover:gap-2 transition-all">
               {t("test_memory")} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 rtl:rotate-180"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
             </div>
           </button>
 
-          <Link href="/progress" className={`group relative overflow-hidden rounded-3xl bg-white dark:bg-neutral-800/80 p-5 sm:p-6 lg:p-8 xl:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm ${language === "ar" ? "text-right" : "text-left"}`}>
+          <Link href="/progress" className={`group relative overflow-hidden rounded-[1.5rem] sm:rounded-3xl bg-white dark:bg-neutral-800/80 p-3.5 sm:p-6 lg:p-8 xl:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm ${language === "ar" ? "text-right" : "text-left"}`}>
             <div className={`absolute -top-4 ${language === "ar" ? "-left-4" : "-right-4"} p-6 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-all duration-500 scale-50 group-hover:scale-150 ${language === "ar" ? "rotate-[15deg]" : "rotate-[-15deg]"} group-hover:rotate-0`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#D6C19E" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="m7 14 3-3 3 2 4-5" /><circle cx="7" cy="14" r="1" /><circle cx="10" cy="11" r="1" /><circle cx="13" cy="13" r="1" /><circle cx="17" cy="8" r="1" /></svg>
             </div>
-            <div className="mb-4 sm:mb-6 xl:mb-4 inline-flex h-12 w-12 xl:h-11 xl:w-11 items-center justify-center rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="m7 14 3-3 3 2 4-5" /><circle cx="7" cy="14" r="1" /><circle cx="10" cy="11" r="1" /><circle cx="13" cy="13" r="1" /><circle cx="17" cy="8" r="1" /></svg>
+            <div className="mb-3 sm:mb-6 xl:mb-4 flex items-center gap-3 sm:block">
+              <div className="inline-flex h-11 w-11 sm:h-12 sm:w-12 xl:h-11 xl:w-11 items-center justify-center rounded-xl sm:rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="m7 14 3-3 3 2 4-5" /><circle cx="7" cy="14" r="1" /><circle cx="10" cy="11" r="1" /><circle cx="13" cy="13" r="1" /><circle cx="17" cy="8" r="1" /></svg>
+              </div>
+              <h3 className="mb-0 sm:mb-2 text-[1.18rem] sm:text-xl xl:text-lg font-bold text-neutral-800 dark:text-neutral-100 whitespace-nowrap">{t("my_progress")}</h3>
             </div>
-            <h3 className="mb-2 text-xl xl:text-lg font-bold text-neutral-800 dark:text-neutral-100">{t("my_progress")}</h3>
             <p className="text-sm xl:text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
               {t("my_progress_desc")}
             </p>
@@ -273,10 +285,12 @@ export default function LandingPage() {
             <div className={`absolute -top-4 ${language === "ar" ? "-left-4" : "-right-4"} p-6 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-all duration-500 scale-50 group-hover:scale-150 ${language === "ar" ? "rotate-[15deg]" : "rotate-[-15deg]"} group-hover:rotate-0`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#D6C19E" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
             </div>
-            <div className="mb-4 sm:mb-6 xl:mb-4 inline-flex h-12 w-12 xl:h-11 xl:w-11 items-center justify-center rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            <div className="mb-3 sm:mb-6 xl:mb-4 flex items-center gap-3 sm:block">
+              <div className="inline-flex h-11 w-11 sm:h-12 sm:w-12 xl:h-11 xl:w-11 items-center justify-center rounded-xl sm:rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+              </div>
+              <h3 className="mb-0 sm:mb-2 text-[1.18rem] sm:text-xl xl:text-lg font-bold text-neutral-800 dark:text-neutral-100 whitespace-nowrap">{t("leaderboard")}</h3>
             </div>
-            <h3 className="mb-2 text-xl xl:text-lg font-bold text-neutral-800 dark:text-neutral-100">{t("leaderboard")}</h3>
             <p className="text-sm xl:text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
               {t("leaderboard_desc")}
             </p>

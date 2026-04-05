@@ -362,7 +362,7 @@ export default function LeaderboardProfilePage() {
         </div>
       </header>
 
-      <main className="relative z-10 max-w-5xl mx-auto px-6 py-8 sm:py-12 sm:px-10 lg:px-12 flex flex-col gap-10 pb-24">
+      <main className="relative z-10 max-w-5xl mx-auto px-4 py-6 sm:py-12 sm:px-10 lg:px-12 flex flex-col gap-6 sm:gap-10 pb-24">
         {loading ? (
           <div className="p-12 flex justify-center items-center">
             <div className="w-8 h-8 border-4 border-[#D6C19E]/30 border-t-[#D6C19E] rounded-full animate-spin"></div>
@@ -374,30 +374,30 @@ export default function LeaderboardProfilePage() {
         ) : (
           <>
             <section className="animate-in slide-in-from-bottom-4 fade-in duration-700">
-              <div className="rounded-[1.75rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-5 sm:px-6 sm:py-6 shadow-[0_8px_28px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_28px_rgb(0,0,0,0.2)] backdrop-blur-xl">
+              <div className="rounded-[1.5rem] sm:rounded-[1.75rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-4 py-4 sm:px-6 sm:py-6 shadow-[0_8px_28px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_28px_rgb(0,0,0,0.2)] backdrop-blur-xl">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="flex items-start gap-3 sm:gap-4 min-w-0">
-                    <div className="inline-flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] shadow-sm shrink-0">
+                    <div className="inline-flex h-11 w-11 sm:h-14 sm:w-14 items-center justify-center rounded-xl sm:rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] shadow-sm shrink-0">
                       <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 21a8 8 0 1 0-12 0" /><circle cx="12" cy="7" r="4" /></svg>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.22em] text-neutral-400 dark:text-neutral-500">
+                      <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.18em] sm:tracking-[0.22em] text-neutral-400 dark:text-neutral-500">
                         {t("player_profile")}
                       </p>
-                      <h2 className="mt-1.5 text-2xl sm:text-3xl lg:text-[2rem] font-extrabold tracking-tight text-neutral-900 dark:text-neutral-50 break-words leading-tight">
+                      <h2 className="mt-1 text-[1.85rem] sm:text-3xl lg:text-[2rem] font-extrabold tracking-tight text-neutral-900 dark:text-neutral-50 break-words leading-[1.05]">
                         {visibleDisplayName}
                       </h2>
                       {isOwnProfile ? (
-                        <p className="mt-1.5 text-xs sm:text-sm font-semibold text-neutral-400 dark:text-neutral-500">
+                        <p className="mt-1 text-xs sm:text-sm font-semibold text-neutral-400 dark:text-neutral-500">
                           @{profile.username}
                         </p>
                       ) : null}
                       {identitySummary.length > 0 ? (
-                        <div className="mt-3 flex flex-wrap gap-2">
+                        <div className="mt-2.5 flex flex-wrap gap-1.5 sm:gap-2">
                           {identitySummary.map((item) => (
                             <span
                               key={item}
-                              className="rounded-full border border-[#D6C19E]/25 bg-[#F8F1E6]/85 dark:bg-neutral-900/65 dark:border-[#D6C19E]/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#B18E4E] dark:text-[#D6C19E]"
+                              className="rounded-full border border-[#D6C19E]/25 bg-[#F8F1E6]/85 dark:bg-neutral-900/65 dark:border-[#D6C19E]/20 px-2 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.08em] sm:tracking-[0.14em] text-[#B18E4E] dark:text-[#D6C19E] leading-none"
                             >
                               {item}
                             </span>
@@ -406,22 +406,22 @@ export default function LeaderboardProfilePage() {
                       ) : null}
                     </div>
                   </div>
-                  <div className="flex items-start justify-start lg:justify-end">
-                    <div className="rounded-[1.25rem] border border-[#D6C19E]/30 bg-[#F8F1E6]/85 dark:bg-neutral-900/70 dark:border-[#D6C19E]/20 px-4 py-3 min-w-[6.5rem] text-center shadow-sm">
-                      <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#B18E4E] dark:text-[#D6C19E]">
+                  <div className="flex items-start justify-start lg:justify-end pt-1 sm:pt-0">
+                    <div className="rounded-[1rem] sm:rounded-[1.25rem] border border-[#D6C19E]/30 bg-[#F8F1E6]/85 dark:bg-neutral-900/70 dark:border-[#D6C19E]/20 px-3 py-2.5 sm:px-4 sm:py-3 min-w-[5.5rem] sm:min-w-[6.5rem] text-center shadow-sm">
+                      <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.12em] sm:tracking-[0.18em] text-[#B18E4E] dark:text-[#D6C19E]">
                         {t("rank")}
                       </div>
-                      <div className="mt-1.5 text-2xl sm:text-[1.75rem] font-black text-neutral-900 dark:text-neutral-50">
+                      <div className="mt-1 text-[1.65rem] sm:text-[1.75rem] font-black text-neutral-900 dark:text-neutral-50 leading-none">
                         {profileMeta?.global_rank ? `#${n(profileMeta.global_rank)}` : "—"}
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="mt-4 rounded-[1.25rem] border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-3.5">
-                  <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-400 dark:text-neutral-500">
+                <div className="mt-3.5 rounded-[1rem] sm:rounded-[1.25rem] border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-3.5 py-3 sm:px-4 sm:py-3.5">
+                  <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.12em] sm:tracking-[0.18em] text-neutral-400 dark:text-neutral-500">
                     {t("recent_activity")}
                   </div>
-                  <p className="mt-1.5 text-sm sm:text-[15px] font-medium leading-relaxed text-neutral-700 dark:text-neutral-200">
+                  <p className="mt-1.5 text-[15px] sm:text-[15px] font-medium leading-relaxed text-neutral-700 dark:text-neutral-200">
                     {recentActivitySummary}
                   </p>
                 </div>
@@ -430,12 +430,12 @@ export default function LeaderboardProfilePage() {
 
             {isOwnProfile && (
               <section className="animate-in slide-in-from-bottom-5 fade-in duration-800">
-                <div className="rounded-[1.5rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-5 shadow-[0_8px_28px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_28px_rgb(0,0,0,0.2)] backdrop-blur-xl">
+                <div className="rounded-[1.35rem] sm:rounded-[1.5rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-4 py-4 sm:px-5 sm:py-5 shadow-[0_8px_28px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_28px_rgb(0,0,0,0.2)] backdrop-blur-xl">
                   <div className="mb-4">
-                    <h3 className="text-base sm:text-lg font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
+                    <h3 className="text-[1.05rem] sm:text-lg font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
                       {t("public_display_name")}
                     </h3>
-                    <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                    <p className="mt-1 text-[13px] sm:text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
                       {t("public_display_name_desc")}
                     </p>
                   </div>
@@ -467,32 +467,32 @@ export default function LeaderboardProfilePage() {
               </section>
             )}
 
-            <section className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 animate-in slide-in-from-bottom-6 fade-in duration-900">
+            <section className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 sm:gap-4 animate-in slide-in-from-bottom-6 fade-in duration-900">
               {primaryStatCards.map((card) => (
                 <div
                   key={card.label}
-                  className="rounded-[1.35rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-4 py-4 sm:px-5 sm:py-5 shadow-[0_8px_24px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_24px_rgb(0,0,0,0.18)] backdrop-blur-xl"
+                  className="rounded-[1.1rem] sm:rounded-[1.35rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-3 py-3.5 sm:px-5 sm:py-5 shadow-[0_8px_24px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_24px_rgb(0,0,0,0.18)] backdrop-blur-xl"
                 >
-                  <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.18em] text-neutral-400 dark:text-neutral-500">
+                  <div className="text-[9px] sm:text-[11px] font-bold uppercase tracking-[0.12em] sm:tracking-[0.18em] text-neutral-400 dark:text-neutral-500 leading-snug">
                     {card.label}
                   </div>
-                  <div className="mt-2.5 text-2xl sm:text-3xl lg:text-[2rem] font-black text-neutral-900 dark:text-neutral-50 leading-none">
+                  <div className="mt-2 text-[1.7rem] sm:text-3xl lg:text-[2rem] font-black text-neutral-900 dark:text-neutral-50 leading-none">
                     {card.value}
                   </div>
                 </div>
               ))}
             </section>
 
-            <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 animate-in slide-in-from-bottom-7 fade-in duration-950">
+            <section className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 animate-in slide-in-from-bottom-7 fade-in duration-950">
               {secondaryStatCards.map((card) => (
                 <div
                   key={card.label}
-                  className="rounded-[1.25rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/80 dark:bg-neutral-800/55 px-4 py-4 shadow-[0_8px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_8px_20px_rgb(0,0,0,0.16)] backdrop-blur-xl"
+                  className="rounded-[1.1rem] sm:rounded-[1.25rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/80 dark:bg-neutral-800/55 px-3.5 py-3.5 sm:px-4 sm:py-4 shadow-[0_8px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_8px_20px_rgb(0,0,0,0.16)] backdrop-blur-xl"
                 >
-                  <div className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.18em] text-neutral-400 dark:text-neutral-500">
+                  <div className="text-[9px] sm:text-[11px] font-bold uppercase tracking-[0.12em] sm:tracking-[0.18em] text-neutral-400 dark:text-neutral-500">
                     {card.label}
                   </div>
-                  <div className="mt-2 text-xl sm:text-2xl font-black text-neutral-900 dark:text-neutral-50 leading-none">
+                  <div className="mt-1.5 text-[1.35rem] sm:text-2xl font-black text-neutral-900 dark:text-neutral-50 leading-none">
                     {card.value}
                   </div>
                 </div>
