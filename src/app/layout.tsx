@@ -22,8 +22,8 @@ const scheherazade = Scheherazade_New({
 });
 
 export const metadata: Metadata = {
-  title: "WriteQuran",
-  description: "Practice writing and memorizing the Qur'an, letter by letter.",
+  title: "WriteQuran — Practice & Memorize the Qur'an",
+  description: "A focused, distraction-free tool to practice writing and memorizing the Qur'an, letter by letter.",
   icons: {
     icon: "/wq.svg",
   },
@@ -35,8 +35,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" translate="no" className={`${inter.variable} ${scheherazade.variable} ${gabriela.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-neutral-50 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-50 font-sans transition-colors duration-300">
+    <html lang="en" translate="no" className={`${inter.variable} ${scheherazade.variable} ${gabriela.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col bg-[#FDFBF7] text-neutral-900 dark:bg-neutral-900 dark:text-neutral-50 font-sans transition-colors duration-300">
         <ThemeInitializer />
         <LanguageProvider>
           {children}

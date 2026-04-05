@@ -205,6 +205,15 @@ export default function LeaderboardPage() {
         </section>
       </main>
 
+      <footer className="relative z-10 w-full text-center py-8 mt-auto text-xs font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500">
+        <div className="flex justify-center gap-6 mb-3">
+          <Link href="/privacy" className="hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">{t("privacy")}</Link>
+          <Link href="/terms" className="hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">{t("terms")}</Link>
+          <Link href="/contact" className="hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">{t("contact")}</Link>
+        </div>
+        <p>© <span className="text-[#B18E4E] dark:text-[#D6C19E]">WriteQuran.com</span> {n(new Date().getFullYear())}</p>
+      </footer>
+
       <MenuDrawer
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}

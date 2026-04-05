@@ -87,6 +87,8 @@ export const translations: Record<Language, Dictionary> = {
     "support": "SUPPORT",
     "contact_us": "Contact Us",
     "language_toggle": "Arabic / العربية",
+    "navigation": "NAVIGATION",
+    "sign_in_to_access": "Sign in to view profile",
 
     // Components & Modals
     "search_surah": "Search Surah...",
@@ -271,6 +273,8 @@ export const translations: Record<Language, Dictionary> = {
     "support": "الدعم",
     "contact_us": "اتصل بنا",
     "language_toggle": "English / الإنجليزية",
+    "navigation": "التنقل",
+    "sign_in_to_access": "سجّل دخولك لعرض الملف الشخصي",
 
     // Components & Modals
     "search_surah": "ابحث عن السورة...",

@@ -71,21 +71,51 @@ export function MenuDrawer({
           </div>
 
           {/* Nav Items */}
-          <div className="flex-1 overflow-y-auto py-6 px-4 flex flex-col gap-1">
-            <p className="px-4 text-[10px] uppercase font-bold text-neutral-400 tracking-widest mb-2">{t("account")}</p>
-            {username ? (
-              <Link href={`/leaderboard/${username}`} onClick={onClose} className="flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:text-[#D6C19E]"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                <span className="font-semibold text-sm">{t("user_profile")}</span>
-              </Link>
-            ) : (
-              <button onClick={() => alert('Please sign in first to access your profile.')} className="flex items-center opacity-50 cursor-not-allowed gap-4 px-4 py-3.5 rounded-2xl transition-all group text-neutral-600 dark:text-neutral-300">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                <span className="font-semibold text-sm">{t("user_profile")}</span>
-              </button>
-            )}
+          <div className="flex-1 overflow-y-auto py-4 px-4 flex flex-col gap-1">
+
+            {/* Navigation section */}
+            <p className="px-4 text-[10px] uppercase font-bold text-neutral-400 tracking-widest mb-2 mt-2">{t("navigation") || "Navigation"}</p>
+            <Link href="/write" onClick={onClose} className="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400 group-hover:text-[#D6C19E] transition-colors shrink-0"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+              <span className="font-semibold text-sm">{t("start_writing")}</span>
+            </Link>
+            <Link href="/review" onClick={onClose} className="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400 group-hover:text-[#D6C19E] transition-colors shrink-0"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /><path d="m15 5 4 4" /></svg>
+              <span className="font-semibold text-sm">{t("review_mistakes")}</span>
+            </Link>
+            <Link href="/memorize" onClick={onClose} className="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400 group-hover:text-[#D6C19E] transition-colors shrink-0"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path d="M12 11h4" /><path d="M12 16h4" /><path d="M8 11h.01" /><path d="M8 16h.01" /></svg>
+              <span className="font-semibold text-sm">{t("memorization_test")}</span>
+            </Link>
+            <Link href="/progress" onClick={onClose} className="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400 group-hover:text-[#D6C19E] transition-colors shrink-0"><path d="M3 3v18h18" /><path d="m7 14 3-3 3 2 4-5" /></svg>
+              <span className="font-semibold text-sm">{t("my_progress")}</span>
+            </Link>
+            <Link href="/leaderboard" onClick={onClose} className="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400 group-hover:text-[#D6C19E] transition-colors shrink-0"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+              <span className="font-semibold text-sm">{t("leaderboard")}</span>
+            </Link>
 
             <div className="my-4 h-px bg-neutral-100 dark:bg-neutral-800/50 mx-4" />
+
+            <p className="px-4 text-[10px] uppercase font-bold text-neutral-400 tracking-widest mb-2">{t("account")}</p>
+            {username ? (
+              <Link href={`/leaderboard/${username}`} onClick={onClose} className="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400 group-hover:text-[#D6C19E] transition-colors shrink-0"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                <div className="min-w-0">
+                  <span className="font-semibold text-sm block">{t("user_profile")}</span>
+                  <span className="text-[11px] text-neutral-400 dark:text-neutral-500 truncate block">@{username}</span>
+                </div>
+              </Link>
+            ) : (
+              <div className="flex items-center gap-4 px-4 py-3 rounded-2xl text-neutral-400 dark:text-neutral-500">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                <div className="min-w-0">
+                  <span className="font-semibold text-sm block">{t("user_profile")}</span>
+                  <span className="text-[11px] truncate block">{t("sign_in_to_access") || "Sign in to view profile"}</span>
+                </div>
+              </div>
+            )}
 
             <div className="my-4 h-px bg-neutral-100 dark:bg-neutral-800/50 mx-4" />
 
@@ -203,10 +233,17 @@ export function MenuDrawer({
             <div className="my-4 h-px bg-neutral-100 dark:bg-neutral-800/50 mx-4" />
 
             <p className="px-4 text-[10px] uppercase font-bold text-neutral-400 tracking-widest mb-2">{t("support")}</p>
-            <button className="flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:text-[#D6C19E]"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+            <Link href="/contact" onClick={onClose} className="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400 group-hover:text-[#D6C19E] transition-colors shrink-0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
               <span className="font-semibold text-sm">{t("contact_us")}</span>
-            </button>
+            </Link>
+          </div>
+
+          {/* Drawer footer */}
+          <div className="px-6 py-5 border-t border-neutral-100 dark:border-neutral-800/50">
+            <p className="text-[10px] font-semibold text-neutral-400 dark:text-neutral-600 text-center tracking-widest uppercase">
+              WriteQuran.com
+            </p>
           </div>
 
 

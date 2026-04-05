@@ -434,6 +434,10 @@ export default function LeaderboardProfilePage() {
           </>
         )}
       </main>
+
+      <footer className="relative z-10 w-full text-center py-8 mt-auto text-xs font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500">
+        <p>© <span className="text-[#B18E4E] dark:text-[#D6C19E]">WriteQuran.com</span></p>
+      </footer>
     </div>
   );
 }

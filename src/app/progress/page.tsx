@@ -184,12 +184,16 @@ export default function ProgressPage() {
       <main className="relative z-10 max-w-6xl mx-auto px-6 py-8 sm:py-12 sm:px-10 lg:px-12 flex flex-col gap-16 pb-24">
 
         {/* Page Title section */}
-        <section className="text-center flex flex-col items-center justify-center gap-6 animate-in slide-in-from-bottom-4 fade-in duration-700">
-          <div className="text-center">
-            <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-50 mb-4">
-              {t("my_progress_desc") || "See your milestones and journey."}
-            </h2>
+        <section className="text-center flex flex-col items-center justify-center gap-4 animate-in slide-in-from-bottom-4 fade-in duration-700">
+          <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] mb-2 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="m7 14 3-3 3 2 4-5" /><circle cx="7" cy="14" r="1" /><circle cx="10" cy="11" r="1" /><circle cx="13" cy="13" r="1" /><circle cx="17" cy="8" r="1" /></svg>
           </div>
+          <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-50">
+            {t("my_progress")}
+          </h2>
+          <p className="text-lg text-neutral-500 dark:text-neutral-400 max-w-xl">
+            {t("my_progress_desc")}
+          </p>
         </section>
 
         {/* Global Milestones */}
@@ -317,6 +321,15 @@ export default function ProgressPage() {
         </section>
 
       </main>
+
+      <footer className="relative z-10 w-full text-center py-8 mt-auto text-xs font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500">
+        <div className="flex justify-center gap-6 mb-3">
+          <Link href="/privacy" className="hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">{t("privacy")}</Link>
+          <Link href="/terms" className="hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">{t("terms")}</Link>
+          <Link href="/contact" className="hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">{t("contact")}</Link>
+        </div>
+        <p>© <span className="text-[#B18E4E] dark:text-[#D6C19E]">WriteQuran.com</span> {n(new Date().getFullYear())}</p>
+      </footer>
     </div>
   );
 }
