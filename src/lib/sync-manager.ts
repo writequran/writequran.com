@@ -27,12 +27,16 @@ export async function syncLocalToCloud() {
   const visibilityMode = getStorage('visibility_mode') || 'hidden';
   const showKeyboard = getStorage('keyboard') === 'true';
   const theme = getStorage('theme') || 'light';
+  const showOnLeaderboard = getStorage('privacy_show_on_leaderboard') !== 'false';
+  const showPublicProfile = getStorage('privacy_show_public_profile') !== 'false';
 
   await supabase.from('user_preferences').upsert({
     user_id: user.id,
     theme,
     visibility_mode: visibilityMode,
     show_keyboard: showKeyboard,
+    show_on_leaderboard: showOnLeaderboard,
+    show_public_profile: showPublicProfile,
     updated_at: now
   });
 
@@ -119,6 +123,8 @@ export async function syncCloudToLocal() {
     setStorage('theme', prefRes.data.theme);
     setStorage('visibility_mode', prefRes.data.visibility_mode);
     setStorage('keyboard', prefRes.data.show_keyboard.toString());
+    setStorage('privacy_show_on_leaderboard', String(prefRes.data.show_on_leaderboard ?? true));
+    setStorage('privacy_show_public_profile', String(prefRes.data.show_public_profile ?? true));
   }
 
   // 3. Current Progress State (Resume pointer)
