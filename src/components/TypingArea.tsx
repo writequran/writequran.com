@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo, type CSSProperties } from "react";
 import { getSurah, getAllSurahsMeta, type MushafBlock } from "@/lib/quran-data";
-import { MistakeRecord, ProgressStats, loadMistakeStats, loadProgressStats, saveMistakeStats, saveProgressStats } from "@/lib/stats";
+import { MistakeRecord, ProgressStats, loadMistakeStats, loadProgressStats, recordDailyActivity, saveMistakeStats, saveProgressStats } from "@/lib/stats";
 import { getStorage, setStorage } from "@/lib/storage";
 import { ConfirmationModal } from "./ConfirmationModal";
 import { PopConfirm } from "./PopConfirm";
@@ -15,6 +15,14 @@ const preserveMarkerSpacing = (str: string) => {
 
 const getTypedIndicesStorageKey = (surahNumber: number) => `typed_indices_${surahNumber}`;
 const getWordDraftsStorageKey = (surahNumber: number) => `word_drafts_${surahNumber}`;
+
+function countTrackableLetters(text: string) {
+  let count = 0;
+  for (const char of text) {
+    if (char !== ' ' && char !== '\u200C') count += 1;
+  }
+  return count;
+}
 
 function loadTypedIndices(surahNumber: number): Set<number> {
   if (typeof window === "undefined") return new Set();
@@ -719,6 +727,7 @@ export function TypingArea({
 
         setCurrentIndex(nextIndex);
         setWrongChar(null);
+        recordDailyActivity(countTrackableLetters(targetWord));
 
         syncProgressSnapshot(nextTypedIndices);
         return;
@@ -775,6 +784,7 @@ export function TypingArea({
       progress[surahNumber] = p;
       saveMistakeStats(mistakes);
       saveProgressStats(progress);
+      recordDailyActivity(1);
       setStatsVersion(prev => prev + 1);
       return;
     }
@@ -808,6 +818,7 @@ export function TypingArea({
         return next;
       });
       setWrongChar(null);
+      recordDailyActivity(1);
     } else {
       setWrongChar(char);
 
@@ -853,6 +864,7 @@ export function TypingArea({
       progress[surahNumber] = p;
       saveMistakeStats(mistakes);
       saveProgressStats(progress);
+      recordDailyActivity(1);
       setStatsVersion(prev => prev + 1);
     }
   }, [activeWordSegment, currentBlock, currentIndex, globalCheckString, surahNumber, syncProgressSnapshot, typedIndices, typingMode, wordDrafts, wordSegments, wrongChar]);

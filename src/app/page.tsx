@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { AuthWidget } from "@/components/AuthWidget";
 import { ProgressModal } from "@/components/ProgressModal";
+import { MenuDrawer } from "@/components/MenuDrawer";
 import { useEffect, useState } from "react";
 import { getStorage, setStorage } from "@/lib/storage";
 import { useLanguage } from "@/lib/i18n";
@@ -40,6 +41,7 @@ export default function LandingPage() {
   const [showProgressModal, setShowProgressModal] = useState(false);
   const [startSurah, setStartSurah] = useState(1);
   const [endSurah, setEndSurah] = useState(114);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const { t, language, setLanguage, n } = useLanguage();
 
@@ -128,9 +130,13 @@ export default function LandingPage() {
       {/* Header */}
       <header className="relative z-50 w-full px-8 py-6 sm:px-10 lg:px-12 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          {/* <div className="relative w-10 h-10 rounded-full overflow-hidden shadow-sm border border-[#D6C19E]/30 bg-white dark:bg-neutral-800">
-            <Image src="/icon.svg" alt="WriteQuran Logo" fill className="object-contain p-1" />
-          </div> */}
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className="mr-1 sm:mr-2 p-2 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors flex items-center justify-center"
+            title={t("open_menu")}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
+          </button>
           <h1 className="text-xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100 font-gabriela">Write Quran</h1>
         </div>
         <div className="flex items-center gap-0 sm:gap-0">
@@ -266,6 +272,22 @@ export default function LandingPage() {
             </div>
           </Link>
 
+          <Link href="/leaderboard" className={`group relative overflow-hidden rounded-3xl bg-white dark:bg-neutral-800/80 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm ${language === "ar" ? "text-right" : "text-left"}`}>
+            <div className={`absolute -top-4 ${language === "ar" ? "-left-4" : "-right-4"} p-6 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-all duration-500 scale-50 group-hover:scale-150 ${language === "ar" ? "rotate-[15deg]" : "rotate-[-15deg]"} group-hover:rotate-0`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#D6C19E" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            </div>
+            <div className="mb-8 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            </div>
+            <h3 className="mb-3 text-2xl font-bold text-neutral-800 dark:text-neutral-100">{t("leaderboard")}</h3>
+            <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
+              {t("leaderboard_desc")}
+            </p>
+            <div className="mt-8 flex items-center text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E] group-hover:gap-2 transition-all">
+              {t("view_rankings")} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 rtl:rotate-180"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+            </div>
+          </Link>
+
         </div>
       </main>
 
@@ -328,6 +350,12 @@ export default function LandingPage() {
         </div>
       )}
 
+      <MenuDrawer
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        isDarkMode={isDarkMode}
+        toggleTheme={toggleTheme}
+      />
     </div>
   );
 }
