@@ -21,6 +21,8 @@ interface LeaderboardEntry {
   hifz_score: number;
 }
 
+type LeaderboardPeriod = "all_time" | "monthly" | "weekly";
+
 export default function LeaderboardPage() {
   const { t, language, n, setLanguage } = useLanguage();
   const [isMounted, setIsMounted] = useState(false);
@@ -30,6 +32,7 @@ export default function LeaderboardPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeUsername, setActiveUsername] = useState<string | null>(null);
+  const [selectedPeriod, setSelectedPeriod] = useState<LeaderboardPeriod>("all_time");
 
   const maskUsername = (value: string) => {
     if (!value) return "User";
@@ -38,11 +41,13 @@ export default function LeaderboardPage() {
     return `${value.slice(0, 3)}***${value.slice(-1)}`;
   };
 
-  const fetchLeaderboard = useCallback(async () => {
+  const fetchLeaderboard = useCallback(async (period: LeaderboardPeriod) => {
     setLoading(true);
     setLoadError(null);
     const supabase = createClient();
-    const { data, error } = await supabase.rpc("get_leaderboard");
+    const { data, error } = await supabase.rpc("get_leaderboard_by_period", {
+      period_key: period,
+    });
     if (error) {
       setLoadError(error.message || "Failed to load leaderboard.");
     } else if (data) {
@@ -74,8 +79,6 @@ export default function LeaderboardPage() {
     setIsMounted(true);
     setActiveUsername(getStorage("active_username"));
 
-    fetchLeaderboard();
-
     const handleThemeEvent = () => {
       setIsDarkMode(document.documentElement.classList.contains("dark"));
     };
@@ -83,6 +86,11 @@ export default function LeaderboardPage() {
     window.addEventListener("quran-typing-theme-change", handleThemeEvent);
     return () => window.removeEventListener("quran-typing-theme-change", handleThemeEvent);
   }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+    fetchLeaderboard(selectedPeriod);
+  }, [fetchLeaderboard, isMounted, selectedPeriod]);
 
   const toggleTheme = () => {
     const next = !isDarkMode;
@@ -104,6 +112,12 @@ export default function LeaderboardPage() {
     "border-[#D6C19E]/40 bg-[#D6C19E]/20 text-[#B18E4E] dark:bg-[#D6C19E]/15 dark:text-[#E6CAA0]",
     "border-neutral-300 bg-neutral-100 text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200",
     "border-amber-300/60 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300",
+  ];
+
+  const periodOptions: { key: LeaderboardPeriod; label: string }[] = [
+    { key: "weekly", label: t("leaderboard_weekly") },
+    { key: "monthly", label: t("leaderboard_monthly") },
+    { key: "all_time", label: t("leaderboard_all_time") },
   ];
 
   return (
@@ -161,6 +175,23 @@ export default function LeaderboardPage() {
           <p className="text-lg text-neutral-500 dark:text-neutral-400 max-w-xl">
             {t("leaderboard_desc")}
           </p>
+          <div className="inline-flex flex-wrap items-center justify-center gap-2 rounded-full border border-neutral-200/70 dark:border-neutral-800 bg-white/85 dark:bg-neutral-900/60 p-1.5 shadow-sm">
+            {periodOptions.map((option) => {
+              const active = option.key === selectedPeriod;
+              return (
+                <button
+                  key={option.key}
+                  type="button"
+                  onClick={() => setSelectedPeriod(option.key)}
+                  className={`rounded-full px-4 py-2 text-xs sm:text-sm font-bold transition-colors ${active
+                    ? "bg-[#D6C19E] text-white shadow-sm"
+                    : "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"}`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
         </section>
 
         <section className="animate-in slide-in-from-bottom-8 fade-in duration-1000">
@@ -179,7 +210,7 @@ export default function LeaderboardPage() {
               <div className="p-12 text-center flex flex-col items-center gap-4">
                 <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400">{t("failed_to_load") || "Failed to load leaderboard."}</p>
                 <button
-                  onClick={fetchLeaderboard}
+                  onClick={() => fetchLeaderboard(selectedPeriod)}
                   className="px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-full border border-[#D6C19E]/50 text-[#B18E4E] dark:text-[#D6C19E] hover:bg-[#D6C19E]/10 transition-colors"
                 >
                   {t("retry") || "Retry"}
@@ -187,7 +218,9 @@ export default function LeaderboardPage() {
               </div>
             ) : leaders.length === 0 ? (
               <div className="p-12 text-center">
-                <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400">{t("no_leaders_yet")}</p>
+                <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
+                  {selectedPeriod === "all_time" ? t("no_leaders_yet") : t("leaderboard_period_empty")}
+                </p>
               </div>
             ) : (
               <div className="divide-y divide-neutral-100 dark:divide-neutral-800/50">
