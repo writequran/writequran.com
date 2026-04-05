@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/lib/i18n';
 import { getStorage } from '@/lib/storage';
 
@@ -34,24 +35,42 @@ export function MenuDrawer({
 }: MenuDrawerProps) {
   const { t, language, setLanguage } = useLanguage();
   const [username, setUsername] = React.useState<string | null>(null);
+  const pathname = usePathname();
+  const closeButtonRef = React.useRef<HTMLButtonElement>(null);
 
   React.useEffect(() => {
     if (isOpen) {
       const stored = getStorage('active_username');
       setUsername(stored || null);
+      // Auto-focus close button when drawer opens
+      setTimeout(() => closeButtonRef.current?.focus(), 50);
     }
   }, [isOpen]);
+
+  // Escape key closes drawer
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   return (
     <>
       {/* Backdrop */}
       <div
+        aria-hidden="true"
         className={`fixed inset-0 bg-black/10 dark:bg-black/40 backdrop-blur-[2px] z-[150] transition-opacity duration-500 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={onClose}
       />
 
       {/* Drawer */}
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("open_menu") || "Menu"}
         className={`fixed top-0 bottom-0 w-[280px] sm:w-80 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-2xl z-[160] shadow-2xl border-neutral-200/50 dark:border-neutral-800/50 transition-all duration-500 ease-out transform ${language === 'ar' ? 'right-0 border-l' : 'left-0 border-r'} ${isOpen ? 'translate-x-0' : (language === 'ar' ? 'translate-x-full' : '-translate-x-full')}`}
       >
         <div className="flex flex-col h-full">
@@ -65,7 +84,7 @@ export function MenuDrawer({
                 Write Quran
               </Link>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200">
+            <button ref={closeButtonRef} onClick={onClose} aria-label={t("close") || "Close"} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
             </button>
           </div>
@@ -75,26 +94,33 @@ export function MenuDrawer({
 
             {/* Navigation section */}
             <p className="px-4 text-[10px] uppercase font-bold text-neutral-400 tracking-widest mb-2 mt-2">{t("navigation") || "Navigation"}</p>
-            <Link href="/write" onClick={onClose} className="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400 group-hover:text-[#D6C19E] transition-colors shrink-0"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
-              <span className="font-semibold text-sm">{t("start_writing")}</span>
-            </Link>
-            <Link href="/review" onClick={onClose} className="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400 group-hover:text-[#D6C19E] transition-colors shrink-0"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /><path d="m15 5 4 4" /></svg>
-              <span className="font-semibold text-sm">{t("review_mistakes")}</span>
-            </Link>
-            <Link href="/memorize" onClick={onClose} className="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400 group-hover:text-[#D6C19E] transition-colors shrink-0"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path d="M12 11h4" /><path d="M12 16h4" /><path d="M8 11h.01" /><path d="M8 16h.01" /></svg>
-              <span className="font-semibold text-sm">{t("memorization_test")}</span>
-            </Link>
-            <Link href="/progress" onClick={onClose} className="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400 group-hover:text-[#D6C19E] transition-colors shrink-0"><path d="M3 3v18h18" /><path d="m7 14 3-3 3 2 4-5" /></svg>
-              <span className="font-semibold text-sm">{t("my_progress")}</span>
-            </Link>
-            <Link href="/leaderboard" onClick={onClose} className="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400 group-hover:text-[#D6C19E] transition-colors shrink-0"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-              <span className="font-semibold text-sm">{t("leaderboard")}</span>
-            </Link>
+            {[
+              { href: "/write", label: t("start_writing"), icon: <><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></> },
+              { href: "/review", label: t("review_mistakes"), icon: <><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /><path d="m15 5 4 4" /></> },
+              { href: "/memorize", label: t("memorization_test"), icon: <><rect width="8" height="4" x="8" y="2" rx="1" ry="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path d="M12 11h4" /><path d="M12 16h4" /><path d="M8 11h.01" /><path d="M8 16h.01" /></> },
+              { href: "/progress", label: t("my_progress"), icon: <><path d="M3 3v18h18" /><path d="m7 14 3-3 3 2 4-5" /></> },
+              { href: "/leaderboard", label: t("leaderboard"), icon: <><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></> },
+            ].map(({ href, label, icon }) => {
+              const active = pathname === href;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={onClose}
+                  aria-current={active ? "page" : undefined}
+                  className={`flex items-center gap-4 px-4 py-3 rounded-2xl transition-all group ${active
+                    ? "bg-[#D6C19E]/12 dark:bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E]"
+                    : "text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800"
+                  }`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`shrink-0 transition-colors ${active ? "text-[#B18E4E] dark:text-[#D6C19E]" : "text-neutral-400 group-hover:text-[#D6C19E]"}`}>
+                    {icon}
+                  </svg>
+                  <span className="font-semibold text-sm">{label}</span>
+                  {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#B18E4E] dark:bg-[#D6C19E]" />}
+                </Link>
+              );
+            })}
 
             <div className="my-4 h-px bg-neutral-100 dark:bg-neutral-800/50 mx-4" />
 
@@ -122,6 +148,8 @@ export function MenuDrawer({
             <p className="px-4 text-[10px] uppercase font-bold text-neutral-400 tracking-widest mb-2">{t("preferences")}</p>
             <button
               onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
+              aria-label={t("language_toggle")}
+              aria-pressed={language === 'ar'}
               className="flex items-center justify-between w-full px-4 py-3.5 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300 mb-1"
             >
               <div className="flex items-center gap-4">
@@ -132,6 +160,8 @@ export function MenuDrawer({
             </button>
             <button
               onClick={toggleTheme}
+              aria-label={isDarkMode ? (t("light_mode") || "Light Mode") : (t("night_mode") || "Night Mode")}
+              aria-pressed={isDarkMode}
               className="flex items-center justify-between w-full px-4 py-3.5 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300"
             >
               <div className="flex items-center gap-4">

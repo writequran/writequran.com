@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/lib/i18n";
 import { getStorage, setStorage } from "@/lib/storage";
@@ -29,6 +29,32 @@ export default function LeaderboardPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const fetchLeaderboard = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+    const supabase = createClient();
+    const { data, error } = await supabase.rpc("get_leaderboard");
+    if (error) {
+      setLoadError(error.message || "Failed to load leaderboard.");
+    } else if (data) {
+      setLeaders(
+        data.map((entry: any) => ({
+          global_rank: entry.global_rank,
+          user_id: entry.user_id,
+          username: entry.username,
+          total_letters_typed: entry.total_letters_typed,
+          total_surahs_practiced: entry.total_surahs_practiced,
+          total_completed_surahs: entry.total_completed_surahs,
+          total_ayat_completed: entry.total_ayat_completed,
+          accuracy_percentage: entry.accuracy_percentage,
+          streak_active: entry.streak_active,
+          hifz_score: entry.hifz_score,
+        }))
+      );
+    }
+    setLoading(false);
+  }, []);
+
   useEffect(() => {
     const saved = getStorage("theme");
     const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -36,30 +62,6 @@ export default function LeaderboardPage() {
     setIsDarkMode(initialDark);
     if (initialDark) document.documentElement.classList.add("dark");
     setIsMounted(true);
-
-    const fetchLeaderboard = async () => {
-      const supabase = createClient();
-      const { data, error } = await supabase.rpc("get_leaderboard");
-      if (error) {
-        setLoadError(error.message || "Failed to load leaderboard.");
-      } else if (data) {
-        setLeaders(
-          data.map((entry: any) => ({
-            global_rank: entry.global_rank,
-            user_id: entry.user_id,
-            username: entry.username,
-            total_letters_typed: entry.total_letters_typed,
-            total_surahs_practiced: entry.total_surahs_practiced,
-            total_completed_surahs: entry.total_completed_surahs,
-            total_ayat_completed: entry.total_ayat_completed,
-            accuracy_percentage: entry.accuracy_percentage,
-            streak_active: entry.streak_active,
-            hifz_score: entry.hifz_score,
-          }))
-        );
-      }
-      setLoading(false);
-    };
 
     fetchLeaderboard();
 
@@ -116,15 +118,17 @@ export default function LeaderboardPage() {
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => setLanguage(language === "en" ? "ar" : "en")}
-            className="flex items-center justify-center w-10 h-10 rounded-full text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700"
-            title={t("language_toggle")}
+            aria-label={t("language_toggle")}
+            aria-pressed={language === "ar"}
+            className="flex items-center justify-center w-11 h-11 rounded-full text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /><path d="M2 12h20" /></svg>
           </button>
           <button
             onClick={toggleTheme}
-            className="flex items-center justify-center w-10 h-10 rounded-full text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700"
-            title={isDarkMode ? t("light_mode") : t("night_mode")}
+            aria-label={isDarkMode ? (t("light_mode") || "Light Mode") : (t("night_mode") || "Night Mode")}
+            aria-pressed={isDarkMode}
+            className="flex items-center justify-center w-11 h-11 rounded-full text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-all border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700"
           >
             {isDarkMode ? (
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
@@ -149,7 +153,7 @@ export default function LeaderboardPage() {
         </section>
 
         <section className="animate-in slide-in-from-bottom-8 fade-in duration-1000">
-          <div className="bg-white dark:bg-neutral-800/80 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 overflow-hidden backdrop-blur-xl">
+          <div className="bg-white dark:bg-neutral-800/80 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 overflow-hidden backdrop-blur-xl">
             <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-neutral-50 dark:bg-neutral-900/50 border-b border-neutral-200/60 dark:border-neutral-800 text-[10px] font-bold uppercase tracking-widest text-neutral-400 dark:text-neutral-500">
               <div className="col-span-2 sm:col-span-2 text-center">{t("rank")}</div>
               <div className="col-span-6 sm:col-span-6">{t("leader")}</div>
@@ -157,14 +161,22 @@ export default function LeaderboardPage() {
             </div>
 
             {loading ? (
-              <div className="p-12 flex justify-center items-center">
-                <div className="w-8 h-8 border-4 border-[#D6C19E]/30 border-t-[#D6C19E] rounded-full animate-spin"></div>
+              <div role="status" aria-label={t("loading") || "Loading"} className="p-12 flex justify-center items-center">
+                <div className="w-8 h-8 border-4 border-[#D6C19E]/30 border-t-[#D6C19E] rounded-full animate-spin" />
               </div>
             ) : loadError ? (
-              <div className="p-12 text-center text-red-500 font-medium">{loadError}</div>
+              <div className="p-12 text-center flex flex-col items-center gap-4">
+                <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400">{t("failed_to_load") || "Failed to load leaderboard."}</p>
+                <button
+                  onClick={fetchLeaderboard}
+                  className="px-4 py-2 text-xs font-bold uppercase tracking-widest rounded-full border border-[#D6C19E]/50 text-[#B18E4E] dark:text-[#D6C19E] hover:bg-[#D6C19E]/10 transition-colors"
+                >
+                  {t("retry") || "Retry"}
+                </button>
+              </div>
             ) : leaders.length === 0 ? (
-              <div className="p-12 text-center text-neutral-500 dark:text-neutral-400 font-medium">
-                {t("no_leaders_yet")}
+              <div className="p-12 text-center">
+                <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400">{t("no_leaders_yet")}</p>
               </div>
             ) : (
               <div className="divide-y divide-neutral-100 dark:divide-neutral-800/50">

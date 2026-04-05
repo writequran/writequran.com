@@ -89,6 +89,8 @@ export const translations: Record<Language, Dictionary> = {
     "language_toggle": "Arabic / العربية",
     "navigation": "NAVIGATION",
     "sign_in_to_access": "Sign in to view profile",
+    "retry": "Try Again",
+    "failed_to_load": "Could not load the leaderboard. Check your connection and try again.",
 
     // Components & Modals
     "search_surah": "Search Surah...",
@@ -275,6 +277,8 @@ export const translations: Record<Language, Dictionary> = {
     "language_toggle": "English / الإنجليزية",
     "navigation": "التنقل",
     "sign_in_to_access": "سجّل دخولك لعرض الملف الشخصي",
+    "retry": "حاول مجدداً",
+    "failed_to_load": "تعذّر تحميل المتصدرين. تحقق من اتصالك وحاول مجدداً.",
 
     // Components & Modals
     "search_surah": "ابحث عن السورة...",
