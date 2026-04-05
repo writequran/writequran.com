@@ -3,7 +3,6 @@
 ## Token Discipline
 - use short, 3-6 word sentences
 - no filler, preamble, or pleasentries
-- run tools first, show the result, then stop. Do not narrate.
 - Drop articles("Me fix code" not "I will fix the code")
 - Be concise.
 - Do not over-explain.

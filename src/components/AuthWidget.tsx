@@ -11,6 +11,34 @@ import { Suspense } from 'react';
 
 type AuthView = 'signin' | 'signup' | 'forgot' | 'check_email' | 'reset_sent' | 'set_password' | 'set_username';
 
+const normalizeUsername = (value: string) => value.trim().toLowerCase();
+
+const validateUsername = (value: string, t: (key: string) => string): string | null => {
+  const username = normalizeUsername(value);
+
+  if (username.length < 3 || username.length > 20) {
+    return t("username_rule_length");
+  }
+
+  if (!/^[a-z]/.test(username)) {
+    return t("username_rule_start");
+  }
+
+  if (!/^[a-z0-9._]+$/.test(username)) {
+    return t("username_rule_charset");
+  }
+
+  if (username.includes('..') || username.includes('__')) {
+    return t("username_rule_repeat");
+  }
+
+  if (/[._]$/.test(username)) {
+    return t("username_rule_end");
+  }
+
+  return null;
+};
+
 function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   const [user, setUser] = useState<{ id: string; email: string; username?: string | null } | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -23,6 +51,8 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const [usernameAvailabilityMessage, setUsernameAvailabilityMessage] = useState<string | null>(null);
+  const [checkingUsername, setCheckingUsername] = useState(false);
   const authRef = useRef<HTMLDivElement>(null);
   const { t, language } = useLanguage();
   const searchParams = useSearchParams();
@@ -137,11 +167,45 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
     setUsername('');
     setError(null);
     setInfo(null);
+    setUsernameAvailabilityMessage(null);
+    setCheckingUsername(false);
   };
 
   const switchView = (v: AuthView) => {
     resetForm();
     setView(v);
+  };
+
+  const checkUsernameAvailability = async (rawValue: string) => {
+    const cleanUsername = normalizeUsername(rawValue);
+    const usernameError = validateUsername(cleanUsername, t);
+    if (!cleanUsername) {
+      setUsernameAvailabilityMessage(null);
+      return false;
+    }
+    if (usernameError) {
+      setUsernameAvailabilityMessage(usernameError);
+      return false;
+    }
+
+    setCheckingUsername(true);
+    const { data, error: rpcError } = await supabase.rpc('is_username_available', {
+      candidate_username: cleanUsername,
+    });
+    setCheckingUsername(false);
+
+    if (rpcError) {
+      setUsernameAvailabilityMessage(null);
+      return true;
+    }
+
+    if (data === false) {
+      setUsernameAvailabilityMessage(t("username_taken"));
+      return false;
+    }
+
+    setUsernameAvailabilityMessage(t("username_available"));
+    return true;
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -183,15 +247,22 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true); setError(null);
-    if (username.trim().length < 3) {
-      setError('Username must be at least 3 characters.');
+    const cleanUsername = normalizeUsername(username);
+    const usernameError = validateUsername(cleanUsername, t);
+    if (usernameError) {
+      setError(usernameError);
       setLoading(false); return;
+    }
+    const available = await checkUsernameAvailability(cleanUsername);
+    if (!available) {
+      setLoading(false);
+      return;
     }
     const { data, error: err } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { username: username.trim() },
+        data: { username: cleanUsername },
         emailRedirectTo: `${getURL()}/auth/callback`,
       },
     });
@@ -201,6 +272,8 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
         setError('An account with this email already exists. Try signing in.');
       } else if (err.message.includes('Password should be')) {
         setError('Password must be at least 6 characters.');
+      } else if (err.message.includes('duplicate key') || err.message.includes('Database error saving new user')) {
+        setUsernameAvailabilityMessage(t("username_taken"));
       } else {
         setError(err.message);
       }
@@ -209,8 +282,8 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
     if (data.session) {
       // Email confirmation disabled in Supabase — user is immediately signed in
       setActiveUserId(data.user!.id);
-      setStorage('active_username', username.trim());
-      setUser({ id: data.user!.id, email: data.user!.email || '', username: username.trim() });
+      setStorage('active_username', cleanUsername);
+      setUser({ id: data.user!.id, email: data.user!.email || '', username: cleanUsername });
       setIsOpen(false);
       resetForm();
       setSyncing(true);
@@ -235,12 +308,12 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   };
 
   const handleResendConfirmation = async () => {
-    if (!email) { setError('Enter your email address first.'); return; }
+    if (!email) { setError(t("email")); return; }
     setLoading(true); setError(null);
     const { error: err } = await supabase.auth.resend({ type: 'signup', email });
     setLoading(false);
     if (err) { setError(err.message); return; }
-    setInfo('Confirmation email resent! Check your inbox.');
+    setInfo(t("confirmation_resent"));
   };
 
   const handleLogout = async () => {
@@ -255,12 +328,12 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
 
   const handleSetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    if (password.length < 6) { setError(t("password_min_6")); return; }
     setLoading(true); setError(null);
     const { error: err } = await supabase.auth.updateUser({ password });
     setLoading(false);
     if (err) {
-      setError(err.message || 'Failed to update password. Please try again.');
+      setError(err.message || t("failed_update_password"));
       return;
     }
     // Password updated — sign out so the user proves it with a fresh sign-in
@@ -271,26 +344,29 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
     resetForm();
     setView('signin');
     setIsOpen(false);
-    setInfo('Password updated! Sign in with your new password.');
+    setInfo(t("password_updated_signin"));
     onAuthChange();
   };
 
   const handleSetUsername = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username.trim().length < 3) { setError('Username must be at least 3 characters.'); return; }
+    const cleanUsername = normalizeUsername(username);
+    const usernameError = validateUsername(cleanUsername, t);
+    if (usernameError) { setError(usernameError); return; }
+    const available = await checkUsernameAvailability(cleanUsername);
+    if (!available) return;
     setLoading(true); setError(null);
     // This updates raw_user_meta_data and securely triggers our db migration on_auth_user_updated
-    const { error: err } = await supabase.auth.updateUser({ data: { username: username.trim() } });
+    const { error: err } = await supabase.auth.updateUser({ data: { username: cleanUsername } });
     setLoading(false);
     if (err) {
       // Very likely a uniqueness constraint collision from user_profiles trigger if taken
-      setError(err.message.includes('duplicate key') ? 'Username is already taken.' : 'Failed to save username. Try again.');
+      setError(err.message.includes('duplicate key') ? t("username_taken") : t("failed_save_username"));
       return;
     }
-    const cleanUsername = username.trim();
     setStorage('active_username', cleanUsername);
     setUser(prev => prev ? { ...prev, username: cleanUsername } : null);
-    setInfo('Username set successfully!');
+    setInfo(t("username_saved"));
     setTimeout(() => {
       setIsOpen(false);
       resetForm();
@@ -349,7 +425,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
         }}
         className="px-2 sm:px-4 py-1 sm:py-1.5 text-[10px] sm:text-xs font-bold text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E] dark:hover:border-[#D6C19E] hover:bg-white dark:hover:bg-neutral-900 transition-all rounded-full ml-1 sm:ml-4 mr-0 sm:mr-2 shadow-sm whitespace-nowrap"
       >
-        {forcesSetUsernameFlow ? "Set Username" : (isRecoveryPasswordFlow ? "Set Password" : t("sign_in"))}
+        {forcesSetUsernameFlow ? t("set_username") : (isRecoveryPasswordFlow ? t("set_password") : t("sign_in"))}
       </button>
 
       {isOpen && (
@@ -359,35 +435,46 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
           {view === 'check_email' && (
             <div className="flex flex-col gap-3 text-center">
               <p className="text-2xl">📬</p>
-              <p className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Check your email</p>
-              <p className="text-xs text-neutral-500">We sent a confirmation link to <strong>{email}</strong>. Click it to complete signup.</p>
+              <p className="text-sm font-bold text-neutral-800 dark:text-neutral-200">{t("check_your_email")}</p>
+              <p className="text-xs text-neutral-500">{t("signup_confirmation_sent")} <strong>{email}</strong>. {t("click_to_complete_signup")}</p>
               <button onClick={handleResendConfirmation} disabled={loading} className="text-xs text-[#D6C19E] hover:text-[#c2ad8a] mt-1 transition-colors">
-                {loading ? 'Resending...' : 'Resend confirmation email'}
+                {loading ? t("resending") : t("resend_confirmation_email")}
               </button>
               {error && <p className="text-xs text-red-500">{error}</p>}
               {info && <p className="text-xs text-green-600">{info}</p>}
-              <button onClick={() => switchView('signin')} className="text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 mt-1">Back to sign in</button>
+              <button onClick={() => switchView('signin')} className="text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 mt-1">{t("back_to_sign_in")}</button>
             </div>
           )}
 
           {/* ── Set Username for existing users ── */}
           {view === 'set_username' && (
             <>
-              <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-1">Set Your Username</h3>
-              <p className="text-xs text-neutral-500 mb-3">To join the global leaderboard, you must choose a unique public username.</p>
+              <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-1">{t("set_your_username")}</h3>
+              <p className="text-xs text-neutral-500 mb-3">{t("set_username_desc")}</p>
               <form onSubmit={handleSetUsername} className="flex flex-col gap-2">
                 <input
                   required
                   type="text"
-                  placeholder="Username (e.g. musa42)"
+                  placeholder={t("username_placeholder")}
                   value={username}
-                  onChange={e => setUsername(e.target.value)}
+                  onChange={e => {
+                    setUsername(e.target.value);
+                    setUsernameAvailabilityMessage(null);
+                    setError(null);
+                  }}
+                  onBlur={() => { void checkUsernameAvailability(username); }}
                   className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200"
                 />
+                {checkingUsername && <p className="text-xs text-neutral-400">{t("checking_username")}</p>}
+                {usernameAvailabilityMessage && (
+                  <p className={`text-xs ${usernameAvailabilityMessage === t("username_available") ? 'text-emerald-500' : 'text-red-500'}`}>
+                    {usernameAvailabilityMessage}
+                  </p>
+                )}
                 {error && <p className="text-xs text-red-500">{error}</p>}
                 {info && <p className="text-xs text-green-600">{info}</p>}
                 <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
-                  {loading ? 'Saving...' : 'Save Username'}
+                  {loading ? t("saving") : t("save_username")}
                 </button>
               </form>
             </>
@@ -396,27 +483,27 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
           {/* ── Set new password (PASSWORD_RECOVERY flow) ── */}
           {view === 'set_password' && (
             <>
-              <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-1">Set New Password</h3>
-              <p className="text-xs text-neutral-500 mb-3">Choose a new password for your account.</p>
+              <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-1">{t("set_new_password")}</h3>
+              <p className="text-xs text-neutral-500 mb-3">{t("set_new_password_desc")}</p>
               <form onSubmit={handleSetPassword} className="flex flex-col gap-2">
                 <input
                   required
                   type="password"
-                  placeholder="New password (min 6)"
+                  placeholder={t("new_password_min_6")}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200"
                 />
                 {error && <p className="text-xs text-red-500">{error}</p>}
                 <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
-                  {loading ? 'Updating...' : 'Set New Password'}
+                  {loading ? t("updating") : t("set_new_password")}
                 </button>
                 <button 
                   type="button" 
                   onClick={() => { setIsRecoveryMode(false); setIsOpen(false); setView('signin'); }} 
                   className="w-full text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 mt-2"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
               </form>
             </>
@@ -426,24 +513,24 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
           {view === 'reset_sent' && (
             <div className="flex flex-col gap-3 text-center">
               <p className="text-2xl">✉️</p>
-              <p className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Reset link sent</p>
-              <p className="text-xs text-neutral-500">Check your inbox at <strong>{email}</strong> for the password reset link.</p>
-              <button onClick={() => switchView('signin')} className="text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 mt-2">Back to sign in</button>
+              <p className="text-sm font-bold text-neutral-800 dark:text-neutral-200">{t("reset_link_sent")}</p>
+              <p className="text-xs text-neutral-500">{t("check_inbox_reset")} <strong>{email}</strong> {t("for_reset_link")}</p>
+              <button onClick={() => switchView('signin')} className="text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 mt-2">{t("back_to_sign_in")}</button>
             </div>
           )}
 
           {/* ── Forgot password ── */}
           {view === 'forgot' && (
             <>
-              <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-3">Reset Password</h3>
+              <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-3">{t("reset_password")}</h3>
               <form onSubmit={handleForgotPassword} className="flex flex-col gap-2">
                 <input required type="email" placeholder="Your email address" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
                 {error && <p className="text-xs text-red-500">{error}</p>}
                 <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
-                  {loading ? 'Sending...' : 'Send Reset Link'}
+                  {loading ? t("sending") : t("send_reset_link")}
                 </button>
               </form>
-              <button onClick={() => switchView('signin')} className="w-full text-xs text-neutral-400 mt-3 hover:text-neutral-600 dark:hover:text-neutral-300">Back to sign in</button>
+              <button onClick={() => switchView('signin')} className="w-full text-xs text-neutral-400 mt-3 hover:text-neutral-600 dark:hover:text-neutral-300">{t("back_to_sign_in")}</button>
             </>
           )}
 
@@ -459,7 +546,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
                     <p>{error}</p>
                     {error.includes('confirm') && (
                       <button type="button" onClick={handleResendConfirmation} disabled={loading} className="text-[#D6C19E] hover:text-[#c2ad8a] underline mt-1 block">
-                        Resend confirmation email
+                        {t("resend_confirmation_email")}
                       </button>
                     )}
                   </div>
@@ -483,9 +570,27 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
             <>
               <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-3">{t("create_account")}</h3>
               <form onSubmit={handleSignUp} className="flex flex-col gap-2">
-                <input required type="text" placeholder="Unique Username" value={username} onChange={e => setUsername(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
                 <input required type="email" placeholder={t("email")} value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
                 <input required type="password" placeholder={t("password_min_6")} value={password} onChange={e => setPassword(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
+                <input
+                  required
+                  type="text"
+                  placeholder={t("unique_username_placeholder")}
+                  value={username}
+                  onChange={e => {
+                    setUsername(e.target.value);
+                    setUsernameAvailabilityMessage(null);
+                    setError(null);
+                  }}
+                  onBlur={() => { void checkUsernameAvailability(username); }}
+                  className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200"
+                />
+                {checkingUsername && <p className="text-xs text-neutral-400">{t("checking_username")}</p>}
+                {usernameAvailabilityMessage && (
+                  <p className={`text-xs ${usernameAvailabilityMessage === t("username_available") ? 'text-emerald-500' : 'text-red-500'}`}>
+                    {usernameAvailabilityMessage}
+                  </p>
+                )}
                 {error && <p className="text-xs text-red-500">{error}</p>}
                 <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
                   {loading ? t("loading") : t("sign_up")}
