@@ -1,4 +1,4 @@
-import { getSurah } from './quran-data';
+import { getAllSurahsMeta, getSurah } from './quran-data';
 import { getStorage, setStorage } from './storage';
 
 export interface MistakeRecord {
@@ -22,6 +22,11 @@ const getTypedIndicesStorageKey = (surahNumber: number) => `typed_indices_${sura
 const ACTIVITY_HISTORY_KEY = 'activity_history';
 
 export type ActivityHistory = Record<string, number>;
+
+const notifyStatsChanged = () => {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new Event('quran-typing-stats-change'));
+};
 
 const getLocalActivityDateKey = (date = new Date()) => {
   const year = date.getFullYear();
@@ -89,6 +94,7 @@ export const loadMistakeStats = (): Record<string, MistakeRecord> => {
 
 export const saveMistakeStats = (stats: Record<string, MistakeRecord>) => {
   setStorage('mistake_stats', JSON.stringify(stats));
+  notifyStatsChanged();
   if (typeof window !== "undefined") import('./sync-manager').then(m => m.debouncedSyncLocalToCloud());
 };
 
@@ -104,6 +110,7 @@ export const loadProgressStats = (): Record<number, ProgressStats> => {
 
 export const saveProgressStats = (stats: Record<number, ProgressStats>) => {
   setStorage('progress_stats', JSON.stringify(stats));
+  notifyStatsChanged();
   if (typeof window !== "undefined") import('./sync-manager').then(m => m.debouncedSyncLocalToCloud());
 };
 
@@ -194,8 +201,24 @@ const loadWeakSpotReviewStates = (): Record<string, WeakSpotReviewState> => {
   }
 };
 
+export interface ReviewAnalyticsItem {
+  label: string;
+  score: number;
+  meta?: string;
+}
+
+export interface ReviewAnalytics {
+  hardestSurahs: ReviewAnalyticsItem[];
+  hardestAyat: ReviewAnalyticsItem[];
+  hardestLetters: ReviewAnalyticsItem[];
+  reviewedCount: number;
+  successfulReviewCount: number;
+  reviewSuccessRate: number;
+}
+
 const saveWeakSpotReviewStates = (states: Record<string, WeakSpotReviewState>) => {
   setStorage(WEAK_SPOT_REVIEW_KEY, JSON.stringify(states));
+  notifyStatsChanged();
 };
 
 const aggregateWeakSpotStats = () => {
@@ -233,6 +256,83 @@ const aggregateWeakSpotStats = () => {
     // Difficulty Score Formula: Unique Events get 2x weight relative to blunt force tracking attempts
     score: (a.events * 2) + (a.attempts * 1)
   })).sort((a, b) => b.score - a.score);
+};
+
+export const getReviewAnalytics = (): ReviewAnalytics => {
+  const mistakes = loadMistakeStats();
+  const reviewStates = loadWeakSpotReviewStates();
+  const weakSpots = aggregateWeakSpotStats();
+  const surahMetaByNumber = new Map(getAllSurahsMeta().map((surah) => [surah.number, surah]));
+  const hardestSurahsMap: Record<number, { score: number; ayat: Set<number> }> = {};
+  const hardestLettersMap: Record<string, { score: number; count: number }> = {};
+
+  Object.values(mistakes).forEach((mistake) => {
+    if (!hardestSurahsMap[mistake.surahNumber]) {
+      hardestSurahsMap[mistake.surahNumber] = { score: 0, ayat: new Set<number>() };
+    }
+    hardestSurahsMap[mistake.surahNumber].score += mistake.wrongAttempts + 1;
+    hardestSurahsMap[mistake.surahNumber].ayat.add(mistake.ayahNumber);
+
+    const letterKey = mistake.expectedChar || "؟";
+    if (!hardestLettersMap[letterKey]) {
+      hardestLettersMap[letterKey] = { score: 0, count: 0 };
+    }
+    hardestLettersMap[letterKey].score += mistake.wrongAttempts + 1;
+    hardestLettersMap[letterKey].count += 1;
+  });
+
+  const hardestSurahs = Object.entries(hardestSurahsMap)
+    .map(([surahNumber, data]) => {
+      const numericSurahNumber = Number(surahNumber);
+      const surah = surahMetaByNumber.get(numericSurahNumber);
+      return {
+        label: `${numericSurahNumber}. ${surah?.englishName || `Surah ${numericSurahNumber}`}`,
+        score: data.score,
+        meta: `${data.ayat.size} ayat`,
+      };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 4);
+
+  const hardestAyat = weakSpots
+    .slice(0, 4)
+    .map((spot) => ({
+      label: `${spot.surahNumber}:${spot.ayahNumber}`,
+      score: spot.score,
+      meta: `${spot.score} difficulty`,
+    }));
+
+  const hardestLetters = Object.entries(hardestLettersMap)
+    .map(([letter, data]) => ({
+      label: letter === " " ? "Space" : letter,
+      score: data.score,
+      meta: `${data.count} slips`,
+    }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 6);
+
+  const reviewedWeakSpots = weakSpots.filter((spot) => reviewStates[getWeakSpotKey(spot.surahNumber, spot.ayahNumber)]);
+  const successfulReviewCount = reviewedWeakSpots.filter((spot) => {
+    const state = reviewStates[getWeakSpotKey(spot.surahNumber, spot.ayahNumber)];
+    if (!state) return false;
+    const hasNoFreshMistakes = (spot.latestMistakeTimestamp || 0) <= state.lastReviewedAt;
+    return hasNoFreshMistakes && state.intervalIndex > 0;
+  }).length;
+
+  const fallbackReviewedCount = Object.keys(reviewStates).length;
+  const reviewedCount = reviewedWeakSpots.length > 0 ? reviewedWeakSpots.length : fallbackReviewedCount;
+  const reviewSuccessRate = reviewedCount > 0
+    ? (successfulReviewCount / reviewedCount) * 100
+    : 0;
+
+  return {
+    hardestSurahs,
+    hardestAyat,
+    hardestLetters,
+    reviewedCount,
+    successfulReviewCount,
+    reviewSuccessRate,
+  };
 };
 
 export const getWeakSpots = (now = Date.now()): WeakSpot[] => {

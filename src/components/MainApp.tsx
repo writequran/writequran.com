@@ -64,7 +64,6 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
   const [reviewQueue, setReviewQueue] = useState<WeakSpot[]>([]);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(-1);
   const [modalType, setModalType] = useState<"review" | "clear" | "no-mistakes" | "review-complete" | "review-scheduled" | null>(null);
-
   const [navInfo, setNavInfo] = useState({ page: 1, juz: 1, ayah: 1 });
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);

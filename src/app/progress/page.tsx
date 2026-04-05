@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/lib/i18n";
-import { getMilestoneProgress, getSurahFinalProgressState } from "@/lib/stats";
+import { getMilestoneProgress, getReviewAnalytics, getSurahFinalProgressState } from "@/lib/stats";
 import { getAllSurahsMeta, getSurah } from "@/lib/quran-data";
 import { getStorage, setStorage } from "@/lib/storage";
 
@@ -66,6 +66,7 @@ export default function ProgressPage() {
   const [isMounted, setIsMounted] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [surahStats, setSurahStats] = useState<{ number: number; name: string; englishName: string; progress: number; ayahCount: number; typedCount: number; totalLetters: number }[]>([]);
+  const [analyticsVersion, setAnalyticsVersion] = useState(0);
 
   const milestones = useMemo(() => {
     if (!isMounted) return null;
@@ -84,6 +85,11 @@ export default function ProgressPage() {
       totalLettersTyped: progress.totalLettersTyped,
     };
   }, [isMounted, language, n, t]);
+
+  const reviewAnalytics = useMemo(() => {
+    if (!isMounted) return null;
+    return getReviewAnalytics();
+  }, [isMounted, analyticsVersion]);
 
   useEffect(() => {
     const saved = getStorage('theme');
@@ -126,6 +132,12 @@ export default function ProgressPage() {
 
     setSurahStats(computedStats);
     setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const handleStatsEvent = () => setAnalyticsVersion((value) => value + 1);
+    window.addEventListener("quran-typing-stats-change", handleStatsEvent);
+    return () => window.removeEventListener("quran-typing-stats-change", handleStatsEvent);
   }, []);
 
   const toggleTheme = () => {
@@ -229,6 +241,81 @@ export default function ProgressPage() {
             />
           </div>
         </section>
+
+        {reviewAnalytics && (
+          <section className="animate-in slide-in-from-bottom-10 fade-in duration-1000">
+            <div className="rounded-[2rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] backdrop-blur-xl">
+              <div className="flex flex-col gap-2 mb-6">
+                <h3 className="text-2xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100">
+                  {t("review_analytics")}
+                </h3>
+                <p className="text-sm sm:text-base text-neutral-500 dark:text-neutral-400 max-w-2xl">
+                  {t("review_analytics_desc")}
+                </p>
+              </div>
+
+              {reviewAnalytics.hardestSurahs.length === 0
+                && reviewAnalytics.hardestAyat.length === 0
+                && reviewAnalytics.hardestLetters.length === 0 ? (
+                <div className="rounded-[1.5rem] border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-5 text-sm font-medium text-neutral-500 dark:text-neutral-400">
+                  {t("no_review_data")}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                  <div className="rounded-[1.5rem] border border-[#D6C19E]/25 bg-[#F8F1E6]/85 dark:bg-neutral-900/65 dark:border-[#D6C19E]/20 px-4 py-4">
+                    <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#B18E4E] dark:text-[#D6C19E]">
+                      {t("review_success_rate")}
+                    </div>
+                    <div className="mt-2 text-3xl font-black text-neutral-900 dark:text-neutral-50">
+                      {n(reviewAnalytics.reviewSuccessRate.toFixed(1))}%
+                    </div>
+                    <div className="mt-2 text-xs font-medium text-neutral-500 dark:text-neutral-400">
+                      {n(reviewAnalytics.successfulReviewCount)} / {n(reviewAnalytics.reviewedCount)} {t("reviewed_weak_spots").toLowerCase()}
+                    </div>
+                  </div>
+
+                  {[
+                    { key: "hardest_surahs", items: reviewAnalytics.hardestSurahs },
+                    { key: "hardest_ayat", items: reviewAnalytics.hardestAyat },
+                    { key: "hardest_letters", items: reviewAnalytics.hardestLetters },
+                  ].map((group) => (
+                    <div
+                      key={group.key}
+                      className="rounded-[1.5rem] border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4"
+                    >
+                      <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-neutral-400 dark:text-neutral-500">
+                        {t(group.key)}
+                      </div>
+                      <div className="mt-3 flex flex-col gap-2">
+                        {group.items.length > 0 ? group.items.slice(0, 4).map((item, index) => (
+                          <div key={`${group.key}-${item.label}-${index}`} className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="text-sm font-bold text-neutral-800 dark:text-neutral-100 truncate">
+                                {item.label}
+                              </div>
+                              {item.meta ? (
+                                <div className="text-[11px] text-neutral-500 dark:text-neutral-400 truncate">
+                                  {item.meta}
+                                </div>
+                              ) : null}
+                            </div>
+                            <div className="shrink-0 text-sm font-black text-[#B18E4E] dark:text-[#D6C19E]">
+                              {n(item.score)}
+                            </div>
+                          </div>
+                        )) : (
+                          <div className="text-xs font-medium text-neutral-400 dark:text-neutral-500">
+                            {t("no_review_data")}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Surah List Tracker */}
         <section className="animate-in slide-in-from-bottom-12 fade-in duration-1000 delay-150">
