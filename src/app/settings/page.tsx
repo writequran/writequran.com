@@ -305,8 +305,11 @@ export default function SettingsPage() {
                   <div className="text-sm font-bold text-neutral-900 dark:text-neutral-50">{item.label}</div>
                   <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{item.description}</p>
                 </div>
-                <div className={`mt-1 inline-flex h-7 w-12 rounded-full transition-colors ${item.enabled ? "bg-[#D6C19E]" : "bg-neutral-200 dark:bg-neutral-700"}`}>
-                  <div className={`m-1 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${item.enabled ? "translate-x-5" : "translate-x-0"}`} />
+                <div className={`mt-0.5 inline-flex h-7 w-12 shrink-0 items-center rounded-full border p-[2px] transition-colors ${item.enabled
+                  ? "bg-[#D6C19E] border-[#D6C19E]/80"
+                  : "bg-neutral-200 dark:bg-neutral-700 border-neutral-300 dark:border-neutral-600"
+                  }`}>
+                  <div className={`h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.18)] transition-transform duration-200 ${item.enabled ? "translate-x-5" : "translate-x-0"}`} />
                 </div>
               </div>
             </button>
