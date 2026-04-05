@@ -162,6 +162,31 @@ export default function LeaderboardProfilePage() {
   const weeksToShow = Math.round((lastGridDay.getTime() - firstGridDay.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
   const monthLabels: Array<{ label: string; column: number }> = [];
   const activityWeeks: ActivityCell[][] = [];
+  const mobileMonthGrids = Array.from({ length: 12 }).map((_, monthIndex) => {
+    const monthStart = new Date(selectedYear, monthIndex, 1);
+    const monthEnd = new Date(selectedYear, monthIndex + 1, 0);
+    const firstMonthGridDay = startOfWeek(monthStart);
+    const monthGridEnd = new Date(monthEnd);
+    monthGridEnd.setDate(monthEnd.getDate() + (6 - monthEnd.getDay()));
+    monthGridEnd.setHours(0, 0, 0, 0);
+    const totalDays = Math.round((monthGridEnd.getTime() - firstMonthGridDay.getTime()) / (24 * 60 * 60 * 1000)) + 1;
+
+    return {
+      label: language === "ar" ? MONTH_LABELS_AR[monthIndex] : MONTH_LABELS_EN[monthIndex],
+      cells: Array.from({ length: totalDays }).map((__, dayOffset) => {
+        const date = new Date(firstMonthGridDay);
+        date.setDate(firstMonthGridDay.getDate() + dayOffset);
+        const key = formatDayKey(date);
+        const count = activityHistory[key] || 0;
+        return {
+          key,
+          inMonth: date.getMonth() === monthIndex,
+          level: getActivityLevel(count),
+          count,
+        };
+      }),
+    };
+  });
 
   for (let weekIndex = 0; weekIndex < weeksToShow; weekIndex++) {
     const weekCells: ActivityCell[] = [];
@@ -328,7 +353,40 @@ export default function LeaderboardProfilePage() {
                   </div>
 
                   <div className="w-full pb-2">
-                    <div className="w-full">
+                    <div className="grid grid-cols-2 gap-3 sm:hidden">
+                      {mobileMonthGrids.map((month) => (
+                        <div
+                          key={`mobile-month-${month.label}`}
+                          className="rounded-2xl border border-[#D6C19E]/25 bg-[#FCF7EF] dark:bg-neutral-900/50 dark:border-[#D6C19E]/15 p-3"
+                        >
+                          <div className="mb-2 text-center text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E]">
+                            {month.label}
+                          </div>
+                          <div className="grid grid-cols-7 gap-[2px]">
+                            {WEEKDAY_LABELS.map((weekday, dayIndex) => (
+                              <div
+                                key={`mobile-weekday-${month.label}-${dayIndex}`}
+                                className="text-center text-[9px] font-bold text-[#B18E4E] dark:text-[#D6C19E]"
+                              >
+                                {weekday}
+                              </div>
+                            ))}
+                            {month.cells.map((cell) => (
+                              <div
+                                key={`mobile-cell-${cell.key}`}
+                                title={`${cell.key}: ${n(cell.count)}`}
+                                className={`aspect-square w-full rounded-none ${cell.inMonth
+                                  ? getActivityCellClassName(cell.level)
+                                  : "bg-transparent"
+                                  }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="hidden sm:block w-full">
                       <div className="grid gap-x-[2px] gap-y-[1px] h-6 mb-2" style={{ gridTemplateColumns: `1.15rem repeat(${weeksToShow}, minmax(0, 1fr))` }}>
                         <div />
                         {Array.from({ length: weeksToShow }).map((_, columnIndex) => {
