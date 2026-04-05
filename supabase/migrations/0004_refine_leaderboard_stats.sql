@@ -6,8 +6,9 @@ ADD COLUMN IF NOT EXISTS typed_indices jsonb DEFAULT '[]'::jsonb;
 DROP FUNCTION IF EXISTS public.get_leaderboard();
 DROP FUNCTION IF EXISTS public.get_leaderboard_profile(text);
 
-CREATE OR REPLACE FUNCTION public.get_leaderboard()
+CREATE OR REPLACE FUNCTION public.get_leaderboard_base()
 RETURNS TABLE (
+  global_rank bigint,
   user_id uuid,
   username text,
   total_letters_typed bigint,
@@ -20,7 +21,7 @@ RETURNS TABLE (
 )
 LANGUAGE sql
 SECURITY DEFINER
-AS $leaderboard$
+AS $base$
   WITH user_stats AS (
     SELECT
       up.id AS user_id,
@@ -30,7 +31,7 @@ AS $leaderboard$
       SUM(CASE WHEN COALESCE(sp.is_completed, false) THEN 1 ELSE 0 END)::bigint AS total_completed_surahs,
       COALESCE(SUM(sp.completed_ayat_count), 0)::bigint AS total_ayat,
       GREATEST(
-        COALESCE(SUM(CASE WHEN sp.typed_indices IS NULL THEN 0 ELSE jsonb_array_length(sp.typed_indices) END), 0),
+        COALESCE(SUM(CASE WHEN jsonb_typeof(sp.typed_indices) = 'array' THEN jsonb_array_length(sp.typed_indices) ELSE 0 END), 0),
         COALESCE(SUM(sp.highest_index_reached), 0)
       )::bigint AS total_typed,
       COALESCE(SUM(sp.total_wrong_attempts), 0)::bigint AS total_mistakes
@@ -65,12 +66,20 @@ AS $leaderboard$
       (
         (au.total_completed_surahs * 300) +
         (au.total_ayat * 60) +
-        (au.total_typed * 0.12) +
+        (au.total_typed * 0.12) -
         (au.total_mistakes * 0.6)
       ) AS volume_points
     FROM active_users au
   )
   SELECT
+    row_number() OVER (
+      ORDER BY
+        (su.volume_points * su.accuracy_multiplier * su.consistency_multiplier)::int DESC,
+        su.total_completed_surahs DESC,
+        su.total_ayat DESC,
+        su.total_typed DESC,
+        su.username ASC
+    ) AS global_rank,
     su.user_id,
     su.username,
     su.total_typed AS total_letters_typed,
@@ -86,12 +95,31 @@ AS $leaderboard$
     su.total_completed_surahs DESC,
     su.total_ayat DESC,
     su.total_typed DESC,
-    su.username ASC
-  LIMIT 100;
+    su.username ASC;
+$base$;
+
+CREATE OR REPLACE FUNCTION public.get_leaderboard()
+RETURNS TABLE (
+  global_rank bigint,
+  user_id uuid,
+  username text,
+  total_letters_typed bigint,
+  total_surahs_practiced bigint,
+  total_completed_surahs bigint,
+  total_ayat_completed bigint,
+  accuracy_percentage numeric,
+  streak_active int,
+  hifz_score int
+)
+LANGUAGE sql
+SECURITY DEFINER
+AS $leaderboard$
+  SELECT * FROM public.get_leaderboard_base() LIMIT 100;
 $leaderboard$;
 
 CREATE OR REPLACE FUNCTION public.get_leaderboard_profile(profile_username text)
 RETURNS TABLE (
+  global_rank bigint,
   user_id uuid,
   username text,
   total_letters_typed bigint,
@@ -106,9 +134,10 @@ LANGUAGE sql
 SECURITY DEFINER
 AS $profile$
   WITH leaderboard_base AS (
-    SELECT * FROM public.get_leaderboard()
+    SELECT * FROM public.get_leaderboard_base()
   )
   SELECT
+    lb.global_rank,
     lb.user_id,
     lb.username,
     lb.total_letters_typed,

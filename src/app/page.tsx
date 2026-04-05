@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { AuthWidget } from "@/components/AuthWidget";
 import { ProgressModal } from "@/components/ProgressModal";
+import { MenuDrawer } from "@/components/MenuDrawer";
 import { useEffect, useState } from "react";
 import { getStorage, setStorage } from "@/lib/storage";
 import { useLanguage } from "@/lib/i18n";
@@ -40,6 +41,7 @@ export default function LandingPage() {
   const [showProgressModal, setShowProgressModal] = useState(false);
   const [startSurah, setStartSurah] = useState(1);
   const [endSurah, setEndSurah] = useState(114);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const { t, language, setLanguage, n } = useLanguage();
 
@@ -128,9 +130,13 @@ export default function LandingPage() {
       {/* Header */}
       <header className="relative z-50 w-full px-8 py-6 sm:px-10 lg:px-12 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          {/* <div className="relative w-10 h-10 rounded-full overflow-hidden shadow-sm border border-[#D6C19E]/30 bg-white dark:bg-neutral-800">
-            <Image src="/icon.svg" alt="WriteQuran Logo" fill className="object-contain p-1" />
-          </div> */}
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className="mr-1 sm:mr-2 p-2 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors flex items-center justify-center"
+            title={t("open_menu")}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
+          </button>
           <h1 className="text-xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100 font-gabriela">Write Quran</h1>
         </div>
         <div className="flex items-center gap-0 sm:gap-0">
@@ -344,6 +350,12 @@ export default function LandingPage() {
         </div>
       )}
 
+      <MenuDrawer
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        isDarkMode={isDarkMode}
+        toggleTheme={toggleTheme}
+      />
     </div>
   );
 }

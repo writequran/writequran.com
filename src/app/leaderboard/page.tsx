@@ -5,10 +5,18 @@ import Link from "next/link";
 import { useLanguage } from "@/lib/i18n";
 import { getStorage, setStorage } from "@/lib/storage";
 import { createClient } from "@/utils/supabase/client";
+import { MenuDrawer } from "@/components/MenuDrawer";
 
 interface LeaderboardEntry {
+  global_rank: number;
   user_id: string;
   username: string;
+  total_letters_typed: number;
+  total_surahs_practiced: number;
+  total_completed_surahs: number;
+  total_ayat_completed: number;
+  accuracy_percentage: number;
+  streak_active: number;
   hifz_score: number;
 }
 
@@ -19,6 +27,7 @@ export default function LeaderboardPage() {
   const [leaders, setLeaders] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const saved = getStorage("theme");
@@ -36,8 +45,15 @@ export default function LeaderboardPage() {
       } else if (data) {
         setLeaders(
           data.map((entry: any) => ({
+            global_rank: entry.global_rank,
             user_id: entry.user_id,
             username: entry.username,
+            total_letters_typed: entry.total_letters_typed,
+            total_surahs_practiced: entry.total_surahs_practiced,
+            total_completed_surahs: entry.total_completed_surahs,
+            total_ayat_completed: entry.total_ayat_completed,
+            accuracy_percentage: entry.accuracy_percentage,
+            streak_active: entry.streak_active,
             hifz_score: entry.hifz_score,
           }))
         );
@@ -83,12 +99,19 @@ export default function LeaderboardPage() {
       <div className="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] bg-[#D6C19E]/5 blur-[120px] rounded-full pointer-events-none" />
 
       <header className="relative z-50 w-full max-w-7xl mx-auto px-6 py-6 sm:px-10 lg:px-12 flex justify-between items-center">
-        <Link href="/" className="flex items-center gap-3 group hover:opacity-80 transition-opacity">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-neutral-800 shadow-sm border border-neutral-200 dark:border-neutral-700 rtl:rotate-180">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
-          </div>
-          <span className="font-bold tracking-tight text-neutral-800 dark:text-neutral-100 hidden sm:block">{t("home")}</span>
-        </Link>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className="p-2 -ml-2 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-full transition-colors flex items-center justify-center"
+            title={t("open_menu")}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
+          </button>
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 group hover:opacity-80 transition-opacity bg-neutral-100 dark:bg-neutral-800/80 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full border border-neutral-200/50 dark:border-neutral-700/50">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="rtl:rotate-180"><path d="m15 18-6-6 6-6" /></svg>
+            <span className="font-bold tracking-tight text-neutral-800 dark:text-neutral-100 text-xs sm:text-sm hidden sm:block">{t("home")}</span>
+          </Link>
+        </div>
         <h1 className="text-xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100 font-gabriela absolute left-1/2 -translate-x-1/2">Write Quran</h1>
         <div className="flex items-center gap-2 sm:gap-3">
           <button
@@ -168,6 +191,9 @@ export default function LeaderboardPage() {
                       <div className="font-extrabold text-neutral-800 dark:text-neutral-100 truncate text-lg">
                         {leader.username}
                       </div>
+                      <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-neutral-400 mt-0.5">
+                        {n(leader.total_completed_surahs)} {t("completed_surahs")} · {n(leader.total_ayat_completed)} {t("completed_ayat")}
+                      </div>
                     </div>
                     <div className="col-span-4 sm:col-span-4 text-right">
                       <div className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#D6C19E] to-[#B18E4E] drop-shadow-[0_1px_1px_rgba(214,193,158,0.2)]">
@@ -181,6 +207,13 @@ export default function LeaderboardPage() {
           </div>
         </section>
       </main>
+
+      <MenuDrawer
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        isDarkMode={isDarkMode}
+        toggleTheme={toggleTheme}
+      />
     </div>
   );
 }

@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { syncCloudToLocal, syncLocalToCloud } from '@/lib/sync-manager';
-import { setActiveUserId } from '@/lib/storage';
+import { setActiveUserId, setStorage } from '@/lib/storage';
 import { createClient } from '@/utils/supabase/client';
 import { getURL } from '@/lib/get-url';
 import { useLanguage } from '@/lib/i18n';
@@ -73,6 +73,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
         const checkUsername = u.user_metadata?.username;
         setUser({ id: u.id, email: u.email || '', username: checkUsername });
         setActiveUserId(u.id);
+        if (checkUsername) setStorage('active_username', checkUsername);
         setSyncing(true);
         syncCloudToLocal().finally(() => {
           setSyncing(false);
@@ -89,6 +90,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
         setActiveUserId(null);
+        localStorage.removeItem('active_username');
         setUser(null);
         onAuthChange();
       }
@@ -161,6 +163,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
     
     const signedInUsername = data.user.user_metadata?.username;
     setActiveUserId(data.user.id);
+    if (signedInUsername) setStorage('active_username', signedInUsername);
     setUser({ id: data.user.id, email: data.user.email || '', username: signedInUsername });
     
     if (!signedInUsername) {
@@ -206,6 +209,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
     if (data.session) {
       // Email confirmation disabled in Supabase — user is immediately signed in
       setActiveUserId(data.user!.id);
+      setStorage('active_username', username.trim());
       setUser({ id: data.user!.id, email: data.user!.email || '', username: username.trim() });
       setIsOpen(false);
       resetForm();
@@ -243,6 +247,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
     setLoading(true);
     await supabase.auth.signOut();
     setActiveUserId(null);
+    localStorage.removeItem('active_username');
     setUser(null);
     setLoading(false);
     onAuthChange();
@@ -283,6 +288,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
       return;
     }
     const cleanUsername = username.trim();
+    setStorage('active_username', cleanUsername);
     setUser(prev => prev ? { ...prev, username: cleanUsername } : null);
     setInfo('Username set successfully!');
     setTimeout(() => {

@@ -3,19 +3,20 @@
 import React from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/lib/i18n';
+import { getStorage } from '@/lib/storage';
 
 interface MenuDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   isDarkMode: boolean;
   toggleTheme: () => void;
-  onClearHistory: () => void;
-  typingMode: "letter" | "word";
-  onTypingModeChange: (mode: "letter" | "word") => void;
-  memorizationRange: { startSurah: number; endSurah: number };
-  onMemorizationRangeChange: (range: { startSurah: number; endSurah: number }) => void;
-  onStartMemorizationTest: () => void;
-  isMemorizationMode: boolean;
+  onClearHistory?: () => void;
+  typingMode?: "letter" | "word";
+  onTypingModeChange?: (mode: "letter" | "word") => void;
+  memorizationRange?: { startSurah: number; endSurah: number };
+  onMemorizationRangeChange?: (range: { startSurah: number; endSurah: number }) => void;
+  onStartMemorizationTest?: () => void;
+  isMemorizationMode?: boolean;
 }
 
 export function MenuDrawer({
@@ -32,6 +33,15 @@ export function MenuDrawer({
   isMemorizationMode,
 }: MenuDrawerProps) {
   const { t, language, setLanguage } = useLanguage();
+  const [username, setUsername] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      const stored = getStorage('active_username');
+      setUsername(stored || null);
+    }
+  }, [isOpen]);
+
   return (
     <>
       {/* Backdrop */}
@@ -63,10 +73,17 @@ export function MenuDrawer({
           {/* Nav Items */}
           <div className="flex-1 overflow-y-auto py-6 px-4 flex flex-col gap-1">
             <p className="px-4 text-[10px] uppercase font-bold text-neutral-400 tracking-widest mb-2">{t("account")}</p>
-            <button className="flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:text-[#D6C19E]"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-              <span className="font-semibold text-sm">{t("user_profile")}</span>
-            </button>
+            {username ? (
+              <Link href={`/leaderboard/${username}`} onClick={onClose} className="flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:text-[#D6C19E]"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                <span className="font-semibold text-sm">{t("user_profile")}</span>
+              </Link>
+            ) : (
+              <button onClick={() => alert('Please sign in first to access your profile.')} className="flex items-center opacity-50 cursor-not-allowed gap-4 px-4 py-3.5 rounded-2xl transition-all group text-neutral-600 dark:text-neutral-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                <span className="font-semibold text-sm">{t("user_profile")}</span>
+              </button>
+            )}
 
             <div className="my-4 h-px bg-neutral-100 dark:bg-neutral-800/50 mx-4" />
 
@@ -100,35 +117,37 @@ export function MenuDrawer({
               </div>
             </button>
 
-            <div className="px-4 py-3.5 rounded-2xl bg-neutral-50/80 dark:bg-neutral-800/70 border border-neutral-100 dark:border-neutral-700/70 mt-1">
-              <div className="flex items-center justify-between gap-4 mb-3">
-                <div className="flex items-center gap-4 text-neutral-600 dark:text-neutral-300">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#D6C19E]"><path d="M4 7h16" /><path d="M4 12h10" /><path d="M4 17h7" /></svg>
-                  <div>
-                    <span className="font-semibold text-sm block">{t("typing_mode")}</span>
-                    <span className="text-[11px] text-neutral-400 dark:text-neutral-500">{t("typing_mode_desc")}</span>
+            {typingMode && onTypingModeChange && (
+              <div className="px-4 py-3.5 rounded-2xl bg-neutral-50/80 dark:bg-neutral-800/70 border border-neutral-100 dark:border-neutral-700/70 mt-1">
+                <div className="flex items-center justify-between gap-4 mb-3">
+                  <div className="flex items-center gap-4 text-neutral-600 dark:text-neutral-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#D6C19E]"><path d="M4 7h16" /><path d="M4 12h10" /><path d="M4 17h7" /></svg>
+                    <div>
+                      <span className="font-semibold text-sm block">{t("typing_mode")}</span>
+                      <span className="text-[11px] text-neutral-400 dark:text-neutral-500">{t("typing_mode_desc")}</span>
+                    </div>
                   </div>
                 </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => onTypingModeChange("letter")}
+                    className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all border ${typingMode === "letter"
+                      ? "bg-[#D6C19E] text-white border-[#D6C19E] shadow-sm"
+                      : "bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E]/50"}`}
+                  >
+                    {t("letter_by_letter")}
+                  </button>
+                  <button
+                    onClick={() => onTypingModeChange("word")}
+                    className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all border ${typingMode === "word"
+                      ? "bg-[#D6C19E] text-white border-[#D6C19E] shadow-sm"
+                      : "bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E]/50"}`}
+                  >
+                    {t("word_by_word")}
+                  </button>
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => onTypingModeChange("letter")}
-                  className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all border ${typingMode === "letter"
-                    ? "bg-[#D6C19E] text-white border-[#D6C19E] shadow-sm"
-                    : "bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E]/50"}`}
-                >
-                  {t("letter_by_letter")}
-                </button>
-                <button
-                  onClick={() => onTypingModeChange("word")}
-                  className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all border ${typingMode === "word"
-                    ? "bg-[#D6C19E] text-white border-[#D6C19E] shadow-sm"
-                    : "bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E]/50"}`}
-                >
-                  {t("word_by_word")}
-                </button>
-              </div>
-            </div>
+            )}
 
             {/* <div className="px-4 py-3.5 rounded-2xl bg-neutral-50/80 dark:bg-neutral-800/70 border border-neutral-100 dark:border-neutral-700/70 mt-1">
               <div className="flex items-start gap-4 text-neutral-600 dark:text-neutral-300 mb-3">
