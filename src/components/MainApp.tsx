@@ -54,7 +54,7 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
     }
 
     setIsMounted(true);
-  }, [resetKey]);
+  }, []);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");

@@ -109,9 +109,9 @@ export default function LeaderboardPage() {
   }
 
   const topThreeStyles = [
-    "border-[#D6C19E]/40 bg-[#D6C19E]/20 text-[#B18E4E] dark:bg-[#D6C19E]/15 dark:text-[#E6CAA0]",
-    "border-neutral-300 bg-neutral-100 text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200",
-    "border-amber-300/60 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300",
+    "border-[#D6C19E]/60 bg-[#D6C19E]/15 text-[#8E6B2F] dark:bg-[#D6C19E]/10 dark:text-[#D6C19E] dark:border-[#D6C19E]/30",
+    "border-neutral-200 bg-neutral-50 text-neutral-500 dark:border-neutral-700 dark:bg-neutral-800/80 dark:text-neutral-400",
+    "border-neutral-200 bg-neutral-50 text-neutral-500 dark:border-neutral-700 dark:bg-neutral-800/80 dark:text-neutral-400",
   ];
 
   const periodOptions: { key: LeaderboardPeriod; label: string }[] = [
@@ -122,8 +122,7 @@ export default function LeaderboardPage() {
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 font-sans transition-colors duration-500 overflow-x-hidden">
-      <div className="fixed top-0 left-0 w-full h-[50vh] bg-gradient-to-b from-[#D6C19E]/10 to-transparent pointer-events-none" />
-      <div className="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] bg-[#D6C19E]/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="fixed top-0 left-0 w-full h-[40vh] bg-gradient-to-b from-[#D6C19E]/8 to-transparent pointer-events-none" />
 
       <header className="relative z-50 w-full max-w-7xl mx-auto px-6 py-6 sm:px-10 lg:px-12 flex justify-between items-center">
         <div className="flex items-center gap-2 sm:gap-4">
@@ -164,18 +163,17 @@ export default function LeaderboardPage() {
         </div>
       </header>
 
-      <main className="relative z-10 max-w-4xl mx-auto px-6 py-8 sm:py-12 sm:px-10 lg:px-12 flex flex-col gap-10 pb-24">
-        <section className="text-center flex flex-col items-center justify-center gap-6 animate-in slide-in-from-bottom-4 fade-in duration-700">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] mb-2 shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+      <main className="relative z-10 max-w-4xl mx-auto px-6 py-8 sm:py-12 sm:px-10 lg:px-12 flex flex-col gap-8 pb-24">
+        <section className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
+              {t("leaderboard")}
+            </h2>
+            <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+              {t("leaderboard_desc")}
+            </p>
           </div>
-          <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-50">
-            {t("leaderboard")}
-          </h2>
-          <p className="text-lg text-neutral-500 dark:text-neutral-400 max-w-xl">
-            {t("leaderboard_desc")}
-          </p>
-          <div className="inline-flex flex-wrap items-center justify-center gap-2 rounded-full border border-neutral-200/70 dark:border-neutral-800 bg-white/85 dark:bg-neutral-900/60 p-1.5 shadow-sm">
+          <div className="inline-flex items-center gap-1 self-start sm:self-auto rounded-2xl border border-neutral-200/70 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 p-1">
             {periodOptions.map((option) => {
               const active = option.key === selectedPeriod;
               return (
@@ -183,7 +181,7 @@ export default function LeaderboardPage() {
                   key={option.key}
                   type="button"
                   onClick={() => setSelectedPeriod(option.key)}
-                  className={`rounded-full px-4 py-2 text-xs sm:text-sm font-bold transition-colors ${active
+                  className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-colors ${active
                     ? "bg-[#D6C19E] text-white shadow-sm"
                     : "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"}`}
                 >
@@ -228,24 +226,20 @@ export default function LeaderboardPage() {
                   <Link
                     key={leader.user_id}
                     href={`/leaderboard/${encodeURIComponent(leader.username)}`}
-                    className={`grid grid-cols-12 gap-4 px-6 py-5 items-center transition-colors ${
-                      idx === 0
-                        ? "bg-gradient-to-r from-[#D6C19E]/12 via-transparent to-transparent dark:from-[#D6C19E]/10"
-                        : "hover:bg-neutral-50/60 dark:hover:bg-neutral-800/50"
-                    }`}
+                    className="grid grid-cols-12 gap-4 px-6 py-4 items-center transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
                   >
                     <div className="col-span-2 sm:col-span-2 flex items-center justify-center">
-                      <span className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl border text-sm font-black shadow-sm ${
+                      <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full border text-xs font-bold ${
                         idx < 3
                           ? topThreeStyles[idx]
-                          : "border-neutral-200 bg-white text-neutral-500 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400"
+                          : "border-neutral-200 bg-white text-neutral-400 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-500"
                       }`}>
                         {n(idx + 1)}
                       </span>
                     </div>
                     <div className="col-span-6 sm:col-span-6 min-w-0">
                       <div className="flex items-center gap-2 min-w-0">
-                        <div className="font-extrabold text-neutral-800 dark:text-neutral-100 truncate text-lg">
+                        <div className="font-semibold text-neutral-800 dark:text-neutral-100 truncate text-sm sm:text-base">
                           {leader.public_display_name || maskUsername(leader.username)}
                         </div>
                         {activeUsername && activeUsername.toLowerCase() === leader.username.toLowerCase() ? (
@@ -256,7 +250,7 @@ export default function LeaderboardPage() {
                       </div>
                     </div>
                     <div className="col-span-4 sm:col-span-4 text-right">
-                      <div className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#D6C19E] to-[#B18E4E] drop-shadow-[0_1px_1px_rgba(214,193,158,0.2)]">
+                      <div className="text-lg sm:text-xl font-bold text-[#B18E4E] dark:text-[#D6C19E] tabular-nums">
                         {n(leader.hifz_score)}
                       </div>
                     </div>

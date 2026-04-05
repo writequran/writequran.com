@@ -24,9 +24,9 @@ function MilestoneCard({
 }) {
   const { t } = useLanguage();
   return (
-    <div className={`rounded-3xl border px-6 py-6 transition-all duration-300 ${achieved
-      ? "border-emerald-200 bg-emerald-50/90 dark:border-emerald-800/70 dark:bg-emerald-900/20 shadow-[0_10px_40px_rgba(16,185,129,0.06)]"
-      : "border-neutral-200 bg-neutral-50/80 dark:border-neutral-700/50 dark:bg-neutral-800/40 opacity-80 hover:opacity-100"
+    <div className={`rounded-3xl border px-6 py-6 transition-colors duration-200 ${achieved
+      ? "border-emerald-200 bg-emerald-50/80 dark:border-emerald-800/60 dark:bg-emerald-900/15"
+      : "border-neutral-200 bg-neutral-50/60 dark:border-neutral-700/50 dark:bg-neutral-800/40"
       }`}>
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -49,7 +49,7 @@ function MilestoneCard({
           <span className="text-3xl font-bold text-neutral-900 dark:text-neutral-50 tracking-tight">{value}</span>
           <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">{target}</span>
         </div>
-        <div className="mt-4 h-2.5 rounded-full bg-neutral-200/80 dark:bg-neutral-800 overflow-hidden shadow-inner">
+        <div className="mt-4 h-1.5 rounded-full bg-neutral-200 dark:bg-neutral-700/80 overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-1000 ${achieved ? "bg-gradient-to-r from-emerald-500 to-emerald-400" : "bg-gradient-to-r from-[#D6C19E] to-[#C1A063]"
               }`}
@@ -158,9 +158,7 @@ export default function ProgressPage() {
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 font-sans transition-colors duration-500 overflow-x-hidden">
-      {/* Background aesthetics */}
-      <div className="fixed top-0 left-0 w-full h-[50vh] bg-gradient-to-b from-[#D6C19E]/10 to-transparent pointer-events-none" />
-      <div className="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] bg-[#D6C19E]/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="fixed top-0 left-0 w-full h-[40vh] bg-gradient-to-b from-[#D6C19E]/8 to-transparent pointer-events-none" />
 
       {/* Header */}
       <header className="relative z-50 w-full max-w-7xl mx-auto px-6 py-6 sm:px-10 lg:px-12 flex justify-between items-center">
@@ -195,17 +193,14 @@ export default function ProgressPage() {
         </div>
       </header>
 
-      <main className="relative z-10 max-w-6xl mx-auto px-6 py-8 sm:py-12 sm:px-10 lg:px-12 flex flex-col gap-16 pb-24">
+      <main className="relative z-10 max-w-6xl mx-auto px-6 py-8 sm:py-12 sm:px-10 lg:px-12 flex flex-col gap-10 pb-24">
 
         {/* Page Title section */}
-        <section className="text-center flex flex-col items-center justify-center gap-4 animate-in slide-in-from-bottom-4 fade-in duration-700">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] mb-2 shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="m7 14 3-3 3 2 4-5" /><circle cx="7" cy="14" r="1" /><circle cx="10" cy="11" r="1" /><circle cx="13" cy="13" r="1" /><circle cx="17" cy="8" r="1" /></svg>
-          </div>
-          <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-50">
+        <section>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
             {t("my_progress")}
           </h2>
-          <p className="text-lg text-neutral-500 dark:text-neutral-400 max-w-xl">
+          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             {t("my_progress_desc")}
           </p>
         </section>
@@ -244,7 +239,7 @@ export default function ProgressPage() {
 
         {reviewAnalytics && (
           <section className="animate-in slide-in-from-bottom-10 fade-in duration-1000">
-            <div className="rounded-[2rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] backdrop-blur-xl">
+            <div className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800 bg-white dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_2px_12px_rgb(0,0,0,0.04)] dark:shadow-none">
               <div className="flex flex-col gap-2 mb-6">
                 <h3 className="text-2xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100">
                   {t("review_analytics")}
@@ -257,12 +252,12 @@ export default function ProgressPage() {
               {reviewAnalytics.hardestSurahs.length === 0
                 && reviewAnalytics.hardestAyat.length === 0
                 && reviewAnalytics.hardestLetters.length === 0 ? (
-                <div className="rounded-[1.5rem] border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-5 text-sm font-medium text-neutral-500 dark:text-neutral-400">
+                <div className="rounded-2xl border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-5 text-sm font-medium text-neutral-500 dark:text-neutral-400">
                   {t("no_review_data")}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-                  <div className="rounded-[1.5rem] border border-[#D6C19E]/25 bg-[#F8F1E6]/85 dark:bg-neutral-900/65 dark:border-[#D6C19E]/20 px-4 py-4">
+                  <div className="rounded-2xl border border-[#D6C19E]/25 bg-[#F8F1E6]/85 dark:bg-neutral-900/65 dark:border-[#D6C19E]/20 px-4 py-4">
                     <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#B18E4E] dark:text-[#D6C19E]">
                       {t("review_success_rate")}
                     </div>
@@ -281,7 +276,7 @@ export default function ProgressPage() {
                   ].map((group) => (
                     <div
                       key={group.key}
-                      className="rounded-[1.5rem] border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4"
+                      className="rounded-2xl border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4"
                     >
                       <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-neutral-400 dark:text-neutral-500">
                         {t(group.key)}
@@ -323,9 +318,9 @@ export default function ProgressPage() {
             <h3 className="text-2xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100">
               {t("surah_progress") || "Surah Progress"}
             </h3>
-            <span className="text-sm font-semibold bg-white dark:bg-neutral-800 px-4 py-1.5 rounded-full shadow-sm border border-neutral-100 dark:border-neutral-700">
+            <span className="text-sm font-semibold bg-white dark:bg-neutral-800 px-4 py-1.5 rounded-full border border-neutral-200 dark:border-neutral-700">
               <span dir="ltr" className="inline-flex items-center gap-1">
-              <span className="text-emerald-500 dark:text-emerald-300 drop-shadow-[0_0_10px_rgba(110,231,183,0.45)] dark:drop-shadow-[0_0_14px_rgba(167,243,208,0.75)]">
+              <span className="text-emerald-600 dark:text-emerald-400 font-bold">
                 {n(surahStats.filter(s => s.progress === 100).length)}
               </span>
               <span className="text-neutral-500 dark:text-neutral-400"> / {n(114)}</span>
@@ -345,8 +340,8 @@ export default function ProgressPage() {
                   className={`relative group flex flex-col justify-between p-3 rounded-2xl border transition-all duration-300 ${isCompleted
                     ? "bg-emerald-50/50 border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-800/40 hover:bg-emerald-100/50 dark:hover:bg-emerald-900/20"
                     : isStarted
-                      ? "bg-white border-[#D6C19E]/40 dark:bg-neutral-800/95 dark:border-[#D6C19E]/45 hover:border-[#D6C19E] hover:shadow-[0_8px_30px_rgba(214,193,158,0.15)] dark:hover:bg-neutral-800"
-                      : "bg-neutral-50/50 border-neutral-200 dark:bg-neutral-800/75 dark:border-neutral-700/80 hover:bg-white dark:hover:bg-neutral-800/90 hover:border-neutral-300 dark:hover:border-neutral-600 opacity-70 dark:opacity-80 hover:opacity-100"
+                      ? "bg-white border-[#D6C19E]/40 dark:bg-neutral-800/95 dark:border-[#D6C19E]/35 hover:border-[#D6C19E]/70 dark:hover:bg-neutral-800"
+                      : "bg-neutral-50/50 border-neutral-200 dark:bg-neutral-800/75 dark:border-neutral-700/80 hover:bg-white dark:hover:bg-neutral-800/90 hover:border-neutral-300 dark:hover:border-neutral-600"
                     }`}
                 >
                   <div className="flex justify-between items-start mb-0">
@@ -370,10 +365,7 @@ export default function ProgressPage() {
                             </p>
                           </div>
                           <span className="shrink-0 self-center pt-1 text-sm font-bold tracking-wide">
-                            <span className={isStarted
-                              ? "text-emerald-600 dark:text-emerald-400 drop-shadow-[0_0_8px_rgba(110,231,183,0.35)] dark:drop-shadow-[0_0_12px_rgba(167,243,208,0.6)]"
-                              : "text-emerald-600 dark:text-emerald-400"
-                            }>
+                            <span className="text-emerald-600 dark:text-emerald-400">
                               {n(surah.typedCount)}
                             </span>
                             <span className="text-neutral-700 dark:text-neutral-200">/{n(surah.totalLetters)}</span>

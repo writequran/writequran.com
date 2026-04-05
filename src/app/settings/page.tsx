@@ -244,7 +244,7 @@ export default function SettingsPage() {
 
   const settingSections = user ? (
     <div className="grid gap-6">
-      <section className="rounded-[2rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] backdrop-blur-xl">
+      <section className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_2px_12px_rgb(0,0,0,0.04)] dark:shadow-none">
         <div className="mb-4">
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">{t("settings_profile")}</h2>
           <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{t("settings_profile_desc")}</p>
@@ -274,7 +274,7 @@ export default function SettingsPage() {
         ) : null}
       </section>
 
-      <section className="rounded-[2rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] backdrop-blur-xl">
+      <section className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_2px_12px_rgb(0,0,0,0.04)] dark:shadow-none">
         <div className="mb-5">
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">{t("privacy_settings")}</h2>
           <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{t("privacy_settings_desc")}</p>
@@ -298,7 +298,7 @@ export default function SettingsPage() {
               key={item.key}
               type="button"
               onClick={() => handlePrivacyToggle(item.key, !item.enabled)}
-              className="w-full rounded-[1.5rem] border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4 text-left transition-colors hover:border-[#D6C19E]/50"
+              className="w-full rounded-2xl border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4 text-left transition-colors hover:border-[#D6C19E]/50"
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -334,12 +334,12 @@ export default function SettingsPage() {
         ) : null}
       </section>
 
-      <section className="rounded-[2rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] backdrop-blur-xl">
+      <section className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_2px_12px_rgb(0,0,0,0.04)] dark:shadow-none">
         <div className="mb-5">
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">{t("account_actions")}</h2>
           <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{t("account_actions_desc")}</p>
         </div>
-        <div className="rounded-[1.5rem] border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4">
+        <div className="rounded-2xl border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4">
           <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-neutral-400 dark:text-neutral-500">{t("signed_in_as")}</div>
           <div className="mt-2 text-base font-semibold text-neutral-900 dark:text-neutral-50 break-all">{user.email}</div>
           {user.username ? (
@@ -384,7 +384,7 @@ export default function SettingsPage() {
       </section>
     </div>
   ) : (
-    <section className="rounded-[2rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] backdrop-blur-xl">
+    <section className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_2px_12px_rgb(0,0,0,0.04)] dark:shadow-none">
       <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">{t("account_actions")}</h2>
       <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">{t("sign_in_required_settings")}</p>
       <Link
@@ -398,8 +398,7 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 font-sans transition-colors duration-500 overflow-x-hidden">
-      <div className="fixed top-0 left-0 w-full h-[50vh] bg-gradient-to-b from-[#D6C19E]/10 to-transparent pointer-events-none" />
-      <div className="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] bg-[#D6C19E]/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="fixed top-0 left-0 w-full h-[40vh] bg-gradient-to-b from-[#D6C19E]/8 to-transparent pointer-events-none" />
 
       <header className="relative z-50 w-full max-w-7xl mx-auto px-6 py-6 sm:px-10 lg:px-12 flex justify-between items-center">
         <Link href="/" className="flex items-center gap-3 group hover:opacity-80 transition-opacity">
@@ -432,14 +431,11 @@ export default function SettingsPage() {
       </header>
 
       <main className="relative z-10 max-w-5xl mx-auto px-6 py-8 sm:py-12 sm:px-10 lg:px-12 flex flex-col gap-8 pb-24">
-        <section className="animate-in slide-in-from-bottom-4 fade-in duration-700 text-center flex flex-col items-center gap-4">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
-          </div>
-          <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-50">
+        <section>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
             {t("settings")}
           </h2>
-          <p className="text-lg text-neutral-500 dark:text-neutral-400 max-w-2xl">
+          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             {t("settings_desc")}
           </p>
         </section>
@@ -450,14 +446,14 @@ export default function SettingsPage() {
           </div>
 
           <div className="grid gap-6 content-start">
-            <section className="rounded-[2rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] backdrop-blur-xl">
+            <section className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_2px_12px_rgb(0,0,0,0.04)] dark:shadow-none">
               <div className="mb-5">
                 <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">{t("appearance_settings")}</h2>
                 <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{t("appearance_settings_desc")}</p>
               </div>
 
               <div className="grid gap-4">
-                <div className="rounded-[1.5rem] border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4">
+                <div className="rounded-2xl border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4">
                   <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-neutral-400 dark:text-neutral-500">{t("language_setting")}</div>
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     <button
@@ -481,7 +477,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="rounded-[1.5rem] border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4">
+                <div className="rounded-2xl border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4">
                   <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-neutral-400 dark:text-neutral-500">{t("theme_setting")}</div>
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     <button
