@@ -191,9 +191,6 @@ export default function LeaderboardPage() {
                       <div className="font-extrabold text-neutral-800 dark:text-neutral-100 truncate text-lg">
                         {leader.username}
                       </div>
-                      <div className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-neutral-400 mt-0.5">
-                        {n(leader.total_completed_surahs)} {t("completed_surahs")} · {n(leader.total_ayat_completed)} {t("completed_ayat")}
-                      </div>
                     </div>
                     <div className="col-span-4 sm:col-span-4 text-right">
                       <div className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#D6C19E] to-[#B18E4E] drop-shadow-[0_1px_1px_rgba(214,193,158,0.2)]">
