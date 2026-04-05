@@ -69,6 +69,8 @@ export const translations: Record<Language, Dictionary> = {
     "player_profile": "Player Profile",
     "back_to_leaderboard": "Back to Leaderboard",
     "player_not_found": "This player could not be found.",
+    "activity_tracker": "Activity Tracker",
+    "private_activity_note": "Visible only to you",
 
     // Drawers and Navigation
     "write_quran": "Write Quran",
@@ -251,6 +253,8 @@ export const translations: Record<Language, Dictionary> = {
     "player_profile": "ملف اللاعب",
     "back_to_leaderboard": "العودة إلى المتصدرين",
     "player_not_found": "تعذر العثور على هذا اللاعب.",
+    "activity_tracker": "متتبع النشاط",
+    "private_activity_note": "مرئي لك فقط",
 
     // Drawers and Navigation
     "write_quran": "Write Quran",

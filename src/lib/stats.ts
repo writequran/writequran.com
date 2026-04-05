@@ -19,6 +19,63 @@ export interface ProgressStats {
 }
 
 const getTypedIndicesStorageKey = (surahNumber: number) => `typed_indices_${surahNumber}`;
+const ACTIVITY_HISTORY_KEY = 'activity_history';
+
+export type ActivityHistory = Record<string, number>;
+
+const getLocalActivityDateKey = (date = new Date()) => {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+export const loadActivityHistory = (): ActivityHistory => {
+  if (typeof window === 'undefined') return {};
+  try {
+    const data = getStorage(ACTIVITY_HISTORY_KEY);
+    const storedHistory: ActivityHistory = data ? JSON.parse(data) : {};
+    const mergedHistory: ActivityHistory = { ...storedHistory };
+
+    const progressStats = loadProgressStats();
+    Object.values(progressStats).forEach((progress) => {
+      if (!progress?.lastPracticed) return;
+      const key = getLocalActivityDateKey(new Date(progress.lastPracticed));
+      mergedHistory[key] = Math.max(mergedHistory[key] || 0, 12);
+    });
+
+    const mistakeStats = loadMistakeStats();
+    Object.values(mistakeStats).forEach((mistake) => {
+      if (!mistake?.timestamp) return;
+      const key = getLocalActivityDateKey(new Date(mistake.timestamp));
+      mergedHistory[key] = Math.min((mergedHistory[key] || 0) + Math.max(1, mistake.wrongAttempts), 5000);
+    });
+
+    return mergedHistory;
+  } catch {
+    return {};
+  }
+};
+
+export const recordDailyActivity = (amount = 1) => {
+  if (typeof window === 'undefined' || amount <= 0) return;
+
+  const history = loadActivityHistory();
+  const todayKey = getLocalActivityDateKey();
+  history[todayKey] = Math.min((history[todayKey] || 0) + amount, 5000);
+
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 400);
+  const cutoffKey = getLocalActivityDateKey(cutoff);
+
+  Object.keys(history).forEach((key) => {
+    if (key < cutoffKey) {
+      delete history[key];
+    }
+  });
+
+  setStorage(ACTIVITY_HISTORY_KEY, JSON.stringify(history));
+};
 
 export const loadMistakeStats = (): Record<string, MistakeRecord> => {
   if (typeof window === 'undefined') return {};

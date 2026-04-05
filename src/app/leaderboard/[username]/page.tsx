@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { useLanguage } from "@/lib/i18n";
 import { getStorage, setStorage } from "@/lib/storage";
+import { loadActivityHistory } from "@/lib/stats";
 
 interface LeaderboardProfile {
   user_id: string;
@@ -19,6 +20,39 @@ interface LeaderboardProfile {
   hifz_score: number;
 }
 
+type ActivityCell = {
+  key: string;
+  date: Date;
+  count: number;
+  level: 0 | 1 | 2 | 3 | 4;
+};
+
+const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
+const MONTH_LABELS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTH_LABELS_AR = ["ينا", "فبر", "مار", "أبر", "ماي", "يون", "يول", "أغس", "سبت", "أكت", "نوف", "ديس"];
+
+function startOfWeek(date: Date) {
+  const next = new Date(date);
+  next.setHours(0, 0, 0, 0);
+  next.setDate(next.getDate() - next.getDay());
+  return next;
+}
+
+function formatDayKey(date: Date) {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getActivityLevel(count: number): ActivityCell["level"] {
+  if (count <= 0) return 0;
+  if (count < 8) return 1;
+  if (count < 20) return 2;
+  if (count < 45) return 3;
+  return 4;
+}
+
 export default function LeaderboardProfilePage() {
   const { t, n, language, setLanguage } = useLanguage();
   const params = useParams<{ username: string }>();
@@ -28,6 +62,9 @@ export default function LeaderboardProfilePage() {
   const [profile, setProfile] = useState<LeaderboardProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [activeUsername, setActiveUsername] = useState<string | null>(null);
+  const [activityHistory, setActivityHistory] = useState<Record<string, number>>({});
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
     const saved = getStorage("theme");
@@ -36,6 +73,15 @@ export default function LeaderboardProfilePage() {
     setIsDarkMode(initialDark);
     if (initialDark) document.documentElement.classList.add("dark");
     setIsMounted(true);
+    setActiveUsername(getStorage("active_username"));
+    const nextActivityHistory = loadActivityHistory();
+    setActivityHistory(nextActivityHistory);
+
+    const historyYears = Object.keys(nextActivityHistory)
+      .map((key) => Number.parseInt(key.slice(0, 4), 10))
+      .filter((year) => !Number.isNaN(year));
+    const latestYear = historyYears.length > 0 ? Math.max(...historyYears) : new Date().getFullYear();
+    setSelectedYear(latestYear);
 
     const fetchProfile = async () => {
       if (!username) {
@@ -94,6 +140,77 @@ export default function LeaderboardProfilePage() {
     { label: t("streak"), value: n(profile.streak_active) },
   ] : [];
 
+  const isOwnProfile = Boolean(
+    profile &&
+    activeUsername &&
+    profile.username.toLowerCase() === activeUsername.toLowerCase()
+  );
+
+  const availableYears = Array.from(
+    new Set([
+      new Date().getFullYear(),
+      ...Object.keys(activityHistory)
+        .map((key) => Number.parseInt(key.slice(0, 4), 10))
+        .filter((year) => !Number.isNaN(year)),
+    ])
+  ).sort((a, b) => b - a);
+
+  const yearStart = new Date(selectedYear, 0, 1);
+  const yearEnd = new Date(selectedYear, 11, 31);
+  const firstGridDay = startOfWeek(yearStart);
+  const lastGridDay = startOfWeek(new Date(yearEnd.getFullYear(), yearEnd.getMonth(), yearEnd.getDate() + 6));
+  const weeksToShow = Math.round((lastGridDay.getTime() - firstGridDay.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
+  const monthLabels: Array<{ label: string; column: number }> = [];
+  const activityWeeks: ActivityCell[][] = [];
+
+  for (let weekIndex = 0; weekIndex < weeksToShow; weekIndex++) {
+    const weekCells: ActivityCell[] = [];
+    for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+      const date = new Date(firstGridDay);
+      date.setDate(firstGridDay.getDate() + (weekIndex * 7) + dayIndex);
+      const key = formatDayKey(date);
+      const count = activityHistory[key] || 0;
+      weekCells.push({
+        key,
+        date,
+        count,
+        level: getActivityLevel(count),
+      });
+    }
+
+    const weekStart = weekCells[0]?.date;
+    if (
+      weekStart &&
+      weekStart.getFullYear() === selectedYear &&
+      (weekIndex === 0 || weekStart.getMonth() !== activityWeeks[weekIndex - 1][0].date.getMonth())
+    ) {
+      monthLabels.push({
+        label: language === "ar"
+          ? MONTH_LABELS_AR[weekStart.getMonth()]
+          : MONTH_LABELS_EN[weekStart.getMonth()],
+        column: weekIndex,
+      });
+    }
+
+    activityWeeks.push(weekCells);
+  }
+
+  const getActivityCellClassName = (level: ActivityCell["level"]) => {
+    if (level === 0) {
+      return "bg-neutral-100 dark:bg-neutral-800/80";
+    }
+    if (level === 1) {
+      return "bg-[#EDE2CC] dark:bg-[#5A4B31]/70";
+    }
+    if (level === 2) {
+      return "bg-[#D6C19E]/70 dark:bg-[#8C7348]/75";
+    }
+    if (level === 3) {
+      return "bg-[#C9A86D] dark:bg-[#B18E4E]";
+    }
+    return "bg-[#B18E4E] dark:bg-[#D6C19E] shadow-[0_0_16px_rgba(177,142,78,0.28)] dark:shadow-[0_0_18px_rgba(214,193,158,0.3)]";
+  };
+
   return (
     <div className="min-h-screen bg-[#FDFBF7] dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 font-sans transition-colors duration-500 overflow-x-hidden">
       <div className="fixed top-0 left-0 w-full h-[50vh] bg-gradient-to-b from-[#D6C19E]/10 to-transparent pointer-events-none" />
@@ -142,7 +259,7 @@ export default function LeaderboardProfilePage() {
           <>
             <section className="text-center flex flex-col items-center justify-center gap-4 animate-in slide-in-from-bottom-4 fade-in duration-700">
               <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] mb-2 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 21a8 8 0 1 0-12 0"/><circle cx="12" cy="7" r="4"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 21a8 8 0 1 0-12 0" /><circle cx="12" cy="7" r="4" /></svg>
               </div>
               <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.28em] text-neutral-400 dark:text-neutral-500">
                 {t("player_profile")}
@@ -167,6 +284,95 @@ export default function LeaderboardProfilePage() {
                 </div>
               ))}
             </section>
+
+            {isOwnProfile && (
+              <section className="animate-in slide-in-from-bottom-8 fade-in duration-1000">
+                <div className="rounded-[2rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] backdrop-blur-xl">
+                  <div className="flex items-start justify-between gap-4 mb-6">
+                    <div>
+                      <h3 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
+                        {t("activity_tracker")}
+                      </h3>
+                      <p className="mt-1 text-sm font-semibold text-[#B18E4E] dark:text-[#D6C19E]">
+                        {t("private_activity_note")}
+                      </p>
+                    </div>
+                    <label className="relative shrink-0">
+                      <span className="sr-only">Choose year</span>
+                      <select
+                        value={selectedYear}
+                        onChange={(e) => setSelectedYear(Number.parseInt(e.target.value, 10))}
+                        className="appearance-none rounded-2xl border border-[#D6C19E]/40 bg-[#F8F1E6] dark:bg-neutral-900/80 dark:border-[#D6C19E]/30 px-4 py-2.5 pr-10 text-sm font-bold text-[#8E6B2F] dark:text-[#E6CAA0] shadow-sm outline-none transition-colors hover:border-[#D6C19E] focus:border-[#D6C19E]"
+                      >
+                        {availableYears.map((year) => (
+                          <option key={year} value={year}>
+                            {n(year)}
+                          </option>
+                        ))}
+                      </select>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#B18E4E] dark:text-[#D6C19E]"
+                      >
+                        <path d="m6 9 6 6 6-6" />
+                      </svg>
+                    </label>
+                  </div>
+
+                  <div className="w-full pb-2">
+                    <div className="w-full">
+                      <div className="grid gap-x-[2px] gap-y-[1px] h-6 mb-2" style={{ gridTemplateColumns: `1.15rem repeat(${weeksToShow}, minmax(0, 1fr))` }}>
+                        <div />
+                        {Array.from({ length: weeksToShow }).map((_, columnIndex) => {
+                          const label = monthLabels.find((item) => item.column === columnIndex);
+                          return (
+                            <div key={`month-${columnIndex}`} className="relative">
+                              {label ? (
+                                <span className="absolute left-1/2 -translate-x-1/2 bottom-0 text-[9px] sm:text-[10px] md:text-xs font-bold text-[#B18E4E] dark:text-[#D6C19E] whitespace-nowrap leading-none">
+                                  {label.label}
+                                </span>
+                              ) : null}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <div className="grid gap-x-[2px] gap-y-[1px]" style={{ gridTemplateColumns: `1.15rem repeat(${weeksToShow}, minmax(0, 1fr))` }}>
+                        {WEEKDAY_LABELS.map((weekday, dayIndex) => (
+                          <div key={`row-${weekday}-${dayIndex}`} className="contents">
+                            <div className="flex items-center justify-center text-[10px] sm:text-xs font-bold text-[#B18E4E] dark:text-[#D6C19E]">
+                              {weekday}
+                            </div>
+                            {activityWeeks.map((week, weekIndex) => {
+                              const cell = week[dayIndex];
+                              const isInSelectedYear = cell.date.getFullYear() === selectedYear;
+                              return (
+                                <div
+                                  key={cell.key}
+                                  title={`${cell.key}: ${n(cell.count)}`}
+                                  className={`aspect-square w-full rounded-none transition-transform duration-200 hover:scale-105 ${isInSelectedYear
+                                    ? getActivityCellClassName(cell.level)
+                                    : "bg-transparent border-transparent"
+                                    }`}
+                                />
+                              );
+                            })}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
           </>
         )}
       </main>
