@@ -318,6 +318,14 @@ export default function SettingsPage() {
             </button>
           ))}
         </div>
+        <div className="mt-5 rounded-2xl border border-[#D6C19E]/20 bg-[#F8F1E6]/70 dark:bg-neutral-900/70 dark:border-[#D6C19E]/15 px-4 py-4">
+          <div className="text-sm font-bold text-neutral-900 dark:text-neutral-50">{t("privacy_explainer_title")}</div>
+          <p className="mt-2 text-sm leading-6 text-neutral-600 dark:text-neutral-300">{t("privacy_explainer_body")}</p>
+          <div className="mt-3 grid gap-2">
+            <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{t("privacy_explainer_public")}</p>
+            <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{t("privacy_explainer_private")}</p>
+          </div>
+        </div>
         <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-neutral-400 dark:text-neutral-500">
             {privacy.show_on_leaderboard ? t("show_on_leaderboard_desc") : t("show_public_profile_desc")}
@@ -506,6 +514,33 @@ export default function SettingsPage() {
                     </button>
                   </div>
                 </div>
+              </div>
+            </section>
+
+            <section className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_2px_12px_rgb(0,0,0,0.04)] dark:shadow-none">
+              <div className="mb-5">
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">{t("trust_center_title")}</h2>
+                <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{t("trust_center_body")}</p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <Link
+                  href="/privacy"
+                  className="rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm font-bold text-neutral-700 dark:text-neutral-200 text-center transition-colors hover:border-[#D6C19E]"
+                >
+                  {t("trust_center_privacy_link")}
+                </Link>
+                <Link
+                  href="/terms"
+                  className="rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm font-bold text-neutral-700 dark:text-neutral-200 text-center transition-colors hover:border-[#D6C19E]"
+                >
+                  {t("trust_center_terms_link")}
+                </Link>
+                <Link
+                  href="/contact"
+                  className="rounded-2xl border border-[#D6C19E]/40 bg-[#F8F1E6] dark:bg-neutral-900/80 dark:border-[#D6C19E]/25 px-4 py-3 text-sm font-bold text-[#8E6B2F] dark:text-[#E6CAA0] text-center transition-colors hover:border-[#D6C19E]"
+                >
+                  {t("trust_center_contact")}
+                </Link>
               </div>
             </section>
           </div>

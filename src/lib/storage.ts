@@ -1,4 +1,5 @@
 const GLOBAL_KEYS = new Set(['theme']);
+const SESSION_KEYS = [/^session_attempts_/, /^session_mistake_indices_/, /^session_mistakes_/];
 
 export function getStoragePrefix() {
   if (typeof window === 'undefined') return 'quran_typing_anon';
@@ -28,6 +29,38 @@ export function removeStorage(key: string) {
   localStorage.removeItem(getScopedKey(key));
 }
 
+export function getTransientStorage(key: string): string | null {
+  if (typeof window === 'undefined') return null;
+  const scopedKey = getScopedKey(key);
+  const sessionValue = sessionStorage.getItem(scopedKey);
+  if (sessionValue !== null) return sessionValue;
+
+  const legacyValue = localStorage.getItem(scopedKey);
+  if (legacyValue !== null && SESSION_KEYS.some((pattern) => pattern.test(key))) {
+    sessionStorage.setItem(scopedKey, legacyValue);
+    localStorage.removeItem(scopedKey);
+    return legacyValue;
+  }
+
+  return legacyValue;
+}
+
+export function setTransientStorage(key: string, value: string) {
+  if (typeof window === 'undefined') return;
+  const scopedKey = getScopedKey(key);
+  sessionStorage.setItem(scopedKey, value);
+  if (SESSION_KEYS.some((pattern) => pattern.test(key))) {
+    localStorage.removeItem(scopedKey);
+  }
+}
+
+export function removeTransientStorage(key: string) {
+  if (typeof window === 'undefined') return;
+  const scopedKey = getScopedKey(key);
+  sessionStorage.removeItem(scopedKey);
+  localStorage.removeItem(scopedKey);
+}
+
 export function setActiveUserId(id: string | null) {
   if (typeof window === 'undefined') return;
   if (id) {
@@ -35,6 +68,49 @@ export function setActiveUserId(id: string | null) {
   } else {
     localStorage.removeItem('quran_typing_active_user_id');
   }
+}
+
+export function pruneStorageFootprint() {
+  if (typeof window === 'undefined') return;
+
+  const prefix = getStoragePrefix();
+  const currentSurah = getStorage('surah');
+
+  Object.keys(localStorage).forEach((key) => {
+    if (!key.startsWith(`${prefix}_`)) return;
+
+    const unscopedKey = key.slice(prefix.length + 1);
+
+    if (unscopedKey.startsWith('quran_typing_progress_')) {
+      localStorage.removeItem(key);
+      return;
+    }
+
+    if (SESSION_KEYS.some((pattern) => pattern.test(unscopedKey))) {
+      const value = localStorage.getItem(key);
+      if (value !== null) {
+        sessionStorage.setItem(key, value);
+      }
+      localStorage.removeItem(key);
+      return;
+    }
+
+    if (
+      currentSurah &&
+      unscopedKey.startsWith('word_drafts_') &&
+      unscopedKey !== `word_drafts_${currentSurah}`
+    ) {
+      try {
+        const raw = localStorage.getItem(key);
+        const parsed = raw ? JSON.parse(raw) : {};
+        if (!parsed || Object.keys(parsed).length === 0) {
+          localStorage.removeItem(key);
+        }
+      } catch {
+        localStorage.removeItem(key);
+      }
+    }
+  });
 }
 
 export function migrateLegacyLocalStorage() {

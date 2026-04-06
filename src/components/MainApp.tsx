@@ -10,7 +10,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getAllSurahsMeta, getSurah, getLocationByPage, getLocationByJuz } from "@/lib/quran-data";
 import { WeakSpot, getNextWeakSpotDueAt, getTrackedWeakSpotsCount, getWeakSpots, markWeakSpotReviewed } from "@/lib/stats";
-import { getStorage, setStorage, getScopedKey, migrateLegacyLocalStorage } from "@/lib/storage";
+import { getStorage, setStorage, getScopedKey, migrateLegacyLocalStorage, pruneStorageFootprint } from "@/lib/storage";
 import { useLanguage } from "@/lib/i18n";
 
 export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "review" | "memorize" }) {
@@ -26,6 +26,7 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
 
   useEffect(() => {
     migrateLegacyLocalStorage(); // Safely scrapes unprotected older JSON if applicable
+    pruneStorageFootprint();
 
     const savedSurah = getStorage('surah');
     if (savedSurah) {

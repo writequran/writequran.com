@@ -10,6 +10,7 @@ import { useLanguage } from '@/lib/i18n';
 import { Suspense } from 'react';
 
 type AuthView = 'signin' | 'signup' | 'forgot' | 'check_email' | 'reset_sent' | 'set_password' | 'set_username';
+type UsernameStatus = 'idle' | 'checking' | 'available' | 'taken';
 
 const normalizeUsername = (value: string) => value.trim().toLowerCase();
 
@@ -51,8 +52,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
-  const [usernameAvailabilityMessage, setUsernameAvailabilityMessage] = useState<string | null>(null);
-  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>('idle');
   const authRef = useRef<HTMLDivElement>(null);
   const { t, language } = useLanguage();
   const searchParams = useSearchParams();
@@ -72,7 +72,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
         refresh_token: refreshToken,
       }).then(({ error }) => {
         if (error) {
-          setError(error.message || 'Recovery link is invalid or expired.');
+          setError(error.message || t("email_link_invalid"));
           setIsRecoveryMode(false);
           setIsOpen(true);
           setView('signin');
@@ -138,7 +138,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
     const params = new URLSearchParams(window.location.search);
     if (params.get('auth_error') === 'confirmation_failed') {
       setIsOpen(true);
-      setError('Email link has expired or is invalid. Please request a new one.');
+      setError(t("email_link_invalid"));
       window.history.replaceState({}, '', '/');
     }
 
@@ -167,8 +167,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
     setUsername('');
     setError(null);
     setInfo(null);
-    setUsernameAvailabilityMessage(null);
-    setCheckingUsername(false);
+    setUsernameStatus('idle');
   };
 
   const switchView = (v: AuthView) => {
@@ -177,34 +176,39 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   };
 
   const checkUsernameAvailability = async (rawValue: string) => {
-    const cleanUsername = normalizeUsername(rawValue);
-    const usernameError = validateUsername(cleanUsername, t);
-    if (!cleanUsername) {
-      setUsernameAvailabilityMessage(null);
+    const candidate = normalizeUsername(rawValue);
+    const validationError = validateUsername(candidate, t);
+    if (!candidate) {
+      setUsernameStatus('idle');
+      setError(null);
       return false;
     }
-    if (usernameError) {
-      setUsernameAvailabilityMessage(usernameError);
+    if (validationError) {
+      setUsernameStatus('idle');
+      setError(validationError);
       return false;
     }
 
-    setCheckingUsername(true);
+    setUsernameStatus('checking');
+    setError(null);
+    setInfo(null);
     const { data, error: rpcError } = await supabase.rpc('is_username_available', {
-      candidate_username: cleanUsername,
+      candidate_username: candidate,
     });
-    setCheckingUsername(false);
 
     if (rpcError) {
-      setUsernameAvailabilityMessage(null);
+      setUsernameStatus('idle');
       return true;
     }
 
     if (data === false) {
-      setUsernameAvailabilityMessage(t("username_taken"));
+      setUsernameStatus('taken');
+      setError(t("username_taken"));
       return false;
     }
 
-    setUsernameAvailabilityMessage(t("username_available"));
+    setUsernameStatus('available');
+    setError(null);
     return true;
   };
 
@@ -215,15 +219,15 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
     setLoading(false);
     if (err) {
       if (err.message.includes('Email not confirmed')) {
-        setError('Please confirm your email first. Check your inbox or resend below.');
+        setError(t("confirm_email_first"));
       } else if (err.message.includes('Invalid login credentials')) {
-        setError('Incorrect email or password.');
+        setError(t("incorrect_email_password"));
       } else {
         setError(err.message);
       }
       return;
     }
-    if (!data.user) { setError('Sign in failed. Please try again.'); return; }
+    if (!data.user) { setError(t("sign_in_failed_retry")); return; }
     
     const signedInUsername = data.user.user_metadata?.username;
     setActiveUserId(data.user.id);
@@ -251,7 +255,13 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
     const usernameError = validateUsername(cleanUsername, t);
     if (usernameError) {
       setError(usernameError);
-      setLoading(false); return;
+      setLoading(false);
+      return;
+    }
+    if (usernameStatus === 'taken') {
+      setError(t("username_taken"));
+      setLoading(false);
+      return;
     }
     const available = await checkUsernameAvailability(cleanUsername);
     if (!available) {
@@ -269,11 +279,12 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
     setLoading(false);
     if (err) {
       if (err.message.includes('already registered') || err.message.includes('User already registered')) {
-        setError('An account with this email already exists. Try signing in.');
+        setError(t("email_exists_try_signin"));
       } else if (err.message.includes('Password should be')) {
-        setError('Password must be at least 6 characters.');
+        setError(t("password_min_6"));
       } else if (err.message.includes('duplicate key') || err.message.includes('Database error saving new user')) {
-        setUsernameAvailabilityMessage(t("username_taken"));
+        setUsernameStatus('taken');
+        setError(t("username_taken"));
       } else {
         setError(err.message);
       }
@@ -308,7 +319,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   };
 
   const handleResendConfirmation = async () => {
-    if (!email) { setError(t("email")); return; }
+    if (!email) { setError(t("email_address")); return; }
     setLoading(true); setError(null);
     const { error: err } = await supabase.auth.resend({ type: 'signup', email });
     setLoading(false);
@@ -361,7 +372,12 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
     setLoading(false);
     if (err) {
       // Very likely a uniqueness constraint collision from user_profiles trigger if taken
-      setError(err.message.includes('duplicate key') ? t("username_taken") : t("failed_save_username"));
+      if (err.message.includes('duplicate key') || err.message.includes('Database error saving new user')) {
+        setUsernameStatus('taken');
+        setError(t("username_taken"));
+      } else {
+        setError(t("failed_save_username"));
+      }
       return;
     }
     setStorage('active_username', cleanUsername);
@@ -459,18 +475,15 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
                   value={username}
                   onChange={e => {
                     setUsername(e.target.value);
-                    setUsernameAvailabilityMessage(null);
+                    setUsernameStatus('idle');
                     setError(null);
+                    setInfo(null);
                   }}
-                  onBlur={() => { void checkUsernameAvailability(username); }}
+                  onBlur={e => void checkUsernameAvailability(e.target.value)}
                   className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200"
                 />
-                {checkingUsername && <p className="text-xs text-neutral-400">{t("checking_username")}</p>}
-                {usernameAvailabilityMessage && (
-                  <p className={`text-xs ${usernameAvailabilityMessage === t("username_available") ? 'text-emerald-500' : 'text-red-500'}`}>
-                    {usernameAvailabilityMessage}
-                  </p>
-                )}
+                {usernameStatus === 'checking' && <p className="text-xs text-neutral-400">{t("checking_username")}</p>}
+                {usernameStatus === 'available' && !error && <p className="text-xs text-green-600">{t("username_available")}</p>}
                 {error && <p className="text-xs text-red-500">{error}</p>}
                 {info && <p className="text-xs text-green-600">{info}</p>}
                 <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
@@ -524,7 +537,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
             <>
               <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 mb-3">{t("reset_password")}</h3>
               <form onSubmit={handleForgotPassword} className="flex flex-col gap-2">
-                <input required type="email" placeholder="Your email address" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
+                <input required type="email" placeholder={t("email_address")} value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200" />
                 {error && <p className="text-xs text-red-500">{error}</p>}
                 <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
                   {loading ? t("sending") : t("send_reset_link")}
@@ -579,19 +592,17 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
                   value={username}
                   onChange={e => {
                     setUsername(e.target.value);
-                    setUsernameAvailabilityMessage(null);
+                    setUsernameStatus('idle');
                     setError(null);
+                    setInfo(null);
                   }}
-                  onBlur={() => { void checkUsernameAvailability(username); }}
+                  onBlur={e => void checkUsernameAvailability(e.target.value)}
                   className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border-none rounded-lg text-sm text-neutral-800 dark:text-neutral-200"
                 />
-                {checkingUsername && <p className="text-xs text-neutral-400">{t("checking_username")}</p>}
-                {usernameAvailabilityMessage && (
-                  <p className={`text-xs ${usernameAvailabilityMessage === t("username_available") ? 'text-emerald-500' : 'text-red-500'}`}>
-                    {usernameAvailabilityMessage}
-                  </p>
-                )}
+                {usernameStatus === 'checking' && <p className="text-xs text-neutral-400">{t("checking_username")}</p>}
+                {usernameStatus === 'available' && !error && <p className="text-xs text-green-600">{t("username_available")}</p>}
                 {error && <p className="text-xs text-red-500">{error}</p>}
+                {info && <p className="text-xs text-green-600">{info}</p>}
                 <button disabled={loading} type="submit" className="w-full py-2 bg-[#D6C19E] hover:bg-[#c2ad8a] text-white rounded-lg text-sm font-bold mt-1 transition-colors">
                   {loading ? t("loading") : t("sign_up")}
                 </button>

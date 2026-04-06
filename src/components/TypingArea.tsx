@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo, type CSSProperties } from "react";
 import { getSurah, getAllSurahsMeta, type MushafBlock } from "@/lib/quran-data";
 import { MistakeRecord, ProgressStats, loadMistakeStats, loadProgressStats, recordDailyActivity, saveMistakeStats, saveProgressStats } from "@/lib/stats";
-import { getStorage, setStorage } from "@/lib/storage";
+import { getStorage, setStorage, getTransientStorage, setTransientStorage } from "@/lib/storage";
 import { ConfirmationModal } from "./ConfirmationModal";
 import { PopConfirm } from "./PopConfirm";
 import { useLanguage } from "@/lib/i18n";
@@ -308,7 +308,7 @@ export function TypingArea({
     if (jumpTarget) {
       return resolveInitialIndex(jumpTarget.index);
     }
-    const saved = getStorage(`quran_typing_progress_${surahNumber}`);
+    const saved = getStorage("current_progress_index") || getStorage(`quran_typing_progress_${surahNumber}`);
     const parsed = saved ? parseInt(saved, 10) || 0 : 0;
     return resolveInitialIndex(parsed);
   });
@@ -335,14 +335,14 @@ export function TypingArea({
 
   const [sessionAttempts, setSessionAttempts] = useState(() => {
     if (typeof window === "undefined") return 0;
-    const saved = getStorage(`session_attempts_${surahNumber}`);
+    const saved = getTransientStorage(`session_attempts_${surahNumber}`);
     return saved ? parseInt(saved, 10) || 0 : 0;
   });
 
   const [sessionMistakeIndices, setSessionMistakeIndices] = useState<Set<number>>(() => {
     if (typeof window === "undefined") return new Set();
     try {
-      const saved = getStorage(`session_mistake_indices_${surahNumber}`);
+      const saved = getTransientStorage(`session_mistake_indices_${surahNumber}`);
       return saved ? new Set<number>(JSON.parse(saved)) : new Set<number>();
     } catch {
       return new Set<number>();
@@ -354,11 +354,11 @@ export function TypingArea({
   const sessionMistakes = sessionMistakeIndices.size;
 
   useEffect(() => {
-    setStorage(`session_attempts_${surahNumber}`, sessionAttempts.toString());
+    setTransientStorage(`session_attempts_${surahNumber}`, sessionAttempts.toString());
   }, [sessionAttempts, surahNumber]);
 
   useEffect(() => {
-    setStorage(`session_mistake_indices_${surahNumber}`, JSON.stringify(Array.from(sessionMistakeIndices)));
+    setTransientStorage(`session_mistake_indices_${surahNumber}`, JSON.stringify(Array.from(sessionMistakeIndices)));
   }, [sessionMistakeIndices, surahNumber]);
 
   useEffect(() => {
@@ -500,8 +500,8 @@ export function TypingArea({
   }, [getCursorIndexFrom, typingMode]);
 
   useEffect(() => {
-    setStorage(`quran_typing_progress_${surahNumber}`, currentIndex.toString());
-  }, [currentIndex, surahNumber]);
+    setStorage("current_progress_index", currentIndex.toString());
+  }, [currentIndex]);
 
   useEffect(() => {
     setStorage('visibility_mode', visibilityMode);
