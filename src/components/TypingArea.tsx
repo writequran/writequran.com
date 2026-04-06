@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo, type CSSProperties } from "react";
 import { getSurah, getAllSurahsMeta, type MushafBlock } from "@/lib/quran-data";
 import { MistakeRecord, ProgressStats, loadMistakeStats, loadProgressStats, recordDailyActivity, saveMistakeStats, saveProgressStats } from "@/lib/stats";
-import { getStorage, setStorage, getTransientStorage, setTransientStorage } from "@/lib/storage";
+import { getStorage, setStorage, getTransientStorage, setTransientStorage, removeTransientStorage } from "@/lib/storage";
 import { ConfirmationModal } from "./ConfirmationModal";
 import { PopConfirm } from "./PopConfirm";
 import { useLanguage } from "@/lib/i18n";
@@ -620,6 +620,9 @@ export function TypingArea({
   }, [blocks, getCursorIndexFrom, globalCheckString.length]);
 
   const confirmReset = () => {
+    removeTransientStorage(`session_attempts_${surahNumber}`);
+    removeTransientStorage(`session_mistake_indices_${surahNumber}`);
+    removeTransientStorage(`session_mistakes_${surahNumber}`);
     setSessionAttempts(0);
     setSessionMistakeIndices(new Set());
   };

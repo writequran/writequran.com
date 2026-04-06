@@ -10,7 +10,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getAllSurahsMeta, getSurah, getLocationByPage, getLocationByJuz } from "@/lib/quran-data";
 import { WeakSpot, getNextWeakSpotDueAt, getTrackedWeakSpotsCount, getWeakSpots, markWeakSpotReviewed } from "@/lib/stats";
-import { getStorage, setStorage, getScopedKey, migrateLegacyLocalStorage, pruneStorageFootprint } from "@/lib/storage";
+import { getStorage, setStorage, getScopedKey, migrateLegacyLocalStorage, pruneStorageFootprint, removeTransientStorage } from "@/lib/storage";
 import { useLanguage } from "@/lib/i18n";
 
 export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "review" | "memorize" }) {
@@ -131,6 +131,10 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
 
   const confirmStartReview = () => {
     const spots = getWeakSpots();
+    if (spots.length === 0) {
+      setModalType(getTrackedWeakSpotsCount() > 0 ? "review-scheduled" : "no-mistakes");
+      return;
+    }
     setReviewQueue(spots);
     setCurrentReviewIndex(0);
 
@@ -273,6 +277,9 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
     localStorage.removeItem(getScopedKey('mistake_stats'));
     localStorage.removeItem(getScopedKey('weak_spot_reviews'));
     for (let i = 1; i <= 114; i++) {
+      removeTransientStorage(`session_attempts_${i}`);
+      removeTransientStorage(`session_mistake_indices_${i}`);
+      removeTransientStorage(`session_mistakes_${i}`);
       localStorage.removeItem(getScopedKey(`session_mistakes_${i}`));
       localStorage.removeItem(getScopedKey(`session_attempts_${i}`));
       localStorage.removeItem(getScopedKey(`session_mistake_indices_${i}`));
@@ -550,7 +557,7 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
               jumpTarget={jumpTarget}
               onJump={handleJumpTo}
               onBlockChange={handleBlockChange}
-              onStartReview={confirmStartReview}
+              onStartReview={startReview}
               onClearHistory={confirmClearAll}
               onExitReview={exitReview}
               onNextReviewSpot={nextReviewSpot}
