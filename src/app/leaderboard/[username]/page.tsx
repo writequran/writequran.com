@@ -81,6 +81,7 @@ export default function LeaderboardProfilePage() {
   const [displayNameInput, setDisplayNameInput] = useState("");
   const [displayNameLoading, setDisplayNameLoading] = useState(false);
   const [displayNameMessage, setDisplayNameMessage] = useState<string | null>(null);
+  const supabase = createClient();
 
   useEffect(() => {
     const saved = getStorage("theme");
@@ -106,7 +107,6 @@ export default function LeaderboardProfilePage() {
         return;
       }
 
-      const supabase = createClient();
       const [profileRes, metaRes] = await Promise.all([
         supabase.rpc("get_leaderboard_profile", {
           profile_username: decodeURIComponent(username),
@@ -306,13 +306,30 @@ export default function LeaderboardProfilePage() {
       return;
     }
 
+    const availabilityRes = await supabase.rpc("is_public_display_name_available", {
+      candidate_display_name: cleaned,
+      current_user_id: profile.user_id,
+    });
+    if (availabilityRes.error) {
+      setDisplayNameMessage(availabilityRes.error.message || t("public_display_name_failed"));
+      return;
+    }
+    if (!availabilityRes.data) {
+      setDisplayNameMessage(t("public_display_name_taken"));
+      return;
+    }
+
     setDisplayNameLoading(true);
     setDisplayNameMessage(null);
-    const supabase = createClient();
     const { error } = await supabase
       .from("user_profiles")
       .update({ public_display_name: cleaned })
       .eq("id", profile.user_id);
+    const { data: refreshedProfile, error: refreshedProfileError } = await supabase
+      .from("user_profiles")
+      .select("public_display_name")
+      .eq("id", profile.user_id)
+      .single();
 
     setDisplayNameLoading(false);
 
@@ -320,6 +337,11 @@ export default function LeaderboardProfilePage() {
       const duplicateError = error.message?.toLowerCase().includes("duplicate")
         || error.message?.toLowerCase().includes("unique");
       setDisplayNameMessage(duplicateError ? t("public_display_name_taken") : (error.message || t("public_display_name_failed")));
+      return;
+    }
+
+    if (refreshedProfileError || refreshedProfile?.public_display_name !== cleaned) {
+      setDisplayNameMessage(t("public_display_name_failed"));
       return;
     }
 

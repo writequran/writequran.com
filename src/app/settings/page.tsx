@@ -40,6 +40,19 @@ export default function SettingsPage() {
   const [accountLoading, setAccountLoading] = useState<"reset" | "logout" | null>(null);
   const [accountMessage, setAccountMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
+  const isDisplayNameAvailable = async (candidate: string, currentUserId: string) => {
+    const { data, error } = await supabase.rpc("is_public_display_name_available", {
+      candidate_display_name: candidate,
+      current_user_id: currentUserId,
+    });
+
+    if (error) {
+      return { available: false, error: error.message || t("public_display_name_failed") };
+    }
+
+    return { available: Boolean(data), error: null };
+  };
+
   useEffect(() => {
     const saved = getStorage("theme");
     const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -156,12 +169,28 @@ export default function SettingsPage() {
       return;
     }
 
+    const availability = await isDisplayNameAvailable(cleaned, user.id);
+    if (availability.error) {
+      setDisplayNameMessage(availability.error);
+      return;
+    }
+    if (!availability.available) {
+      setDisplayNameMessage(t("public_display_name_taken"));
+      return;
+    }
+
     setDisplayNameLoading(true);
     setDisplayNameMessage(null);
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("user_profiles")
       .update({ public_display_name: cleaned })
       .eq("id", user.id);
+      
+    const { data: refreshedProfile, error: refreshedProfileError } = await supabase
+      .from("user_profiles")
+      .select("public_display_name")
+      .eq("id", user.id)
+      .single();
 
     setDisplayNameLoading(false);
 
@@ -169,6 +198,11 @@ export default function SettingsPage() {
       const duplicateError = error.message?.toLowerCase().includes("duplicate")
         || error.message?.toLowerCase().includes("unique");
       setDisplayNameMessage(duplicateError ? t("public_display_name_taken") : (error.message || t("public_display_name_failed")));
+      return;
+    }
+
+    if (refreshedProfileError || refreshedProfile?.public_display_name !== cleaned) {
+      setDisplayNameMessage(t("public_display_name_failed"));
       return;
     }
 
