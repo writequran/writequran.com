@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/lib/i18n";
+
 interface PopConfirmProps {
   isOpen: boolean;
   onClose: () => void;
@@ -14,9 +16,11 @@ export function PopConfirm({
   onClose,
   onConfirm,
   title,
-  confirmLabel = "Yes",
-  cancelLabel = "No",
+  confirmLabel,
+  cancelLabel,
 }: PopConfirmProps) {
+  const { t } = useLanguage();
+
   if (!isOpen) return null;
 
   return (
@@ -30,7 +34,7 @@ export function PopConfirm({
             onClick={onClose}
             className="flex-1 py-2 px-3 bg-neutral-100 dark:bg-neutral-700/50 hover:bg-neutral-200 dark:hover:bg-neutral-600/50 text-neutral-600 dark:text-neutral-300 text-[10px] font-bold rounded-xl transition-all active:scale-95 uppercase tracking-widest"
           >
-            {cancelLabel}
+            {cancelLabel ?? t("no")}
           </button>
           <button
             onClick={() => {
@@ -39,7 +43,7 @@ export function PopConfirm({
             }}
             className="flex-1 py-2 px-3 bg-[#D6C19E] hover:bg-[#C1A063] text-white dark:text-neutral-900 text-[10px] font-bold rounded-xl shadow-lg shadow-[#D6C19E]/30 transition-all active:scale-95 uppercase tracking-widest"
           >
-            {confirmLabel}
+            {confirmLabel ?? t("yes")}
           </button>
         </div>
         {/* Arrow (Enhanced Triangle) */}

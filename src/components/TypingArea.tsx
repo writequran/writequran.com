@@ -1443,9 +1443,9 @@ export function TypingArea({
                 isOpen={modalType === "rewrite_ayah"}
                 onClose={() => setModalType(null)}
                 onConfirm={confirmRestartAyah}
-                title="Rewrite Ayah?"
-                confirmLabel="Yes"
-                cancelLabel="No"
+                title={t("rewrite_current_ayah_q")}
+                confirmLabel={t("yes")}
+                cancelLabel={t("no")}
               />
             </div>
 

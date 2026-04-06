@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useLanguage } from "@/lib/i18n";
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -19,10 +20,12 @@ export function ConfirmationModal({
   onConfirm,
   title,
   message,
-  confirmLabel = "Continue",
-  cancelLabel = "Cancel",
+  confirmLabel,
+  cancelLabel,
   showCancel = true,
 }: ConfirmationModalProps) {
+  const { t } = useLanguage();
+
   if (!isOpen) return null;
 
   return (
@@ -54,7 +57,7 @@ export function ConfirmationModal({
               onClick={onClose}
               className="flex-1 py-3 px-4 bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 text-neutral-600 dark:text-neutral-200 text-sm font-bold rounded-2xl transition-all active:scale-95"
             >
-              {cancelLabel}
+              {cancelLabel ?? t("cancel")}
             </button>
           )}
           <button
@@ -64,7 +67,7 @@ export function ConfirmationModal({
             }}
             className="flex-1 py-3 px-4 bg-[#D6C19E] hover:bg-[#C1A063] text-white dark:text-neutral-900 text-sm font-bold rounded-2xl shadow-lg shadow-[#D6C19E]/20 transition-all active:scale-95"
           >
-            {confirmLabel}
+            {confirmLabel ?? t("continue")}
           </button>
         </div>
       </div>
