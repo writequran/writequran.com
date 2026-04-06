@@ -1,5 +1,7 @@
 # WriteQuran
 
+**Live app: [writequran.com](https://writequran.com)**
+
 WriteQuran is a Quran writing and memorization web app designed to help learners strengthen visual memory of the Mushaf by typing ayah letter by letter.
 
 It combines writing practice, mistake review, memorization testing, progress tracking, and a public leaderboard into one focused experience for both Arabic and English users.
@@ -65,7 +67,7 @@ npm start
 
 - The interface supports both English and Arabic.
 - Some features are available without an account, while account-based features allow synced progress and public profile functionality.
-- Quran text in the app is based on the Tanzil Uthmani text, a widely trusted digital Quran text resource.
+- Quran text in the app is based on the [Tanzil Uthmani text](https://tanzil.net), a widely trusted digital Quran text resource.
 
 
 ## Contributing
@@ -76,5 +78,6 @@ If you notice a bug, translation issue, or usability problem, feel free to open 
 
 ## License
 
-This project is intended for learning and beneficial use.  
-Please use it respectfully and in a way that honors the Quran and its learners.
+**Code:** Licensed under the [GNU General Public License v3.0](LICENSE). Any modified version that is distributed must also be released under GPL v3.
+
+**Quran text:** The Uthmani text in `src/data/quran-uthmani.json` is sourced from [Tanzil](https://tanzil.net) and is subject to [Tanzil's terms of use](https://tanzil.net/docs/license). Attribution is required and commercial use is not permitted under those terms.
