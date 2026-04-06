@@ -1481,7 +1481,7 @@ export function TypingArea({
                   >
                     <span className={`font-bold ${isReviewMode ? 'text-[10px]' : 'text-[12px]'} ${isReviewMode ? 'text-orange-600 dark:text-orange-400' : 'text-red-600 dark:text-red-400'
                       }`}>
-                      {isReviewMode ? reviewProgress : sessionMistakes}
+                      {n(isReviewMode ? reviewProgress : sessionMistakes)}
                     </span>
                     {!isReviewMode && (
                       <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md">
