@@ -71,7 +71,7 @@ export const recordDailyActivity = (amount = 1) => {
   history[todayKey] = Math.min((history[todayKey] || 0) + amount, 5000);
 
   const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - 400);
+  cutoff.setDate(cutoff.getDate() - 120);
   const cutoffKey = getLocalActivityDateKey(cutoff);
 
   Object.keys(history).forEach((key) => {

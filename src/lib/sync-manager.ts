@@ -14,7 +14,7 @@ export async function syncLocalToCloud() {
   
   // 1. Current Progress State
   const surahNumber = parseInt(getStorage('surah') || '1', 10);
-  const globalIndex = parseInt(getStorage(`quran_typing_progress_${surahNumber}`) || '0', 10);
+  const globalIndex = parseInt(getStorage('current_progress_index') || getStorage(`quran_typing_progress_${surahNumber}`) || '0', 10);
   
   await supabase.from('current_progress_state').upsert({
     user_id: user.id,
@@ -131,7 +131,7 @@ export async function syncCloudToLocal() {
   if (progStateRes.data) {
     // We update the Surah and the explicit local progress pointer
     setStorage('surah', progStateRes.data.surah_number.toString());
-    setStorage(`quran_typing_progress_${progStateRes.data.surah_number}`, progStateRes.data.global_index.toString());
+    setStorage('current_progress_index', progStateRes.data.global_index.toString());
   }
 
   // 4. Safely merge historical Surah Progress (Max wins)
