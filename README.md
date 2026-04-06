@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WriteQuran
+
+WriteQuran is a Quran writing and memorization web app designed to help learners strengthen visual memory of the Mushaf by typing ayah letter by letter.
+
+It combines writing practice, mistake review, memorization testing, progress tracking, and a public leaderboard into one focused experience for both Arabic and English users.
+
+## What It Offers
+
+- Letter-by-letter Quran writing practice
+- Mistake review with spaced repetition
+- Memorization test mode with random ayah selection
+- Progress tracking across surahs, ayat, and letters
+- Public profiles and leaderboard
+- Arabic and English interface support
+- Mobile and desktop friendly experience
+
+## Main Sections
+
+- `Start Writing`  
+  Practice Quran writing directly from the Mushaf layout.
+
+- `Review Mistakes`  
+  Revisit weak spots and repeat the places where errors happened.
+
+- `Memorization Test`  
+  Choose a surah range and test retention through random ayat.
+
+- `My Progress`  
+  Follow milestones, surah progress, review analytics, and activity.
+
+- `Leaderboard`  
+  Compare overall progress through a simple public rating system.
+
+## Project Goal
+
+The aim of WriteQuran is to support Quran learners in building stronger writing accuracy, visual familiarity, and memorization consistency through focused repetition and clean daily practice.
 
 ## Getting Started
 
-First, run the development server:
+Run the development server:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+To create a production build locally:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Notes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- The interface supports both English and Arabic.
+- Some features are available without an account, while account-based features allow synced progress and public profile functionality.
+- Quran text in the app is based on the Tanzil Uthmani text, a widely trusted digital Quran text resource.
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Contributing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Contributions, feedback, and corrections are welcome.
+
+If you notice a bug, translation issue, or usability problem, feel free to open an issue or submit a pull request.
+
+## License
+
+This project is intended for learning and beneficial use.  
+Please use it respectfully and in a way that honors the Quran and its learners.
