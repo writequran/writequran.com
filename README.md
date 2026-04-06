@@ -1,3 +1,5 @@
+<img width="514" height="300" alt="image" src="https://github.com/user-attachments/assets/ce866526-71f9-40ca-b2e3-b989acb5c078" />
+
 # WriteQuran
 
 **Live app: [writequran.com](https://writequran.com)**
