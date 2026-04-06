@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Scheherazade_New, Gabriela } from "next/font/google";
 import { ThemeInitializer } from "@/components/ThemeInitializer";
 import { LanguageProvider } from "@/lib/i18n";
+import AnalyticsWrapper from "../../Analytics";
 import "./globals.css";
 
 const inter = Inter({
@@ -41,6 +42,7 @@ export default function RootLayout({
         <LanguageProvider>
           {children}
         </LanguageProvider>
+        <AnalyticsWrapper />
       </body>
     </html>
   );
