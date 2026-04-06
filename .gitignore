@@ -33,6 +33,16 @@ coverage/
 # Deployment
 .vercel
 
+# Local databases
+*.db
+*.sqlite
+
+# TypeScript build cache
+tsconfig.tsbuildinfo
+
+# Claude Code local settings
+.claude/
+
 # OS metadata
 .DS_Store
 Thumbs.db
