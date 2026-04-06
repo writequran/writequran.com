@@ -1,9 +1,3 @@
-<img width="514" height="300" alt="image" src="https://github.com/user-attachments/assets/ce866526-71f9-40ca-b2e3-b989acb5c078" />
-<img width="514" height="300" alt="image" src="https://github.com/user-attachments/assets/afbf4686-c0e6-4b62-a830-69603dce63c8" />
-<img width="514" height="300" alt="image" src="https://github.com/user-attachments/assets/60ffc0e1-e163-4a87-a612-1860d36471a7" />
-<img width="514" height="300" alt="image" src="https://github.com/user-attachments/assets/55b1864d-6753-4bc5-92b8-855003c60911" />
-<img width="514" height="300" alt="image" src="https://github.com/user-attachments/assets/986fc60c-ef66-40ad-9bbb-ae4a1cd63809" />
-
 # WriteQuran
 
 **Live app: [writequran.com](https://writequran.com)**
@@ -16,7 +10,7 @@ WriteQuran is a Quran writing and memorization web app designed to help learners
 </p>
 <p align="center">
   <img src="https://github.com/user-attachments/assets/60ffc0e1-e163-4a87-a612-1860d36471a7" alt="WriteQuran progress" width="46%" />
-  <img src="https://github.com/user-attachments/assets/55b1864d-6753-4bc5-92b8-855003c60911" alt="WriteQuran leaderboard" width="46%" />
+  <img src="https://github.com/user-attachments/assets/986fc60c-ef66-40ad-9bbb-ae4a1cd63809" alt="WriteQuran leaderboard" width="46%" />
 </p>
 It combines writing practice, mistake review, memorization testing, progress tracking, and a public leaderboard into one focused experience for both Arabic and English users.
 
