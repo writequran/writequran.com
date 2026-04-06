@@ -55,10 +55,11 @@ npm start
 
 ## Tech Stack
 
-- Next.js
-- React
+- Next.js 16 (App Router)
+- React 19
 - TypeScript
-- Tailwind CSS
+- Tailwind CSS v4
+- Supabase (authentication and data)
 
 ## Notes
 
