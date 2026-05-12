@@ -282,6 +282,8 @@ export const translations: Record<Language, Dictionary> = {
     "wrong_attempts": "wrong attempt(s)",
 
     // AuthWidget
+    "or": "or",
+    "continue_with_google": "Continue with Google",
     "sign_in": "Sign In",
     "sign_out": "Sign Out",
     "synced": "Synced",
@@ -344,6 +346,7 @@ export const translations: Record<Language, Dictionary> = {
     "incorrect_email_password": "Incorrect email or password.",
     "sign_in_failed_retry": "Sign in failed. Please try again.",
     "email_exists_try_signin": "An account with this email already exists. Try signing in.",
+    "google_link_conflict": "This email is already registered with a password. Please sign in with your email and password first.",
   },
   ar: {
     // Landing Page
@@ -619,6 +622,8 @@ export const translations: Record<Language, Dictionary> = {
     "wrong_attempts": "محاولة خاطئة",
 
     // AuthWidget
+    "or": "أو",
+    "continue_with_google": "المتابعة باستخدام Google",
     "sign_in": "تسجيل الدخول",
     "sign_out": "تسجيل الخروج",
     "synced": "متزامن",
@@ -681,6 +686,7 @@ export const translations: Record<Language, Dictionary> = {
     "incorrect_email_password": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
     "sign_in_failed_retry": "فشل تسجيل الدخول. حاول مرة أخرى.",
     "email_exists_try_signin": "يوجد حساب بهذا البريد الإلكتروني بالفعل. حاول تسجيل الدخول.",
+    "google_link_conflict": "هذا البريد الإلكتروني مسجل بالفعل بكلمة مرور. يرجى تسجيل الدخول باستخدام البريد الإلكتروني وكلمة المرور أولاً.",
   }
 };
 

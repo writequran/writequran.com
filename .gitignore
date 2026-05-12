@@ -46,3 +46,6 @@ tsconfig.tsbuildinfo
 # OS metadata
 .DS_Store
 Thumbs.db
+
+# AI brainstorming cache
+.superpowers/
