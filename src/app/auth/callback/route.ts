@@ -21,6 +21,15 @@ export async function GET(request: NextRequest) {
   const token_hash = searchParams.get('token_hash')
   const type = searchParams.get('type')
   const next = searchParams.get('next') ?? '/'
+  const error_param = searchParams.get('error')
+  const error_description = searchParams.get('error_description')
+
+  if (error_param) {
+    console.error('[auth/callback] OAuth error redirect:', { error_param, error_description })
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '')
+      || new URL(request.url).origin
+    return NextResponse.redirect(`${siteUrl}/?auth_error=${encodeURIComponent(error_description || error_param)}`)
+  }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '')
     || new URL(request.url).origin
@@ -89,7 +98,8 @@ export async function GET(request: NextRequest) {
         error_status: error.status,
         error_code: (error as any).code ?? 'unknown',
       })
-      return NextResponse.redirect(`${siteUrl}/?auth_error=confirmation_failed`)
+      const encodedError = encodeURIComponent(error.message)
+      return NextResponse.redirect(`${siteUrl}/?auth_error=${encodedError}`)
     }
 
     console.log('[auth/callback] exchangeCodeForSession SUCCEEDED | user:', data.user?.id)
@@ -115,7 +125,8 @@ export async function GET(request: NextRequest) {
         error_status: error.status,
         error_code: (error as any).code ?? 'unknown',
       })
-      return NextResponse.redirect(`${siteUrl}/?auth_error=confirmation_failed`)
+      const encodedError = encodeURIComponent(error.message)
+      return NextResponse.redirect(`${siteUrl}/?auth_error=${encodedError}`)
     }
 
     console.log('[auth/callback] verifyOtp SUCCEEDED | user confirmed:', data.user?.id)
@@ -125,5 +136,5 @@ export async function GET(request: NextRequest) {
 
   // ── Neither param present ─────────────────────────────────────────────────────
   console.error('[auth/callback] No code or token_hash. Params:', Object.fromEntries(searchParams))
-  return NextResponse.redirect(`${siteUrl}/?auth_error=confirmation_failed`)
+  return NextResponse.redirect(`${siteUrl}/?auth_error=No%20authentication%20parameters%20found`)
 }

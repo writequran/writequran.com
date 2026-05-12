@@ -98,9 +98,25 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   }, [searchParams]);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user: u } }) => {
+    supabase.auth.getUser().then(async ({ data: { user: u } }) => {
       if (u) {
-        const checkUsername = u.user_metadata?.username;
+        let checkUsername = u.user_metadata?.username;
+        
+        // Fallback: If metadata is missing username, check the database profile
+        if (!checkUsername) {
+          const { data: profile } = await supabase
+            .from('user_profiles')
+            .select('username')
+            .eq('id', u.id)
+            .single();
+          
+          if (profile?.username) {
+            checkUsername = profile.username;
+            // Silently update metadata so it's cached on the user object for next time
+            await supabase.auth.updateUser({ data: { username: checkUsername } });
+          }
+        }
+
         setUser({ id: u.id, email: u.email || '', username: checkUsername });
         setActiveUserId(u.id);
         if (checkUsername) setStorage('active_username', checkUsername);
@@ -136,9 +152,16 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
 
     // Surface confirmation errors from email callback redirects
     const params = new URLSearchParams(window.location.search);
-    if (params.get('auth_error') === 'confirmation_failed') {
+    const authError = params.get('auth_error');
+    if (authError) {
       setIsOpen(true);
-      setError(t("email_link_invalid"));
+      if (authError === 'confirmation_failed') {
+        setError(t("email_link_invalid"));
+      } else if (authError.includes('identity_already_exists') || authError.toLowerCase().includes('already registered')) {
+        setError(t("google_link_conflict"));
+      } else {
+        setError(decodeURIComponent(authError));
+      }
       window.history.replaceState({}, '', '/');
     }
 
