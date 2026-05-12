@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams } from 'next/navigation';
 import { syncCloudToLocal, syncLocalToCloud } from '@/lib/sync-manager';
 import { setActiveUserId, setStorage } from '@/lib/storage';
@@ -53,11 +54,16 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>('idle');
+  const [isMounted, setIsMounted] = useState(false);
   const authRef = useRef<HTMLDivElement>(null);
   const { t, language } = useLanguage();
   const searchParams = useSearchParams();
 
   const supabase = createClient();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     const hash = typeof window !== 'undefined' ? window.location.hash.replace(/^#/, '') : '';
@@ -126,7 +132,65 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
           onAuthChange();
         });
         
-        if (!checkUsername) {
+        if (!checkUsername && u.email) {
+          // Attempt to auto-set username from email prefix by default
+          const emailPrefix = u.email.split('@')[0].toLowerCase().replace(/[^a-z0-9._]/g, '');
+          const candidate = emailPrefix.length >= 3 ? emailPrefix : `user_${emailPrefix}`;
+          
+          // Check if this candidate is valid and available
+          const validationError = validateUsername(candidate, t);
+          if (!validationError) {
+            const { data: available } = await supabase.rpc('is_username_available', {
+              candidate_username: candidate,
+            });
+
+            if (available) {
+              const { error: updateError } = await supabase.auth.updateUser({ 
+                data: { username: candidate } 
+              });
+              
+              if (!updateError) {
+                checkUsername = candidate;
+                setUser(prev => prev ? { ...prev, username: candidate } : null);
+                setStorage('active_username', candidate);
+                onAuthChange();
+              } else {
+                setIsOpen(true);
+                setView('set_username');
+              }
+            } else {
+              // If prefix is taken, try with a short random suffix
+              const randomSuffix = Math.floor(100 + Math.random() * 899).toString();
+              const suffixedCandidate = candidate.slice(0, 16) + randomSuffix;
+              
+              const { data: availableSuffix } = await supabase.rpc('is_username_available', {
+                candidate_username: suffixedCandidate,
+              });
+
+              if (availableSuffix) {
+                const { error: updateError } = await supabase.auth.updateUser({ 
+                  data: { username: suffixedCandidate } 
+                });
+                if (!updateError) {
+                  checkUsername = suffixedCandidate;
+                  setUser(prev => prev ? { ...prev, username: suffixedCandidate } : null);
+                  setStorage('active_username', suffixedCandidate);
+                  onAuthChange();
+                } else {
+                  setIsOpen(true);
+                  setView('set_username');
+                }
+              } else {
+                // Last resort: ask user
+                setIsOpen(true);
+                setView('set_username');
+              }
+            }
+          } else {
+            setIsOpen(true);
+            setView('set_username');
+          }
+        } else if (!checkUsername) {
           setIsOpen(true);
           setView('set_username');
         }
@@ -481,7 +545,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
         {forcesSetUsernameFlow ? t("set_username") : (isRecoveryPasswordFlow ? t("set_password") : t("sign_in"))}
       </button>
 
-      {isOpen && (
+      {isOpen && isMounted && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto backdrop-blur-sm bg-neutral-900/40 transition-all duration-200">
           
           <div ref={authRef} className="relative w-full max-w-sm bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl p-6 sm:p-8 transform transition-all">
@@ -744,7 +808,8 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
             )}
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
