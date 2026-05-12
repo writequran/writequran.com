@@ -282,6 +282,8 @@ export const translations: Record<Language, Dictionary> = {
     "wrong_attempts": "wrong attempt(s)",
 
     // AuthWidget
+    "or": "or",
+    "continue_with_google": "Continue with Google",
     "sign_in": "Sign In",
     "sign_out": "Sign Out",
     "synced": "Synced",
@@ -619,6 +621,8 @@ export const translations: Record<Language, Dictionary> = {
     "wrong_attempts": "محاولة خاطئة",
 
     // AuthWidget
+    "or": "أو",
+    "continue_with_google": "المتابعة باستخدام Google",
     "sign_in": "تسجيل الدخول",
     "sign_out": "تسجيل الخروج",
     "synced": "متزامن",
