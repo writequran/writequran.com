@@ -249,9 +249,6 @@ function MistakePopover({
           </button>
         )}
       </div>
-
-      {/* Spacer at bottom to ensure last elements can be scrolled into view above keyboard */}
-      <div style={{ height: Math.max(320, 300 * keyboardScale + 50) }} />
       {/* Adaptive Arrow */}
       <div className={`absolute w-3 h-3 bg-white dark:bg-neutral-900 rotate-45 z-[-1] ${variant === "top"
         ? "-bottom-1.5 right-4 border-r border-b border-neutral-200 dark:border-neutral-800"
@@ -1378,6 +1375,9 @@ export function TypingArea({
             </div>
           )}
         </div>
+
+        {/* Spacer at bottom to ensure last elements can be scrolled into view above keyboard */}
+        <div style={{ height: Math.max(320, 300 * keyboardScale + 50) }} />
       </div>
 
       <div
