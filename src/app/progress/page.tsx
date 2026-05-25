@@ -24,7 +24,7 @@ function MilestoneCard({
 }) {
   const { t } = useLanguage();
   return (
-    <div className={`rounded-[1.2rem] sm:rounded-3xl border px-3 py-3 sm:px-6 sm:py-6 transition-colors duration-200 ${achieved
+    <div className={`rounded-2xl sm:rounded-3xl border px-3 py-3 sm:px-6 sm:py-6 transition-colors duration-200 ${achieved
       ? "border-emerald-200 bg-emerald-50/80 dark:border-emerald-800/60 dark:bg-emerald-900/15"
       : "border-neutral-200 bg-neutral-50/60 dark:border-neutral-700/50 dark:bg-neutral-800/40"
       }`}>
@@ -33,7 +33,7 @@ function MilestoneCard({
           <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.14em] sm:tracking-[0.22em] font-bold text-neutral-400 dark:text-neutral-500">
             {t("milestone") || "Milestone"}
           </p>
-          <h3 className="mt-1 text-[1rem] sm:text-base font-semibold text-neutral-800 dark:text-neutral-100 leading-tight">{title}</h3>
+          <h3 className="mt-1 text-xs sm:text-base font-semibold text-neutral-800 dark:text-neutral-100 leading-tight">{title}</h3>
           <p className="mt-1 hidden sm:block text-[13px] sm:text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">{description}</p>
         </div>
         <div className={`shrink-0 rounded-full px-2 py-1 sm:px-3 sm:py-1.5 text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.08em] sm:tracking-[0.18em] ${achieved
@@ -44,9 +44,9 @@ function MilestoneCard({
         </div>
       </div>
 
-      <div className="mt-3 sm:mt-6">
+      <div className="mt-2.5 sm:mt-6">
         <div className="flex items-end justify-between gap-3">
-          <span className="text-[1.7rem] sm:text-3xl font-bold text-neutral-900 dark:text-neutral-50 tracking-tight leading-none">{value}</span>
+          <span className="text-lg sm:text-3xl font-bold text-neutral-900 dark:text-neutral-50 tracking-tight leading-none">{value}</span>
           <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.06em] sm:tracking-wider text-neutral-400 dark:text-neutral-500">{target}</span>
         </div>
         <div className="mt-2.5 sm:mt-4 h-1.5 rounded-full bg-neutral-200 dark:bg-neutral-700/80 overflow-hidden">
@@ -207,7 +207,7 @@ export default function ProgressPage() {
 
         {/* Global Milestones */}
         <section className="animate-in slide-in-from-bottom-8 fade-in duration-1000">
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-3 sm:gap-6 md:grid-cols-3">
             <MilestoneCard
               title={t("first_completed_surah") || "First Completed Surah"}
               description={t("first_completed_surah_desc") || "Finish an entire surah from beginning to end."}
@@ -241,7 +241,7 @@ export default function ProgressPage() {
           <section className="animate-in slide-in-from-bottom-10 fade-in duration-1000">
             <div className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800 bg-white dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_2px_12px_rgb(0,0,0,0.04)] dark:shadow-none">
               <div className="flex flex-col gap-2 mb-6">
-                <h3 className="text-2xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100">
+                <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100">
                   {t("review_analytics")}
                 </h3>
                 <p className="text-sm sm:text-base text-neutral-500 dark:text-neutral-400 max-w-2xl">
@@ -257,17 +257,17 @@ export default function ProgressPage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-4 items-stretch">
-                  <div className="rounded-2xl border border-[#D6C19E]/25 bg-[#F8F1E6]/85 dark:bg-neutral-900/65 dark:border-[#D6C19E]/20 px-4 py-4 min-h-[220px] h-[220px] xl:col-span-3 xl:min-h-[280px] xl:h-[280px] flex flex-col">
+                  <div className="rounded-2xl border border-[#D6C19E]/25 bg-[#F8F1E6]/85 dark:bg-neutral-900/65 dark:border-[#D6C19E]/20 px-4 py-4 h-auto xl:col-span-3 xl:min-h-[280px] xl:h-[280px] flex flex-col">
                     <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#B18E4E] dark:text-[#D6C19E]">
                       {t("review_success_rate")}
                     </div>
-                    <div className="mt-2 text-3xl font-black text-neutral-900 dark:text-neutral-50">
+                    <div className="mt-2 text-2xl sm:text-3xl font-black text-neutral-900 dark:text-neutral-50">
                       {n(reviewAnalytics.reviewSuccessRate.toFixed(1))}%
                     </div>
                     <div className="mt-2 text-xs font-medium text-neutral-500 dark:text-neutral-400">
                       {n(reviewAnalytics.successfulReviewCount)} / {n(reviewAnalytics.reviewedCount)} {t("reviewed_weak_spots").toLowerCase()}
                     </div>
-                    <div className="mt-auto pt-6">
+                    <div className="mt-4 xl:mt-auto pt-2 xl:pt-6">
                       <div className="h-2 rounded-full bg-neutral-200/80 dark:bg-neutral-700/70 overflow-hidden">
                         <div
                           className="h-full rounded-full bg-gradient-to-r from-[#D6C19E] to-[#B18E4E] dark:from-[#E3BE72] dark:to-[#D6C19E] transition-all duration-700"
@@ -284,7 +284,7 @@ export default function ProgressPage() {
                   ].map((group) => (
                     <div
                       key={group.key}
-                      className="rounded-2xl border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4 min-h-[220px] h-[220px] xl:col-span-3 xl:min-h-[280px] xl:h-[280px] flex flex-col"
+                      className="rounded-2xl border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4 h-auto max-h-[220px] xl:max-h-none xl:col-span-3 xl:min-h-[280px] xl:h-[280px] flex flex-col"
                     >
                       <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-neutral-400 dark:text-neutral-500">
                         {t(group.key)}
@@ -358,7 +358,7 @@ export default function ProgressPage() {
                 >
                   <div className="flex justify-between items-start mb-0">
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className={`flex items-center justify-center min-w-10 h-10 px-3 rounded-full text-xs font-bold ${isCompleted
+                      <div className={`flex items-center justify-center min-w-8 h-8 sm:min-w-10 sm:h-10 px-2 sm:px-3 rounded-full text-[10px] sm:text-xs font-bold ${isCompleted
                         ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-200"
                         : isStarted
                           ? "bg-[#D6C19E]/20 dark:bg-[#D6C19E]/25 text-[#B18E4E] dark:text-[#E3BE72]"
@@ -369,14 +369,14 @@ export default function ProgressPage() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <h4 className="text-xl font-bold text-neutral-800 dark:text-neutral-100 font-quran truncate">
+                            <h4 className="text-sm sm:text-lg font-bold text-neutral-800 dark:text-neutral-100 font-quran truncate">
                               {language === "ar" ? surah.name : surah.englishName}
                             </h4>
                             <p className="mt-0.5 text-[11px] font-semibold tracking-wide text-neutral-400 dark:text-neutral-500">
                               {n(surah.ayahCount)} {language === "ar" ? "آيات" : "Ayahs"}
                             </p>
                           </div>
-                          <span className="shrink-0 self-center pt-1 text-sm font-bold tracking-wide">
+                          <span className="shrink-0 self-center pt-1 text-[10px] sm:text-xs font-bold tracking-wide">
                             <span className="text-emerald-600 dark:text-emerald-400">
                               {n(surah.typedCount)}
                             </span>
