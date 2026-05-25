@@ -129,8 +129,26 @@ export async function syncProgressAction(
         };
     });
 
-    if (validatedMistakeUpserts.length > 0) {
-        const { error } = await supabase.from('mistake_stats').upsert(validatedMistakeUpserts, { onConflict: 'user_id,surah_number,ayah_number,global_index,expected_char' });
+    // Deduplicate array because Postgres upsert fails if the same key appears multiple times in a single query
+    const deduplicatedMistakes = Array.from(
+        validatedMistakeUpserts.reduce((map, m) => {
+            const key = `${m.surah_number}-${m.ayah_number}-${m.global_index}-${m.expected_char}`;
+            if (!map.has(key)) {
+                map.set(key, m);
+            } else {
+                const existing = map.get(key)!;
+                // Sum the attempts or just keep the latest, keeping the max is safest for the current progress logic
+                existing.wrong_attempts = Math.max(existing.wrong_attempts, m.wrong_attempts);
+                if (new Date(m.timestamp) > new Date(existing.timestamp)) {
+                    existing.timestamp = m.timestamp;
+                }
+            }
+            return map;
+        }, new Map<string, any>()).values()
+    );
+
+    if (deduplicatedMistakes.length > 0) {
+        const { error } = await supabase.from('mistake_stats').upsert(deduplicatedMistakes, { onConflict: 'user_id,surah_number,ayah_number,global_index,expected_char' });
         if (error) console.error("Validation Upsert Error (mistake_stats):", error);
     }
   }
