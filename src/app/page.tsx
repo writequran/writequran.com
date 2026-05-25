@@ -206,11 +206,18 @@ export default function LandingPage() {
             </div>
           </div>
           
-          <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
-            <Link href="/write" className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 font-bold text-[15px] hover:scale-105 transition-transform shadow-[0_4px_14px_rgba(0,0,0,0.15)] dark:shadow-[0_4px_14px_rgba(255,255,255,0.15)] flex items-center justify-center gap-2">
-              {t("start_writing")}
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="rtl:rotate-180"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </Link>
+          <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10 animate-[float_4s_ease-in-out_infinite]">
+            <div className="relative group w-full sm:w-auto">
+              {/* Pulsing Sonar Glow Effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#D6C19E] to-[#C5963D] dark:from-[#D6C19E] dark:to-[#E3BE72] rounded-full blur-md opacity-0 group-hover:opacity-0 animate-[sonar-glow_2.5s_ease-out_infinite]"></div>
+              {/* Secondary persistent subtle glow */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#D6C19E]/50 to-[#C5963D]/50 dark:from-[#D6C19E]/50 dark:to-[#E3BE72]/50 rounded-full blur opacity-40 group-hover:opacity-100 transition duration-500"></div>
+              
+              <Link href="/write" className="relative w-full flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 font-bold text-[15px] hover:scale-105 transition-all shadow-[0_4px_14px_rgba(0,0,0,0.15)] dark:shadow-[0_4px_14px_rgba(255,255,255,0.15)]">
+                {t("start_writing")}
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform duration-300"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </Link>
+            </div>
           </div>
         </div>
 
