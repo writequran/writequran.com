@@ -187,30 +187,25 @@ export function MenuDrawer({
             </button>
 
             {typingMode && onTypingModeChange && (
-              <div className="px-4 py-3.5 rounded-2xl bg-neutral-50/80 dark:bg-neutral-800/70 border border-neutral-100 dark:border-neutral-700/70 mt-1">
-                <div className="flex items-center justify-between gap-4 mb-3">
-                  <div className="flex items-center gap-4 text-neutral-600 dark:text-neutral-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#D6C19E]"><path d="M4 7h16" /><path d="M4 12h10" /><path d="M4 17h7" /></svg>
-                    <div>
-                      <span className="font-semibold text-sm block">{t("typing_mode")}</span>
-                      <span className="text-[11px] text-neutral-400 dark:text-neutral-500">{t("typing_mode_desc")}</span>
-                    </div>
-                  </div>
+              <div className="w-full px-4 py-2 mt-1">
+                <div className="flex items-center gap-4 text-neutral-600 dark:text-neutral-300 mb-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400"><path d="M4 7h16" /><path d="M4 12h10" /><path d="M4 17h7" /></svg>
+                  <span className="font-semibold text-sm">{t("typing_mode")}</span>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex bg-neutral-100 dark:bg-neutral-800/80 p-1 rounded-xl">
                   <button
                     onClick={() => onTypingModeChange("letter")}
-                    className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all border ${typingMode === "letter"
-                      ? "bg-[#D6C19E] text-white border-[#D6C19E] shadow-sm"
-                      : "bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E]/50"}`}
+                    className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all ${typingMode === "letter"
+                      ? "bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm"
+                      : "text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"}`}
                   >
                     {t("letter_by_letter")}
                   </button>
                   <button
                     onClick={() => onTypingModeChange("word")}
-                    className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all border ${typingMode === "word"
-                      ? "bg-[#D6C19E] text-white border-[#D6C19E] shadow-sm"
-                      : "bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-300 border-neutral-200 dark:border-neutral-700 hover:border-[#D6C19E]/50"}`}
+                    className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all ${typingMode === "word"
+                      ? "bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm"
+                      : "text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"}`}
                   >
                     {t("word_by_word")}
                   </button>
