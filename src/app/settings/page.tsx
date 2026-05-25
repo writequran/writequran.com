@@ -278,166 +278,169 @@ export default function SettingsPage() {
 
   const settingSections = user ? (
     <div className="grid gap-6">
-      <section className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_2px_12px_rgb(0,0,0,0.04)] dark:shadow-none">
-        <div className="mb-4">
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">{t("settings_profile")}</h2>
+      <section className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm overflow-hidden">
+        <div className="border-b border-neutral-200 dark:border-neutral-800 px-6 py-5">
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{t("settings_profile")}</h2>
           <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{t("settings_profile_desc")}</p>
         </div>
-        <form onSubmit={handleSaveDisplayName} className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <input
-            type="text"
-            value={displayNameInput}
-            onChange={(event) => setDisplayNameInput(event.target.value)}
-            placeholder={t("public_display_name_placeholder")}
-            className="flex-1 rounded-2xl bg-neutral-50 dark:bg-neutral-900/80 border border-neutral-200 dark:border-neutral-700 px-4 py-3 text-sm font-semibold text-neutral-800 dark:text-neutral-100 outline-none focus:border-[#D6C19E]"
-          />
-          <button
-            type="submit"
-            disabled={displayNameLoading}
-            className="rounded-2xl bg-[#D6C19E] hover:bg-[#c2ad8a] disabled:opacity-70 text-white px-5 py-3 text-sm font-bold transition-colors"
-          >
-            {displayNameLoading ? t("loading") : t("save_display_name")}
-          </button>
-        </form>
-        {displayNameMessage ? (
-          <p className={`mt-3 text-sm font-medium ${displayNameMessage === t("public_display_name_taken")
-            ? "text-red-500 dark:text-red-400"
-            : "text-[#B18E4E] dark:text-[#D6C19E]"}`}>
-            {displayNameMessage}
-          </p>
-        ) : null}
-      </section>
-
-      <section className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_2px_12px_rgb(0,0,0,0.04)] dark:shadow-none">
-        <div className="mb-5">
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">{t("privacy_settings")}</h2>
-          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{t("privacy_settings_desc")}</p>
-        </div>
-        <div className="grid gap-4">
-          {[
-            {
-              key: "show_on_leaderboard" as const,
-              label: t("show_on_leaderboard"),
-              description: t("show_on_leaderboard_desc"),
-              enabled: privacy.show_on_leaderboard,
-            },
-            {
-              key: "show_public_profile" as const,
-              label: t("show_public_profile"),
-              description: t("show_public_profile_desc"),
-              enabled: privacy.show_public_profile,
-            },
-          ].map((item) => (
+        <div className="px-6 py-6">
+          <form onSubmit={handleSaveDisplayName} className="flex flex-col sm:flex-row items-start sm:items-end gap-3">
+            <div className="w-full sm:max-w-[240px]">
+              <label className="block text-xs font-semibold text-neutral-500 dark:text-neutral-400 mb-1.5 uppercase tracking-wider">{t("public_display_name_placeholder")}</label>
+              <input
+                type="text"
+                value={displayNameInput}
+                onChange={(event) => setDisplayNameInput(event.target.value)}
+                placeholder={t("public_display_name_placeholder")}
+                className="w-full rounded-md bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-sm font-medium text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-[#D6C19E]/50 focus:border-[#D6C19E] transition-all"
+              />
+            </div>
             <button
-              key={item.key}
-              type="button"
-              onClick={() => handlePrivacyToggle(item.key, !item.enabled)}
-              className="w-full rounded-2xl border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4 text-left transition-colors hover:border-[#D6C19E]/50"
+              type="submit"
+              disabled={displayNameLoading}
+              className="w-full sm:w-auto rounded-md bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-white disabled:opacity-50 px-3 py-2 text-xs font-medium transition-colors shadow-sm whitespace-nowrap"
             >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="text-sm font-bold text-neutral-900 dark:text-neutral-50">{item.label}</div>
-                  <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{item.description}</p>
-                </div>
-                <div className={`mt-0.5 inline-flex h-7 w-12 shrink-0 items-center rounded-full border p-[2px] transition-colors ${item.enabled
-                  ? "bg-[#D6C19E] border-[#D6C19E]/80"
-                  : "bg-neutral-200 dark:bg-neutral-700 border-neutral-300 dark:border-neutral-600"
-                  }`}>
-                  <div className={`h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.18)] transition-transform duration-200 ${item.enabled
-                    ? (language === "ar" ? "-translate-x-5" : "translate-x-5")
-                    : "translate-x-0"
-                    }`} />
-                </div>
-              </div>
+              {displayNameLoading ? t("loading") : t("save_display_name")}
             </button>
-          ))}
-        </div>
-        <div className="mt-5 rounded-2xl border border-[#D6C19E]/20 bg-[#F8F1E6]/70 dark:bg-neutral-900/70 dark:border-[#D6C19E]/15 px-4 py-4">
-          <div className="text-sm font-bold text-neutral-900 dark:text-neutral-50">{t("privacy_explainer_title")}</div>
-          <p className="mt-2 text-sm leading-6 text-neutral-600 dark:text-neutral-300">{t("privacy_explainer_body")}</p>
-          <div className="mt-3 grid gap-2">
-            <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{t("privacy_explainer_public")}</p>
-            <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{t("privacy_explainer_private")}</p>
-          </div>
-        </div>
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-neutral-400 dark:text-neutral-500">
-            {privacy.show_on_leaderboard ? t("show_on_leaderboard_desc") : t("show_public_profile_desc")}
-          </p>
-          <button
-            type="button"
-            onClick={handleSavePrivacy}
-            disabled={privacyLoading}
-            className="rounded-2xl bg-[#D6C19E] hover:bg-[#c2ad8a] disabled:opacity-70 text-white px-5 py-3 text-sm font-bold transition-colors"
-          >
-            {privacyLoading ? t("loading") : t("save_privacy")}
-          </button>
-        </div>
-        {privacyMessage ? (
-          <p className={`mt-3 text-sm font-medium ${privacyMessage === t("privacy_saved")
-            ? "text-[#B18E4E] dark:text-[#D6C19E]"
-            : "text-red-500 dark:text-red-400"}`}>
-            {privacyMessage}
-          </p>
-        ) : null}
-      </section>
-
-      <section className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_2px_12px_rgb(0,0,0,0.04)] dark:shadow-none">
-        <div className="mb-5">
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">{t("account_actions")}</h2>
-          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{t("account_actions_desc")}</p>
-        </div>
-        <div className="rounded-2xl border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4">
-          <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-neutral-400 dark:text-neutral-500">{t("signed_in_as")}</div>
-          <div className="mt-2 text-base font-semibold text-neutral-900 dark:text-neutral-50 break-all">{user.email}</div>
-          {user.username ? (
-            <div className="mt-1 text-sm font-medium text-neutral-500 dark:text-neutral-400">@{user.username}</div>
+          </form>
+          {displayNameMessage ? (
+            <p className={`mt-3 text-sm font-medium ${displayNameMessage === t("public_display_name_taken")
+              ? "text-red-500 dark:text-red-400"
+              : "text-emerald-600 dark:text-emerald-400"}`}>
+              {displayNameMessage}
+            </p>
           ) : null}
         </div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          {profileHref ? (
-            <Link
-              href={profileHref}
-              className="rounded-2xl border border-[#D6C19E]/40 bg-[#F8F1E6] dark:bg-neutral-900/80 dark:border-[#D6C19E]/25 px-4 py-3 text-sm font-bold text-[#8E6B2F] dark:text-[#E6CAA0] text-center transition-colors hover:border-[#D6C19E]"
-            >
-              {t("open_public_profile")}
-            </Link>
-          ) : (
-            <div />
-          )}
-          <button
-            type="button"
-            onClick={handleSendResetEmail}
-            disabled={accountLoading !== null}
-            className="rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm font-bold text-neutral-700 dark:text-neutral-200 transition-colors hover:border-[#D6C19E]"
-          >
-            {accountLoading === "reset" ? t("loading") : t("send_reset_email")}
-          </button>
-          <button
-            type="button"
-            onClick={handleLogout}
-            disabled={accountLoading !== null}
-            className="rounded-2xl border border-red-200 dark:border-red-900/70 bg-red-50 dark:bg-red-950/25 px-4 py-3 text-sm font-bold text-red-600 dark:text-red-300 transition-colors hover:bg-red-100 dark:hover:bg-red-950/40"
-          >
-            {accountLoading === "logout" ? t("loading") : t("sign_out")}
-          </button>
+      </section>
+
+      <section className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm overflow-hidden">
+        <div className="border-b border-neutral-200 dark:border-neutral-800 px-6 py-5 flex items-start justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{t("privacy_settings")}</h2>
+            <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{t("privacy_settings_desc")}</p>
+          </div>
         </div>
-        {accountMessage ? (
-          <p className={`mt-3 text-sm font-medium ${accountMessage.type === "success"
-            ? "text-[#B18E4E] dark:text-[#D6C19E]"
-            : "text-red-500 dark:text-red-400"}`}>
-            {accountMessage.text}
-          </p>
-        ) : null}
+        <div className="px-6 py-6 grid gap-6">
+          <div className="grid gap-4">
+            {[
+              {
+                key: "show_on_leaderboard" as const,
+                label: t("show_on_leaderboard"),
+                description: t("show_on_leaderboard_desc"),
+                enabled: privacy.show_on_leaderboard,
+              },
+              {
+                key: "show_public_profile" as const,
+                label: t("show_public_profile"),
+                description: t("show_public_profile_desc"),
+                enabled: privacy.show_public_profile,
+              },
+            ].map((item) => (
+              <div key={item.key} className="flex items-start justify-between gap-4 py-1">
+                <div className="flex-1 pr-8">
+                  <div className="text-sm font-medium text-neutral-900 dark:text-neutral-100">{item.label}</div>
+                  <p className="mt-1 text-[13px] text-neutral-500 dark:text-neutral-400 leading-relaxed">{item.description}</p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={item.enabled}
+                  onClick={() => handlePrivacyToggle(item.key, !item.enabled)}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#D6C19E] focus:ring-offset-2 dark:focus:ring-offset-neutral-900 ${item.enabled ? 'bg-[#D6C19E]' : 'bg-neutral-300 dark:bg-neutral-700'}`}
+                >
+                  <span aria-hidden="true" className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${item.enabled ? (language === "ar" ? '-translate-x-5' : 'translate-x-5') : 'translate-x-0'}`} />
+                </button>
+              </div>
+            ))}
+          </div>
+          
+          <div className="rounded-lg bg-neutral-50 dark:bg-neutral-950 px-4 py-4 border border-neutral-100 dark:border-neutral-800">
+            <h4 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+              {t("privacy_explainer_title")}
+            </h4>
+            <p className="mt-2 text-[13px] leading-relaxed text-neutral-600 dark:text-neutral-400">{t("privacy_explainer_body")}</p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-t border-neutral-100 dark:border-neutral-800 pt-5 mt-2">
+            <p className="text-[13px] text-neutral-500 mb-4 sm:mb-0">
+              {privacyMessage ? (
+                <span className={privacyMessage === t("privacy_saved") ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"}>
+                  {privacyMessage}
+                </span>
+              ) : (
+                privacy.show_on_leaderboard ? t("show_on_leaderboard_desc") : t("show_public_profile_desc")
+              )}
+            </p>
+            <button
+              type="button"
+              onClick={handleSavePrivacy}
+              disabled={privacyLoading}
+              className="rounded-md bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-white disabled:opacity-50 px-3 py-2 text-xs font-medium transition-colors shadow-sm whitespace-nowrap"
+            >
+              {privacyLoading ? t("loading") : t("save_privacy")}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm overflow-hidden">
+        <div className="border-b border-neutral-200 dark:border-neutral-800 px-6 py-5">
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{t("account_actions")}</h2>
+          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{t("account_actions_desc")}</p>
+        </div>
+        <div className="px-6 py-6">
+          <div className="rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-950 px-4 py-4 mb-6">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-500 mb-1">{t("signed_in_as")}</div>
+            <div className="text-sm font-medium text-neutral-900 dark:text-neutral-100 break-all">{user.email}</div>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row flex-wrap items-center gap-2.5">
+            {profileHref ? (
+              <Link
+                href={profileHref}
+                className="w-full sm:w-auto rounded-md border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-200 text-center transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800 whitespace-nowrap"
+              >
+                {t("open_public_profile")}
+              </Link>
+            ) : null}
+            <button
+              type="button"
+              onClick={handleSendResetEmail}
+              disabled={accountLoading !== null}
+              className="w-full sm:w-auto rounded-md border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-200 transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800 whitespace-nowrap"
+            >
+              {accountLoading === "reset" ? t("loading") : t("send_reset_email")}
+            </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={accountLoading !== null}
+              className="w-full sm:w-auto rounded-md border border-red-200 dark:border-red-900/50 bg-white dark:bg-neutral-900 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 sm:ml-auto whitespace-nowrap"
+            >
+              {accountLoading === "logout" ? t("loading") : t("sign_out")}
+            </button>
+          </div>
+          {accountMessage ? (
+            <p className={`mt-4 text-sm font-medium ${accountMessage.type === "success"
+              ? "text-emerald-600 dark:text-emerald-400"
+              : "text-red-500 dark:text-red-400"}`}>
+              {accountMessage.text}
+            </p>
+          ) : null}
+        </div>
       </section>
     </div>
   ) : (
-    <section className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_2px_12px_rgb(0,0,0,0.04)] dark:shadow-none">
-      <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">{t("account_actions")}</h2>
-      <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">{t("sign_in_required_settings")}</p>
+    <section className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm px-6 py-8 text-center flex flex-col items-center">
+      <div className="w-12 h-12 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center mb-4 text-neutral-400">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">{t("account_actions")}</h2>
+      <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{t("sign_in_required_settings")}</p>
       <Link
         href="/"
-        className="mt-5 inline-flex rounded-2xl bg-[#D6C19E] hover:bg-[#c2ad8a] text-white px-5 py-3 text-sm font-bold transition-colors"
+        className="mt-6 rounded-lg bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 px-6 py-2.5 text-sm font-medium transition-colors"
       >
         {t("go_home")}
       </Link>
@@ -478,71 +481,69 @@ export default function SettingsPage() {
         </div>
       </header>
 
-      <main className="relative z-10 max-w-5xl mx-auto px-6 py-8 sm:py-12 sm:px-10 lg:px-12 flex flex-col gap-8 pb-24">
+      <main className="relative z-10 max-w-4xl mx-auto px-6 py-8 sm:py-12 flex flex-col gap-8 pb-24">
         <section>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
             {t("settings")}
           </h2>
-          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+          <p className="mt-1.5 text-sm text-neutral-500 dark:text-neutral-400">
             {t("settings_desc")}
           </p>
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] animate-in slide-in-from-bottom-6 fade-in duration-900">
+        <section className="grid gap-6 md:grid-cols-[1fr_280px] animate-in slide-in-from-bottom-6 fade-in duration-700">
           <div className="grid gap-6">
             {settingSections}
           </div>
 
           <div className="grid gap-6 content-start">
-            <section className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_2px_12px_rgb(0,0,0,0.04)] dark:shadow-none">
-              <div className="mb-5">
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">{t("appearance_settings")}</h2>
-                <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{t("appearance_settings_desc")}</p>
+            <section className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm overflow-hidden">
+              <div className="border-b border-neutral-200 dark:border-neutral-800 px-5 py-4">
+                <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-50">{t("appearance_settings")}</h2>
               </div>
-
-              <div className="grid gap-4">
-                <div className="rounded-2xl border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4">
-                  <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-neutral-400 dark:text-neutral-500">{t("language_setting")}</div>
-                  <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="p-5 grid gap-5">
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2">{t("language_setting")}</div>
+                  <div className="grid grid-cols-2 gap-1.5 p-1 rounded-lg bg-neutral-100 dark:bg-neutral-800/50">
                     <button
                       type="button"
                       onClick={() => setLanguage("en")}
-                      className={`rounded-2xl px-4 py-3 text-sm font-bold transition-colors ${language === "en"
-                        ? "bg-[#D6C19E] text-white"
-                        : "bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-700"}`}
+                      className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${language === "en"
+                        ? "bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm"
+                        : "text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"}`}
                     >
                       English
                     </button>
                     <button
                       type="button"
                       onClick={() => setLanguage("ar")}
-                      className={`rounded-2xl px-4 py-3 text-sm font-bold transition-colors ${language === "ar"
-                        ? "bg-[#D6C19E] text-white"
-                        : "bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-700"}`}
+                      className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${language === "ar"
+                        ? "bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm"
+                        : "text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"}`}
                     >
                       العربية
                     </button>
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-4 py-4">
-                  <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-neutral-400 dark:text-neutral-500">{t("theme_setting")}</div>
-                  <div className="mt-3 grid grid-cols-2 gap-2">
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2">{t("theme_setting")}</div>
+                  <div className="grid grid-cols-2 gap-1.5 p-1 rounded-lg bg-neutral-100 dark:bg-neutral-800/50">
                     <button
                       type="button"
                       onClick={() => toggleTheme("light")}
-                      className={`rounded-2xl px-4 py-3 text-sm font-bold transition-colors ${!isDarkMode
-                        ? "bg-[#D6C19E] text-white"
-                        : "bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-700"}`}
+                      className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${!isDarkMode
+                        ? "bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm"
+                        : "text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"}`}
                     >
                       {t("theme_light")}
                     </button>
                     <button
                       type="button"
                       onClick={() => toggleTheme("dark")}
-                      className={`rounded-2xl px-4 py-3 text-sm font-bold transition-colors ${isDarkMode
-                        ? "bg-[#D6C19E] text-white"
-                        : "bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-700"}`}
+                      className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${isDarkMode
+                        ? "bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm"
+                        : "text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"}`}
                     >
                       {t("theme_dark")}
                     </button>
@@ -551,27 +552,24 @@ export default function SettingsPage() {
               </div>
             </section>
 
-            <section className="rounded-3xl border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_2px_12px_rgb(0,0,0,0.04)] dark:shadow-none">
-              <div className="mb-5">
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">{t("trust_center_title")}</h2>
-                <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">{t("trust_center_body")}</p>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-3">
+            <section className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm overflow-hidden p-5">
+              <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-50 mb-3">{t("trust_center_title")}</h2>
+              <div className="flex flex-col gap-2">
                 <Link
                   href="/privacy"
-                  className="rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm font-bold text-neutral-700 dark:text-neutral-200 text-center transition-colors hover:border-[#D6C19E]"
+                  className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors py-1"
                 >
                   {t("trust_center_privacy_link")}
                 </Link>
                 <Link
                   href="/terms"
-                  className="rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm font-bold text-neutral-700 dark:text-neutral-200 text-center transition-colors hover:border-[#D6C19E]"
+                  className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors py-1"
                 >
                   {t("trust_center_terms_link")}
                 </Link>
                 <Link
                   href="/contact"
-                  className="rounded-2xl border border-[#D6C19E]/40 bg-[#F8F1E6] dark:bg-neutral-900/80 dark:border-[#D6C19E]/25 px-4 py-3 text-sm font-bold text-[#8E6B2F] dark:text-[#E6CAA0] text-center transition-colors hover:border-[#D6C19E]"
+                  className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors py-1"
                 >
                   {t("trust_center_contact")}
                 </Link>
