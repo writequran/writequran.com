@@ -138,7 +138,7 @@ export default function LeaderboardPage() {
             <span className="font-bold tracking-tight text-neutral-800 dark:text-neutral-100 text-xs sm:text-sm hidden sm:block">{t("home")}</span>
           </Link>
         </div>
-        <h1 className="text-xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100 font-gabriela absolute left-1/2 -translate-x-1/2">Write Quran</h1>
+
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => setLanguage(language === "en" ? "ar" : "en")}

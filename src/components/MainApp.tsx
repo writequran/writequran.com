@@ -381,7 +381,7 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
               className="object-contain"
             />
           </div> */}
-          <h1 className="text-xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100 font-gabriela">Write Quran</h1>
+
         </Link>
 
         {/* ABSOLUTE CENTERED SURAH SELECTOR */}

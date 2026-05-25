@@ -7,6 +7,7 @@ import { setActiveUserId, setStorage } from '@/lib/storage';
 import { createClient } from '@/utils/supabase/client';
 import { getURL } from '@/lib/get-url';
 import { useLanguage } from '@/lib/i18n';
+import Link from 'next/link';
 
 import { Suspense } from 'react';
 
@@ -58,6 +59,8 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   const authRef = useRef<HTMLDivElement>(null);
   const { t, language } = useLanguage();
   const searchParams = useSearchParams();
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const supabase = createClient();
 
@@ -239,14 +242,17 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
       if (authRef.current && !authRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
     };
-    if (isOpen) {
+    if (isOpen || isUserMenuOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     } else {
       document.removeEventListener("mousedown", handleClickOutside);
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen, isRecoveryMode, view]);
+  }, [isOpen, isRecoveryMode, view, isUserMenuOpen]);
 
   const resetForm = () => {
     setEmail('');
@@ -502,25 +508,52 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
 
   // ─── Signed-in state ────────────────────────────────────────────────────────
   if (user && !isRecoveryPasswordFlow && !forcesSetUsernameFlow) {
+    const visibleName = user.username || user.email.split('@')[0];
+    const initial = visibleName.charAt(0).toUpperCase();
+
     return (
-      <div className="flex items-center gap-1.5 sm:gap-3 ml-1 sm:ml-4 mr-0 sm:mr-2 min-w-0">
-        <div className="flex flex-col items-end min-w-0">
-          <span className="max-w-[4.75rem] sm:max-w-none truncate text-[9px] sm:text-[10px] font-bold text-neutral-400 capitalize tracking-[0.08em] sm:tracking-widest leading-tight">
-            {user.username || user.email.split('@')[0]}
-          </span>
-          <button onClick={forceSync} className="text-[9px] sm:text-[10px] font-medium text-[#D6C19E] hover:text-[#c2ad8a] flex items-center justify-end gap-1 transition-colors">
-            <span className="hidden sm:inline">{syncing ? t("syncing") : t("synced")}</span>
-            <div className={`w-1.5 h-1.5 rounded-full ${syncing ? 'bg-orange-400 animate-pulse' : 'bg-green-500'}`} />
-          </button>
-        </div>
+      <div className="relative ml-1 sm:ml-4 mr-0 sm:mr-2" ref={userMenuRef}>
         <button
-          onClick={handleLogout}
-          disabled={loading}
-          className="w-8 h-8 sm:w-7 sm:h-7 flex items-center justify-center bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-red-300 hover:text-red-500 rounded-full text-neutral-400 transition-all shadow-sm shrink-0"
-          title={t("sign_out")}
+          onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+          className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 shadow-sm font-bold text-xs sm:text-sm transition-transform hover:scale-105 shrink-0 uppercase"
+          title={visibleName}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+          {initial}
         </button>
+
+        {isUserMenuOpen && (
+          <div className={`absolute top-full mt-2 w-52 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-lg z-50 overflow-hidden ${language === 'ar' ? 'left-0' : 'right-0'}`}>
+            <div className="px-4 py-3 border-b border-neutral-100 dark:border-neutral-800">
+              <p className="text-sm font-bold text-neutral-800 dark:text-neutral-100 truncate">{visibleName}</p>
+              <button onClick={forceSync} className="mt-1 text-[10px] font-medium text-[#B18E4E] dark:text-[#D6C19E] hover:text-[#c2ad8a] flex items-center gap-1.5 transition-colors">
+                <div className={`w-1.5 h-1.5 rounded-full ${syncing ? 'bg-orange-400 animate-pulse' : 'bg-green-500'}`} />
+                {syncing ? t("syncing") : t("synced")}
+              </button>
+            </div>
+            
+            <div className="py-1">
+              <Link href={`/leaderboard/${user.username}`} onClick={() => setIsUserMenuOpen(false)} className="flex items-center px-4 py-2.5 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors font-medium">
+                <svg className="w-4 h-4 mr-2.5 rtl:ml-2.5 rtl:mr-0 opacity-70" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                {t("profile") || "Profile"}
+              </Link>
+              <Link href="/settings" onClick={() => setIsUserMenuOpen(false)} className="flex items-center px-4 py-2.5 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors font-medium">
+                <svg className="w-4 h-4 mr-2.5 rtl:ml-2.5 rtl:mr-0 opacity-70" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                {t("settings") || "Settings"}
+              </Link>
+            </div>
+            
+            <div className="border-t border-neutral-100 dark:border-neutral-800 py-1">
+              <button 
+                onClick={() => { setIsUserMenuOpen(false); handleLogout(); }}
+                disabled={loading}
+                className="w-full flex items-center px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors disabled:opacity-50"
+              >
+                <svg className="w-4 h-4 mr-2.5 rtl:ml-2.5 rtl:mr-0 opacity-70" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                {t("sign_out")}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

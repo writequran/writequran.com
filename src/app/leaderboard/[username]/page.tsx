@@ -361,7 +361,7 @@ export default function LeaderboardProfilePage() {
           </div>
           <span className="font-bold tracking-tight text-neutral-800 dark:text-neutral-100 hidden sm:block">{t("back_to_leaderboard")}</span>
         </Link>
-        <h1 className="text-xl font-bold tracking-tight text-neutral-800 dark:text-neutral-100 font-gabriela absolute left-1/2 -translate-x-1/2">Write Quran</h1>
+
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => setLanguage(language === "en" ? "ar" : "en")}
@@ -397,48 +397,50 @@ export default function LeaderboardProfilePage() {
           <>
             <section className="animate-in slide-in-from-bottom-4 fade-in duration-700">
               <div className="rounded-xl border border-neutral-200/80 dark:border-neutral-700/50 bg-white/90 dark:bg-neutral-800/50 backdrop-blur-xl px-6 py-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] overflow-hidden">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                  <div className="flex items-start gap-4 min-w-0">
-                    <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#D6C19E] to-[#B18E4E] text-white shrink-0 shadow-sm text-2xl font-bold uppercase">
+                <div className="flex justify-between items-start gap-4">
+                  <div className="flex items-center sm:items-start gap-3 sm:gap-4 min-w-0">
+                    <div className="inline-flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 shrink-0 shadow-sm text-lg sm:text-xl font-bold uppercase">
                       {visibleDisplayName ? visibleDisplayName[0] : "U"}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                      <p className="hidden sm:block text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                         {t("player_profile")}
                       </p>
-                      <h2 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50 break-words leading-tight">
+                      <h2 className="text-lg sm:text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50 break-words leading-tight sm:mt-1">
                         {visibleDisplayName}
                       </h2>
                       {isOwnProfile ? (
-                        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                        <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400">
                           @{profile.username}
                         </p>
                       ) : null}
-                      {identitySummary.length > 0 ? (
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {identitySummary.map((item) => (
-                            <span
-                              key={item}
-                              className="rounded-md border border-neutral-200/80 dark:border-neutral-700/60 bg-neutral-50/80 dark:bg-neutral-800/80 px-2 py-1 text-[11px] font-medium text-neutral-600 dark:text-neutral-300"
-                            >
-                              {item}
-                            </span>
-                          ))}
-                        </div>
-                      ) : null}
                     </div>
                   </div>
-                  <div className="flex items-start justify-start lg:justify-end pt-1 sm:pt-0">
-                    <div className="rounded-lg border border-[#D6C19E]/30 dark:border-[#D6C19E]/20 bg-[#F8F1E6]/80 dark:bg-[#1a150e]/60 px-4 py-3 min-w-[6.5rem] text-center shadow-sm">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-[#B18E4E] dark:text-[#D6C19E]">
+                  
+                  <div className="flex items-start justify-end shrink-0">
+                    <div className="rounded-lg border border-[#D6C19E]/30 dark:border-[#D6C19E]/20 bg-[#F8F1E6]/80 dark:bg-[#1a150e]/60 px-3 py-2 sm:px-4 sm:py-3 min-w-[4rem] sm:min-w-[6.5rem] text-center shadow-sm">
+                      <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#B18E4E] dark:text-[#D6C19E]">
                         {t("rank")}
                       </div>
-                      <div className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-50 leading-none">
+                      <div className="mt-0.5 sm:mt-1 text-lg sm:text-2xl font-bold text-neutral-900 dark:text-neutral-50 leading-none">
                         {profileMeta?.global_rank ? `#${n(profileMeta.global_rank)}` : "—"}
                       </div>
                     </div>
                   </div>
                 </div>
+
+                {identitySummary.length > 0 ? (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {identitySummary.map((item) => (
+                      <span
+                        key={item}
+                        className="rounded-md border border-neutral-200/80 dark:border-neutral-700/60 bg-neutral-50/80 dark:bg-neutral-800/80 px-2 py-1 text-[10px] sm:text-[11px] font-medium text-neutral-600 dark:text-neutral-300"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
 
                 {isOwnProfile && (
                   <div className="mt-6 pt-5 border-t border-neutral-200/80 dark:border-neutral-700/50">
@@ -479,12 +481,12 @@ export default function LeaderboardProfilePage() {
                   {primaryStatCards.map((card, idx) => (
                     <div
                       key={card.label}
-                      className={`px-5 py-6 ${idx < 2 ? 'border-b lg:border-b-0 border-neutral-200/80 dark:border-neutral-700/50' : ''}`}
+                      className={`px-4 sm:px-5 py-4 sm:py-6 ${idx < 2 ? 'border-b lg:border-b-0 border-neutral-200/80 dark:border-neutral-700/50' : ''}`}
                     >
-                      <div className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 leading-snug">
+                      <div className="text-[9px] sm:text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 leading-snug">
                         {card.label}
                       </div>
-                      <div className="mt-2 text-3xl font-bold text-neutral-900 dark:text-neutral-50 leading-none">
+                      <div className="mt-1 sm:mt-2 text-xl sm:text-3xl font-bold text-neutral-900 dark:text-neutral-50 leading-none">
                         {card.value}
                       </div>
                     </div>
@@ -494,12 +496,12 @@ export default function LeaderboardProfilePage() {
                   {secondaryStatCards.map((card) => (
                     <div
                       key={card.label}
-                      className="px-5 py-5"
+                      className="px-4 sm:px-5 py-3 sm:py-5 flex justify-between items-center sm:block"
                     >
-                      <div className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                      <div className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                         {card.label}
                       </div>
-                      <div className="mt-2 text-2xl font-bold text-neutral-900 dark:text-neutral-50 leading-none">
+                      <div className="text-base sm:text-2xl font-bold text-neutral-900 dark:text-neutral-50 leading-none sm:mt-2">
                         {card.value}
                       </div>
                     </div>
@@ -550,42 +552,9 @@ export default function LeaderboardProfilePage() {
                     </label>
                   </div>
 
-                  <div className="w-full pb-2">
-                    <div className="grid grid-cols-2 gap-3 sm:hidden">
-                      {mobileMonthGrids.map((month) => (
-                        <div
-                          key={`mobile-month-${month.label}`}
-                          className="rounded-2xl border border-[#D6C19E]/25 bg-[#FCF7EF] dark:bg-neutral-900/50 dark:border-[#D6C19E]/15 p-3"
-                        >
-                          <div className="mb-2 text-center text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E]">
-                            {month.label}
-                          </div>
-                          <div className="grid grid-cols-7 gap-[2px]">
-                            {WEEKDAY_LABELS.map((weekday, dayIndex) => (
-                              <div
-                                key={`mobile-weekday-${month.label}-${dayIndex}`}
-                                className="text-center text-[9px] font-bold text-[#B18E4E] dark:text-[#D6C19E]"
-                              >
-                                {weekday}
-                              </div>
-                            ))}
-                            {month.cells.map((cell) => (
-                              <div
-                                key={`mobile-cell-${cell.key}`}
-                                title={`${cell.key}: ${n(cell.count)}`}
-                                className={`aspect-square w-full rounded-none ${cell.inMonth
-                                  ? getActivityCellClassName(cell.level)
-                                  : "bg-transparent"
-                                  }`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="hidden sm:block w-full">
-                      <div className="grid gap-x-[2px] gap-y-[1px] h-6 mb-2" style={{ gridTemplateColumns: `1.15rem repeat(${weeksToShow}, minmax(0, 1fr))` }}>
+                  <div className="w-full pb-2 overflow-x-auto" dir="ltr">
+                    <div className="min-w-[600px] sm:min-w-full pb-2 pr-4 sm:pr-0">
+                      <div className="grid gap-x-[2px] gap-y-[1px] h-6 mb-2" style={{ gridTemplateColumns: `1.15rem repeat(${weeksToShow}, minmax(10px, 1fr))` }}>
                         <div />
                         {Array.from({ length: weeksToShow }).map((_, columnIndex) => {
                           const label = monthLabels.find((item) => item.column === columnIndex);
@@ -601,7 +570,7 @@ export default function LeaderboardProfilePage() {
                         })}
                       </div>
 
-                      <div className="grid gap-x-[2px] gap-y-[1px]" style={{ gridTemplateColumns: `1.15rem repeat(${weeksToShow}, minmax(0, 1fr))` }}>
+                      <div className="grid gap-x-[2px] gap-y-[1px]" style={{ gridTemplateColumns: `1.15rem repeat(${weeksToShow}, minmax(10px, 1fr))` }}>
                         {WEEKDAY_LABELS.map((weekday, dayIndex) => (
                           <div key={`row-${weekday}-${dayIndex}`} className="contents">
                             <div className="flex items-center justify-center text-[10px] sm:text-xs font-bold text-[#B18E4E] dark:text-[#D6C19E]">
@@ -614,7 +583,7 @@ export default function LeaderboardProfilePage() {
                                 <div
                                   key={cell.key}
                                   title={`${cell.key}: ${n(cell.count)}`}
-                                  className={`aspect-square w-full rounded-none transition-transform duration-200 hover:scale-105 ${isInSelectedYear
+                                  className={`aspect-square w-full rounded-[1px] sm:rounded-none transition-transform duration-200 hover:scale-105 ${isInSelectedYear
                                     ? getActivityCellClassName(cell.level)
                                     : "bg-transparent border-transparent"
                                     }`}
