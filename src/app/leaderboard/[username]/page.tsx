@@ -522,30 +522,30 @@ export default function LeaderboardProfilePage() {
                         {t("private_activity_note")}
                       </p>
                     </div>
-                    <label className="relative shrink-0">
+                    <label className="relative shrink-0 group">
                       <span className="sr-only">Choose year</span>
                       <select
                         value={selectedYear}
                         onChange={(e) => setSelectedYear(Number.parseInt(e.target.value, 10))}
-                        className="appearance-none rounded-md border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-950 px-3 py-1.5 pr-8 text-sm font-medium text-neutral-900 dark:text-neutral-100 shadow-sm outline-none transition-all focus:ring-2 focus:ring-[#D6C19E]/50 focus:border-[#D6C19E]"
+                        className="appearance-none cursor-pointer rounded-lg border border-[#D6C19E]/30 dark:border-[#D6C19E]/20 bg-[#F8F1E6]/80 hover:bg-[#F8F1E6] dark:bg-[#1a150e]/60 dark:hover:bg-[#1a150e]/80 px-3.5 py-1.5 pr-8 text-[11px] sm:text-xs font-bold tracking-wider text-[#B18E4E] dark:text-[#D6C19E] shadow-sm outline-none transition-all focus:ring-2 focus:ring-[#D6C19E]/50"
                       >
                         {availableYears.map((year) => (
-                          <option key={year} value={year}>
+                          <option key={year} value={year} className="text-neutral-900 dark:text-neutral-100 font-medium bg-white dark:bg-neutral-900">
                             {n(year)}
                           </option>
                         ))}
                       </select>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
+                        width="14"
+                        height="14"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="2"
+                        strokeWidth="2.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500"
+                        className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[#B18E4E] dark:text-[#D6C19E] transition-transform group-hover:translate-y-[1px]"
                       >
                         <path d="m6 9 6 6 6-6" />
                       </svg>
