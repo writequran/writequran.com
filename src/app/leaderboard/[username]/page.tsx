@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
@@ -81,7 +81,19 @@ export default function LeaderboardProfilePage() {
   const [displayNameInput, setDisplayNameInput] = useState("");
   const [displayNameLoading, setDisplayNameLoading] = useState(false);
   const [displayNameMessage, setDisplayNameMessage] = useState<string | null>(null);
+  const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
+  const yearDropdownRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (yearDropdownRef.current && !yearDropdownRef.current.contains(event.target as Node)) {
+        setIsYearDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const saved = getStorage("theme");
@@ -522,34 +534,49 @@ export default function LeaderboardProfilePage() {
                         {t("private_activity_note")}
                       </p>
                     </div>
-                    <label className="relative shrink-0 group">
-                      <span className="sr-only">Choose year</span>
-                      <select
-                        value={selectedYear}
-                        onChange={(e) => setSelectedYear(Number.parseInt(e.target.value, 10))}
-                        className="appearance-none cursor-pointer rounded-lg border border-[#D6C19E]/30 dark:border-[#D6C19E]/20 bg-[#F8F1E6]/80 hover:bg-[#F8F1E6] dark:bg-[#1a150e]/60 dark:hover:bg-[#1a150e]/80 px-3.5 py-1.5 pr-8 text-[11px] sm:text-xs font-bold tracking-wider text-[#B18E4E] dark:text-[#D6C19E] shadow-sm outline-none transition-all focus:ring-2 focus:ring-[#D6C19E]/50"
+                    <div className="relative shrink-0 group" ref={yearDropdownRef}>
+                      <button
+                        onClick={() => setIsYearDropdownOpen(!isYearDropdownOpen)}
+                        className="flex items-center gap-2 rounded-lg border border-[#D6C19E]/30 dark:border-[#D6C19E]/20 bg-[#F8F1E6]/80 hover:bg-[#F8F1E6] dark:bg-[#1a150e]/60 dark:hover:bg-[#1a150e]/80 px-3 py-1.5 text-[11px] sm:text-xs font-bold tracking-wider text-[#B18E4E] dark:text-[#D6C19E] shadow-sm outline-none transition-all focus:ring-2 focus:ring-[#D6C19E]/50"
                       >
-                        {availableYears.map((year) => (
-                          <option key={year} value={year} className="text-neutral-900 dark:text-neutral-100 font-medium bg-white dark:bg-neutral-900">
-                            {n(year)}
-                          </option>
-                        ))}
-                      </select>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[#B18E4E] dark:text-[#D6C19E] transition-transform group-hover:translate-y-[1px]"
-                      >
-                        <path d="m6 9 6 6 6-6" />
-                      </svg>
-                    </label>
+                        {n(selectedYear)}
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className={`transition-transform duration-200 ${isYearDropdownOpen ? "rotate-180" : "group-hover:translate-y-[1px]"}`}
+                        >
+                          <path d="m6 9 6 6 6-6" />
+                        </svg>
+                      </button>
+
+                      {isYearDropdownOpen && (
+                        <div className="absolute right-0 top-full mt-1.5 w-24 rounded-xl border border-neutral-200/80 dark:border-neutral-700/60 bg-white dark:bg-neutral-800 p-1.5 shadow-lg shadow-black/5 dark:shadow-black/20 z-50 animate-in fade-in zoom-in-95 duration-100">
+                          {availableYears.map((year) => (
+                            <button
+                              key={year}
+                              onClick={() => {
+                                setSelectedYear(year);
+                                setIsYearDropdownOpen(false);
+                              }}
+                              className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
+                                selectedYear === year
+                                  ? "bg-[#D6C19E]/15 text-[#B18E4E] dark:bg-[#D6C19E]/10 dark:text-[#D6C19E]"
+                                  : "text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50"
+                              }`}
+                            >
+                              {n(year)}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="w-full pb-2 overflow-x-auto" dir="ltr">

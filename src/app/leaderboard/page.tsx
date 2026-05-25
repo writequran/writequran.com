@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/lib/i18n";
 import { getStorage, setStorage } from "@/lib/storage";
@@ -33,6 +33,18 @@ export default function LeaderboardPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeUsername, setActiveUsername] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<LeaderboardPeriod>("all_time");
+  const [isPeriodDropdownOpen, setIsPeriodDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsPeriodDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const maskUsername = (value: string) => {
     if (!value) return "User";
@@ -173,28 +185,58 @@ export default function LeaderboardPage() {
               {t("leaderboard_desc")}
             </p>
           </div>
-          <div className="inline-flex items-center gap-1 self-start sm:self-auto rounded-2xl border border-neutral-200/70 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 p-1">
-            {periodOptions.map((option) => {
-              const active = option.key === selectedPeriod;
-              return (
-                <button
-                  key={option.key}
-                  type="button"
-                  onClick={() => setSelectedPeriod(option.key)}
-                  className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-colors ${active
-                    ? "bg-[#D6C19E] text-white shadow-sm"
-                    : "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"}`}
-                >
-                  {option.label}
-                </button>
-              );
-            })}
-          </div>
         </section>
 
         <section className="animate-in slide-in-from-bottom-8 fade-in duration-1000">
           <div className="bg-white dark:bg-neutral-800/80 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 overflow-hidden backdrop-blur-xl">
-            <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-neutral-50 dark:bg-neutral-900/50 border-b border-neutral-200/60 dark:border-neutral-800 text-[10px] font-bold uppercase tracking-widest text-neutral-400 dark:text-neutral-500">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200/60 dark:border-neutral-700/60 bg-neutral-50/50 dark:bg-neutral-900/30">
+              <h3 className="text-sm font-bold text-neutral-900 dark:text-neutral-100">Global Rankings</h3>
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsPeriodDropdownOpen(!isPeriodDropdownOpen)}
+                  className="flex items-center gap-2 rounded-lg border border-[#D6C19E]/30 dark:border-[#D6C19E]/20 bg-[#F8F1E6]/80 hover:bg-[#F8F1E6] dark:bg-[#1a150e]/60 dark:hover:bg-[#1a150e]/80 px-3 py-1.5 text-[11px] sm:text-xs font-bold tracking-wider text-[#B18E4E] dark:text-[#D6C19E] shadow-sm outline-none transition-all focus:ring-2 focus:ring-[#D6C19E]/50"
+                >
+                  {periodOptions.find(o => o.key === selectedPeriod)?.label}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={`transition-transform duration-200 ${isPeriodDropdownOpen ? "rotate-180" : ""}`}
+                  >
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </button>
+
+                {isPeriodDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-1.5 w-32 rounded-xl border border-neutral-200/80 dark:border-neutral-700/60 bg-white dark:bg-neutral-800 p-1.5 shadow-lg shadow-black/5 dark:shadow-black/20 z-50 animate-in fade-in zoom-in-95 duration-100">
+                    {periodOptions.map((option) => (
+                      <button
+                        key={option.key}
+                        onClick={() => {
+                          setSelectedPeriod(option.key);
+                          setIsPeriodDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
+                          selectedPeriod === option.key
+                            ? "bg-[#D6C19E]/15 text-[#B18E4E] dark:bg-[#D6C19E]/10 dark:text-[#D6C19E]"
+                            : "text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50"
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-white dark:bg-neutral-800 border-b border-neutral-200/60 dark:border-neutral-700/60 text-[9px] font-bold uppercase tracking-widest text-neutral-400 dark:text-neutral-500">
               <div className="col-span-2 sm:col-span-2 text-center">{t("rank")}</div>
               <div className="col-span-6 sm:col-span-6">{t("leader")}</div>
               <div className="col-span-4 sm:col-span-4 text-right">{t("rating")}</div>
@@ -221,15 +263,15 @@ export default function LeaderboardPage() {
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-neutral-100 dark:divide-neutral-800/50">
+              <div className="flex flex-col">
                 {leaders.map((leader, idx) => (
                   <Link
                     key={leader.user_id}
                     href={`/leaderboard/${encodeURIComponent(leader.username)}`}
-                    className="grid grid-cols-12 gap-4 px-6 py-4 items-center transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
+                    className="grid grid-cols-12 gap-4 px-6 py-4 items-center transition-colors hover:bg-neutral-50/80 dark:hover:bg-neutral-800/40 border-b border-neutral-200/80 dark:border-neutral-700/60 last:border-0"
                   >
                     <div className="col-span-2 sm:col-span-2 flex items-center justify-center">
-                      <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full border text-xs font-bold ${
+                      <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full border text-xs font-bold ${
                         idx < 3
                           ? topThreeStyles[idx]
                           : "border-neutral-200 bg-white text-neutral-400 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-500"
@@ -238,19 +280,19 @@ export default function LeaderboardPage() {
                       </span>
                     </div>
                     <div className="col-span-6 sm:col-span-6 min-w-0">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="font-semibold text-neutral-800 dark:text-neutral-100 truncate text-sm sm:text-base">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="font-semibold text-neutral-700 dark:text-neutral-200 truncate text-sm">
                           {leader.public_display_name || maskUsername(leader.username)}
                         </div>
                         {activeUsername && activeUsername.toLowerCase() === leader.username.toLowerCase() ? (
-                          <span className="shrink-0 rounded-full bg-[#D6C19E]/18 dark:bg-[#D6C19E]/12 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#B18E4E] dark:text-[#D6C19E]">
+                          <span className="shrink-0 rounded-md bg-[#D6C19E]/18 dark:bg-[#D6C19E]/12 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#B18E4E] dark:text-[#D6C19E]">
                             {t("you")}
                           </span>
                         ) : null}
                       </div>
                     </div>
                     <div className="col-span-4 sm:col-span-4 text-right">
-                      <div className="text-lg sm:text-xl font-bold text-[#B18E4E] dark:text-[#D6C19E] tabular-nums">
+                      <div className="text-[15px] font-bold text-neutral-900 dark:text-neutral-50 tabular-nums">
                         {n(leader.hifz_score)}
                       </div>
                     </div>
