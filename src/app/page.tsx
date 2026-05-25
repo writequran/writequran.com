@@ -113,7 +113,7 @@ export default function LandingPage() {
     window.location.href = "/memorize";
   };
 
-  if (!isMounted) return <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#0A0A0A] transition-colors duration-500" />;
+  if (!isMounted) return <div className="min-h-screen bg-[#FDFBF7] dark:bg-neutral-900 transition-colors duration-500" />;
 
   const currentHeroAyah = heroAyat[activeAyah];
   const currentHeroAyahUnits = splitArabicGraphemes(currentHeroAyah.text);
@@ -121,7 +121,7 @@ export default function LandingPage() {
   const footerRightsText = t("all_rights_reserved").replace(/writequran\.com\s*/i, "").trim();
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#0A0A0A] text-neutral-900 dark:text-neutral-100 transition-colors duration-500 font-sans relative overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-[#FDFBF7] dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 transition-colors duration-500 font-sans relative overflow-hidden flex flex-col">
       {/* Background Mesh Gradients */}
       <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[80vw] h-[60vh] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#D6C19E]/20 via-[#D6C19E]/5 to-transparent pointer-events-none blur-3xl" />
       <div className="absolute top-1/4 left-0 w-[40vw] h-[50vh] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#B18E4E]/5 to-transparent pointer-events-none blur-3xl mix-blend-screen" />

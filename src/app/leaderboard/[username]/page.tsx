@@ -384,7 +384,7 @@ export default function LeaderboardProfilePage() {
         </div>
       </header>
 
-      <main className="relative z-10 max-w-5xl mx-auto px-4 py-6 sm:py-12 sm:px-10 lg:px-12 flex flex-col gap-6 sm:gap-10 pb-24">
+      <main className="relative z-10 max-w-5xl mx-auto px-4 py-6 sm:py-12 sm:px-10 lg:px-12 flex flex-col gap-4 sm:gap-6 pb-24">
         {loading ? (
           <div className="p-12 flex justify-center items-center">
             <div className="w-8 h-8 border-4 border-[#D6C19E]/30 border-t-[#D6C19E] rounded-full animate-spin"></div>
@@ -396,30 +396,30 @@ export default function LeaderboardProfilePage() {
         ) : (
           <>
             <section className="animate-in slide-in-from-bottom-4 fade-in duration-700">
-              <div className="rounded-[1.5rem] sm:rounded-[1.75rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-4 py-4 sm:px-6 sm:py-6 shadow-[0_8px_28px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_28px_rgb(0,0,0,0.2)] backdrop-blur-xl">
+              <div className="rounded-xl border border-neutral-200/80 dark:border-neutral-700/50 bg-white/90 dark:bg-neutral-800/50 backdrop-blur-xl px-6 py-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] overflow-hidden">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                  <div className="flex items-start gap-3 sm:gap-4 min-w-0">
-                    <div className="inline-flex h-11 w-11 sm:h-14 sm:w-14 items-center justify-center rounded-xl sm:rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] shadow-sm shrink-0">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 21a8 8 0 1 0-12 0" /><circle cx="12" cy="7" r="4" /></svg>
+                  <div className="flex items-start gap-4 min-w-0">
+                    <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#D6C19E] to-[#B18E4E] text-white shrink-0 shadow-sm text-2xl font-bold uppercase">
+                      {visibleDisplayName ? visibleDisplayName[0] : "U"}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.18em] sm:tracking-[0.22em] text-neutral-400 dark:text-neutral-500">
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                         {t("player_profile")}
                       </p>
-                      <h2 className="mt-1 text-[1.85rem] sm:text-3xl lg:text-[2rem] font-extrabold tracking-tight text-neutral-900 dark:text-neutral-50 break-words leading-[1.05]">
+                      <h2 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50 break-words leading-tight">
                         {visibleDisplayName}
                       </h2>
                       {isOwnProfile ? (
-                        <p className="mt-1 text-xs sm:text-sm font-semibold text-neutral-400 dark:text-neutral-500">
+                        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
                           @{profile.username}
                         </p>
                       ) : null}
                       {identitySummary.length > 0 ? (
-                        <div className="mt-2.5 flex flex-wrap gap-1.5 sm:gap-2">
+                        <div className="mt-3 flex flex-wrap gap-2">
                           {identitySummary.map((item) => (
                             <span
                               key={item}
-                              className="rounded-full border border-[#D6C19E]/25 bg-[#F8F1E6]/85 dark:bg-neutral-900/65 dark:border-[#D6C19E]/20 px-2 py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.08em] sm:tracking-[0.14em] text-[#B18E4E] dark:text-[#D6C19E] leading-none"
+                              className="rounded-md border border-neutral-200/80 dark:border-neutral-700/60 bg-neutral-50/80 dark:bg-neutral-800/80 px-2 py-1 text-[11px] font-medium text-neutral-600 dark:text-neutral-300"
                             >
                               {item}
                             </span>
@@ -429,107 +429,94 @@ export default function LeaderboardProfilePage() {
                     </div>
                   </div>
                   <div className="flex items-start justify-start lg:justify-end pt-1 sm:pt-0">
-                    <div className="rounded-[1rem] sm:rounded-[1.25rem] border border-[#D6C19E]/30 bg-[#F8F1E6]/85 dark:bg-neutral-900/70 dark:border-[#D6C19E]/20 px-3 py-2.5 sm:px-4 sm:py-3 min-w-[5.5rem] sm:min-w-[6.5rem] text-center shadow-sm">
-                      <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.12em] sm:tracking-[0.18em] text-[#B18E4E] dark:text-[#D6C19E]">
+                    <div className="rounded-lg border border-[#D6C19E]/30 dark:border-[#D6C19E]/20 bg-[#F8F1E6]/80 dark:bg-[#1a150e]/60 px-4 py-3 min-w-[6.5rem] text-center shadow-sm">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-[#B18E4E] dark:text-[#D6C19E]">
                         {t("rank")}
                       </div>
-                      <div className="mt-1 text-[1.65rem] sm:text-[1.75rem] font-black text-neutral-900 dark:text-neutral-50 leading-none">
+                      <div className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-50 leading-none">
                         {profileMeta?.global_rank ? `#${n(profileMeta.global_rank)}` : "—"}
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="mt-3.5 rounded-[1rem] sm:rounded-[1.25rem] border border-neutral-200/80 dark:border-neutral-700/70 bg-neutral-50/90 dark:bg-neutral-900/55 px-3.5 py-3 sm:px-4 sm:py-3.5">
-                  <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.12em] sm:tracking-[0.18em] text-neutral-400 dark:text-neutral-500">
-                    {t("recent_activity")}
+
+                {isOwnProfile && (
+                  <div className="mt-6 pt-5 border-t border-neutral-200/80 dark:border-neutral-700/50">
+                    <form onSubmit={handleSaveDisplayName} className="flex flex-col sm:flex-row gap-3 sm:items-center">
+                      <div className="w-full sm:max-w-xs">
+                        <input
+                          type="text"
+                          value={displayNameInput}
+                          onChange={(e) => setDisplayNameInput(e.target.value)}
+                          placeholder={t("public_display_name_placeholder")}
+                          className="w-full rounded-md bg-neutral-50/80 dark:bg-neutral-900/60 border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-sm font-medium text-neutral-900 dark:text-neutral-100 outline-none focus:ring-2 focus:ring-[#D6C19E]/50 focus:border-[#D6C19E] transition-all"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={displayNameLoading}
+                        className="w-full sm:w-auto rounded-md bg-[#D6C19E] hover:bg-[#c2ad8a] text-white disabled:opacity-70 px-4 py-2 text-sm font-bold transition-colors shadow-sm whitespace-nowrap"
+                      >
+                        {displayNameLoading ? t("loading") : t("save_display_name")}
+                      </button>
+                      {displayNameMessage && (
+                        <span className={`text-[13px] font-medium ${displayNameMessage === t("public_display_name_taken")
+                          ? "text-red-500 dark:text-red-400"
+                          : "text-emerald-600 dark:text-emerald-400"
+                          }`}>
+                          {displayNameMessage}
+                        </span>
+                      )}
+                    </form>
                   </div>
-                  <p className="mt-1.5 text-[15px] sm:text-[15px] font-medium leading-relaxed text-neutral-700 dark:text-neutral-200">
-                    {recentActivitySummary}
-                  </p>
+                )}
+              </div>
+            </section>
+
+            <section className="animate-in slide-in-from-bottom-6 fade-in duration-900">
+              <div className="rounded-xl border border-neutral-200/80 dark:border-neutral-700/50 bg-white/90 dark:bg-neutral-800/50 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] overflow-hidden">
+                <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-neutral-200/80 dark:divide-neutral-700/50">
+                  {primaryStatCards.map((card, idx) => (
+                    <div
+                      key={card.label}
+                      className={`px-5 py-6 ${idx < 2 ? 'border-b lg:border-b-0 border-neutral-200/80 dark:border-neutral-700/50' : ''}`}
+                    >
+                      <div className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 leading-snug">
+                        {card.label}
+                      </div>
+                      <div className="mt-2 text-3xl font-bold text-neutral-900 dark:text-neutral-50 leading-none">
+                        {card.value}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-neutral-200/80 dark:divide-neutral-700/50 border-t border-neutral-200/80 dark:border-neutral-700/50 bg-neutral-50/50 dark:bg-neutral-900/30">
+                  {secondaryStatCards.map((card) => (
+                    <div
+                      key={card.label}
+                      className="px-5 py-5"
+                    >
+                      <div className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                        {card.label}
+                      </div>
+                      <div className="mt-2 text-2xl font-bold text-neutral-900 dark:text-neutral-50 leading-none">
+                        {card.value}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </section>
 
             {isOwnProfile && (
-              <section className="animate-in slide-in-from-bottom-5 fade-in duration-800">
-                <div className="rounded-[1.35rem] sm:rounded-[1.5rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-4 py-4 sm:px-5 sm:py-5 shadow-[0_8px_28px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_28px_rgb(0,0,0,0.2)] backdrop-blur-xl">
-                  <div className="mb-4">
-                    <h3 className="text-[1.05rem] sm:text-lg font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
-                      {t("public_display_name")}
-                    </h3>
-                    <p className="mt-1 text-[13px] sm:text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
-                      {t("public_display_name_desc")}
-                    </p>
-                  </div>
-                  <form onSubmit={handleSaveDisplayName} className="flex flex-col sm:flex-row gap-3 sm:items-center">
-                    <input
-                      type="text"
-                      value={displayNameInput}
-                      onChange={(e) => setDisplayNameInput(e.target.value)}
-                      placeholder={t("public_display_name_placeholder")}
-                      className="flex-1 rounded-2xl bg-neutral-50 dark:bg-neutral-900/80 border border-neutral-200 dark:border-neutral-700 px-4 py-3 text-sm font-semibold text-neutral-800 dark:text-neutral-100 outline-none focus:border-[#D6C19E]"
-                    />
-                    <button
-                      type="submit"
-                      disabled={displayNameLoading}
-                      className="rounded-2xl bg-[#D6C19E] hover:bg-[#c2ad8a] disabled:opacity-70 text-white px-5 py-3 text-sm font-bold transition-colors"
-                    >
-                      {displayNameLoading ? t("loading") : t("save_display_name")}
-                    </button>
-                  </form>
-                  {displayNameMessage ? (
-                    <p className={`mt-3 text-sm font-medium ${displayNameMessage === t("public_display_name_taken")
-                      ? "text-red-500 dark:text-red-400"
-                      : "text-[#B18E4E] dark:text-[#D6C19E]"
-                      }`}>
-                      {displayNameMessage}
-                    </p>
-                  ) : null}
-                </div>
-              </section>
-            )}
-
-            <section className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 sm:gap-4 animate-in slide-in-from-bottom-6 fade-in duration-900">
-              {primaryStatCards.map((card) => (
-                <div
-                  key={card.label}
-                  className="rounded-[1.1rem] sm:rounded-[1.35rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-3 py-3.5 sm:px-5 sm:py-5 shadow-[0_8px_24px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_24px_rgb(0,0,0,0.18)] backdrop-blur-xl"
-                >
-                  <div className="text-[9px] sm:text-[11px] font-bold uppercase tracking-[0.12em] sm:tracking-[0.18em] text-neutral-400 dark:text-neutral-500 leading-snug">
-                    {card.label}
-                  </div>
-                  <div className="mt-2 text-[1.7rem] sm:text-3xl lg:text-[2rem] font-black text-neutral-900 dark:text-neutral-50 leading-none">
-                    {card.value}
-                  </div>
-                </div>
-              ))}
-            </section>
-
-            <section className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 animate-in slide-in-from-bottom-7 fade-in duration-950">
-              {secondaryStatCards.map((card) => (
-                <div
-                  key={card.label}
-                  className="rounded-[1.1rem] sm:rounded-[1.25rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/80 dark:bg-neutral-800/55 px-3.5 py-3.5 sm:px-4 sm:py-4 shadow-[0_8px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_8px_20px_rgb(0,0,0,0.16)] backdrop-blur-xl"
-                >
-                  <div className="text-[9px] sm:text-[11px] font-bold uppercase tracking-[0.12em] sm:tracking-[0.18em] text-neutral-400 dark:text-neutral-500">
-                    {card.label}
-                  </div>
-                  <div className="mt-1.5 text-[1.35rem] sm:text-2xl font-black text-neutral-900 dark:text-neutral-50 leading-none">
-                    {card.value}
-                  </div>
-                </div>
-              ))}
-            </section>
-
-            {isOwnProfile && (
               <section className="animate-in slide-in-from-bottom-8 fade-in duration-1000">
-                <div className="rounded-[2rem] border border-neutral-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/70 px-5 py-6 sm:px-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] backdrop-blur-xl">
+                <div className="rounded-xl border border-neutral-200/80 dark:border-neutral-700/50 bg-white/90 dark:bg-neutral-800/50 backdrop-blur-xl px-6 py-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] overflow-hidden">
                   <div className="flex items-start justify-between gap-4 mb-6">
                     <div>
-                      <h3 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
+                      <h3 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
                         {t("activity_tracker")}
                       </h3>
-                      <p className="mt-1 text-sm font-semibold text-[#B18E4E] dark:text-[#D6C19E]">
+                      <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
                         {t("private_activity_note")}
                       </p>
                     </div>
@@ -538,7 +525,7 @@ export default function LeaderboardProfilePage() {
                       <select
                         value={selectedYear}
                         onChange={(e) => setSelectedYear(Number.parseInt(e.target.value, 10))}
-                        className="appearance-none rounded-2xl border border-[#D6C19E]/40 bg-[#F8F1E6] dark:bg-neutral-900/80 dark:border-[#D6C19E]/30 px-4 py-2.5 pr-10 text-sm font-bold text-[#8E6B2F] dark:text-[#E6CAA0] shadow-sm outline-none transition-colors hover:border-[#D6C19E] focus:border-[#D6C19E]"
+                        className="appearance-none rounded-md border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-950 px-3 py-1.5 pr-8 text-sm font-medium text-neutral-900 dark:text-neutral-100 shadow-sm outline-none transition-all focus:ring-2 focus:ring-[#D6C19E]/50 focus:border-[#D6C19E]"
                       >
                         {availableYears.map((year) => (
                           <option key={year} value={year}>
@@ -548,15 +535,15 @@ export default function LeaderboardProfilePage() {
                       </select>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
+                        width="16"
+                        height="16"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="2.5"
+                        strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#B18E4E] dark:text-[#D6C19E]"
+                        className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500"
                       >
                         <path d="m6 9 6 6 6-6" />
                       </svg>
