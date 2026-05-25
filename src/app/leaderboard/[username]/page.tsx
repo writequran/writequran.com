@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { useLanguage } from "@/lib/i18n";
 import { getStorage, setStorage } from "@/lib/storage";
@@ -68,7 +68,14 @@ function getActivityLevel(count: number): ActivityCell["level"] {
 export default function LeaderboardProfilePage() {
   const { t, n, language, setLanguage } = useLanguage();
   const params = useParams<{ username: string }>();
+  const searchParams = useSearchParams();
   const username = Array.isArray(params?.username) ? params.username[0] : params?.username;
+  const fromParam = searchParams?.get("from");
+  const backHref = fromParam || "/leaderboard";
+  let backText = t("back_to_leaderboard");
+  if (fromParam === "/") backText = t("go_home");
+  else if (fromParam && fromParam !== "/leaderboard") backText = t("go_back");
+
   const [isMounted, setIsMounted] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [profile, setProfile] = useState<LeaderboardProfile | null>(null);
@@ -367,11 +374,11 @@ export default function LeaderboardProfilePage() {
       <div className="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] bg-[#D6C19E]/5 blur-[120px] rounded-full pointer-events-none" />
 
       <header className="relative z-50 w-full max-w-7xl mx-auto px-6 py-6 sm:px-10 lg:px-12 flex justify-between items-center">
-        <Link href="/leaderboard" className="flex items-center gap-3 group hover:opacity-80 transition-opacity">
+        <Link href={backHref} className="flex items-center gap-3 group hover:opacity-80 transition-opacity">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-neutral-800 shadow-sm border border-neutral-200 dark:border-neutral-700 rtl:rotate-180">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
           </div>
-          <span className="font-bold tracking-tight text-neutral-800 dark:text-neutral-100 hidden sm:block">{t("back_to_leaderboard")}</span>
+          <span className="font-bold tracking-tight text-neutral-800 dark:text-neutral-100 hidden sm:block">{backText}</span>
         </Link>
 
         <div className="flex items-center gap-2 sm:gap-3">

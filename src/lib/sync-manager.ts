@@ -16,14 +16,14 @@ export async function syncLocalToCloud() {
   const surahNumber = parseInt(getStorage('surah') || '1', 10);
   const globalIndex = parseInt(getStorage('current_progress_index') || getStorage(`quran_typing_progress_${surahNumber}`) || '0', 10);
   
-  await supabase.from('current_progress_state').upsert({
+  const currentProgressState = {
     user_id: user.id,
     surah_number: surahNumber,
     global_index: globalIndex,
     updated_at: now
-  });
+  };
 
-  // 2. User Preferences
+  // 2. User Preferences (Can remain client-side, just basic settings)
   const visibilityMode = getStorage('visibility_mode') || 'hidden';
   const showKeyboard = getStorage('keyboard') === 'true';
   const theme = getStorage('theme') || 'light';
@@ -67,11 +67,7 @@ export async function syncLocalToCloud() {
     };
   });
 
-  if (progressUpserts.length > 0) {
-    await supabase.from('surah_progress').upsert(progressUpserts, { onConflict: 'user_id,surah_number' });
-  }
-
-  // 4. Mistake Stats (Additive Upsert handled securely via Postgres Unique Constraint)
+  // 4. Mistake Stats
   const mistakeStats: Record<string, MistakeRecord> = JSON.parse(getStorage('mistake_stats') || '{}');
   const mistakeUpserts = Object.values(mistakeStats).map(m => ({
     user_id: user.id,
@@ -83,8 +79,12 @@ export async function syncLocalToCloud() {
     timestamp: new Date(m.timestamp || Date.now()).toISOString()
   }));
 
-  if (mistakeUpserts.length > 0) {
-    await supabase.from('mistake_stats').upsert(mistakeUpserts, { onConflict: 'user_id,surah_number,ayah_number,global_index,expected_char' });
+  // 5. Send to Server Action for Structural Validation
+  const { syncProgressAction } = await import('@/app/actions/syncProgress');
+  try {
+    await syncProgressAction(currentProgressState, progressUpserts, mistakeUpserts);
+  } catch (err) {
+    console.error("Server-side progress validation failed:", err);
   }
 }
 

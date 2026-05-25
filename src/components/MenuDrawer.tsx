@@ -135,7 +135,7 @@ export function MenuDrawer({
 
             <p className="px-4 text-[10px] uppercase font-bold text-neutral-400 tracking-widest mb-2">{t("account")}</p>
             {username ? (
-              <Link href={`/leaderboard/${username}`} onClick={onClose} className="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
+              <Link href={`/leaderboard/${username}?from=${encodeURIComponent(pathname)}`} onClick={onClose} className="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all group text-neutral-600 dark:text-neutral-300">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400 group-hover:text-[#D6C19E] transition-colors shrink-0"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                 <div className="min-w-0">
                   <span className="font-semibold text-sm block">{t("user_profile")}</span>

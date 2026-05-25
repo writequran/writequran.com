@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, usePathname } from 'next/navigation';
 import { syncCloudToLocal, syncLocalToCloud } from '@/lib/sync-manager';
 import { setActiveUserId, setStorage } from '@/lib/storage';
 import { createClient } from '@/utils/supabase/client';
@@ -59,6 +59,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
   const authRef = useRef<HTMLDivElement>(null);
   const { t, language } = useLanguage();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -532,7 +533,7 @@ function AuthWidgetContent({ onAuthChange }: { onAuthChange: () => void }) {
             </div>
             
             <div className="py-1">
-              <Link href={`/leaderboard/${user.username}`} onClick={() => setIsUserMenuOpen(false)} className="flex items-center px-4 py-2.5 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors font-medium">
+              <Link href={`/leaderboard/${user.username}?from=${encodeURIComponent(pathname)}`} onClick={() => setIsUserMenuOpen(false)} className="flex items-center px-4 py-2.5 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors font-medium">
                 <svg className="w-4 h-4 mr-2.5 rtl:ml-2.5 rtl:mr-0 opacity-70" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 {t("profile") || "Profile"}
               </Link>
