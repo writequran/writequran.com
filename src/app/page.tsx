@@ -113,7 +113,7 @@ export default function LandingPage() {
     window.location.href = "/memorize";
   };
 
-  if (!isMounted) return <div className="min-h-screen bg-[#FDFBF7] dark:bg-neutral-900 transition-colors duration-500" />;
+  if (!isMounted) return <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#0A0A0A] transition-colors duration-500" />;
 
   const currentHeroAyah = heroAyat[activeAyah];
   const currentHeroAyahUnits = splitArabicGraphemes(currentHeroAyah.text);
@@ -121,8 +121,10 @@ export default function LandingPage() {
   const footerRightsText = t("all_rights_reserved").replace(/writequran\.com\s*/i, "").trim();
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 transition-colors duration-500 font-sans relative overflow-hidden flex flex-col">
-      <div className="absolute top-0 left-0 w-full h-[50vh] bg-gradient-to-b from-[#D6C19E]/12 to-transparent pointer-events-none" />
+    <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#0A0A0A] text-neutral-900 dark:text-neutral-100 transition-colors duration-500 font-sans relative overflow-hidden flex flex-col">
+      {/* Background Mesh Gradients */}
+      <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[80vw] h-[60vh] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#D6C19E]/20 via-[#D6C19E]/5 to-transparent pointer-events-none blur-3xl" />
+      <div className="absolute top-1/4 left-0 w-[40vw] h-[50vh] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#B18E4E]/5 to-transparent pointer-events-none blur-3xl mix-blend-screen" />
 
       {/* Header */}
       <header className="relative z-50 w-full px-4 py-4 sm:px-10 sm:py-6 lg:px-12 flex justify-between items-center">
@@ -161,26 +163,30 @@ export default function LandingPage() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 relative z-10 flex flex-col items-center justify-center px-4 py-6 sm:px-6 sm:py-16">
-        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-16 animate-in slide-in-from-bottom-4 fade-in duration-700">
-          <div className="inline-flex items-center justify-center px-3 py-1 sm:px-4 sm:py-1.5 mb-4 sm:mb-6 rounded-full border border-[#D6C19E]/30 bg-[#D6C19E]/10 text-xs sm:text-sm font-semibold text-[#B18E4E] dark:text-[#D6C19E]">
+      <main className="flex-1 relative z-10 flex flex-col items-center justify-center px-4 py-4 sm:px-6 sm:py-8 lg:py-12">
+        <div className="text-center max-w-4xl mx-auto mb-8 sm:mb-12 animate-in slide-in-from-bottom-4 fade-in duration-700">
+          <div className="inline-flex items-center justify-center px-4 py-1.5 mb-4 rounded-full border border-[#D6C19E]/20 bg-white/50 dark:bg-white/5 text-[11px] sm:text-xs font-bold uppercase tracking-[0.15em] text-[#B18E4E] dark:text-[#D6C19E] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
             {t("practice_memorize_review")}
           </div>
-          <h2 className="text-[2.35rem] sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-4 sm:mb-6 text-neutral-800 dark:text-neutral-50 leading-[1.04] sm:leading-[1.1]">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[4.2rem] font-bold tracking-tight sm:tracking-tighter mb-4 text-neutral-800 dark:text-white leading-[1.05] sm:leading-[1.05]">
             <span>{t("master_the_quran_1").replace(/,\s*$/, "")}</span>
             <br />
-            <span className="text-[0.72em] sm:text-[1em] whitespace-nowrap">{t("master_the_quran_2")}</span>
+            <span className="text-[0.72em] sm:text-[1em] whitespace-nowrap bg-clip-text text-transparent bg-gradient-to-r from-neutral-800 to-neutral-500 dark:from-white dark:to-neutral-400">{t("master_the_quran_2")}</span>
           </h2>
-          <div className="mx-auto mt-5 sm:mt-8 w-full max-w-2xl rounded-[1.5rem] sm:rounded-[2rem] border border-[#D6C19E]/35 bg-white/80 dark:bg-neutral-900/70 px-4 py-3.5 sm:px-8 sm:py-6 shadow-[0_18px_60px_rgba(214,193,158,0.14)] backdrop-blur-xl">
-            <div className="mb-2.5 sm:mb-3 flex items-center justify-between gap-3 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.18em] sm:tracking-[0.28em] text-[#B18E4E] dark:text-[#D6C19E]">
+          
+          <div className="mx-auto mt-6 sm:mt-8 w-full max-w-3xl rounded-[1.5rem] sm:rounded-[2rem] border border-neutral-200 dark:border-white/10 bg-white/60 dark:bg-white/[0.03] px-5 py-5 sm:px-8 sm:py-6 shadow-[0_8px_40px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_20px_60px_rgba(0,0,0,0.4)] backdrop-blur-2xl relative overflow-hidden group">
+            {/* Subtle inner highlight */}
+            <div className="absolute inset-0 bg-gradient-to-b from-white/40 to-transparent dark:from-white/5 dark:to-transparent opacity-50 pointer-events-none" />
+            
+            <div className="mb-3 sm:mb-4 flex items-center justify-between gap-3 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.18em] sm:tracking-[0.28em] text-[#B18E4E] dark:text-[#D6C19E] relative z-10">
               <span>{t("typing_revelation")}</span>
               <span>{language === 'ar' ? `${n(currentHeroAyah.surah.split(':')[0])}:${n(currentHeroAyah.surah.split(':')[1])}` : currentHeroAyah.surah}</span>
             </div>
             <div
-              className="quran-text rtl min-h-[2.65rem] text-[1.3rem] leading-[1.9] sm:min-h-[4.6rem] sm:text-[2.35rem] sm:leading-[2.5] text-neutral-800 dark:text-neutral-100"
+              className="quran-text rtl min-h-[2.65rem] text-[1.4rem] leading-[1.9] sm:min-h-[4.6rem] sm:text-[2.2rem] sm:leading-[2.2] text-neutral-800 dark:text-neutral-50 relative z-10"
               dir="rtl"
             >
-              <span className="relative inline-block max-w-full whitespace-nowrap">
+              <span className="relative inline-block max-w-full whitespace-nowrap drop-shadow-sm">
                 <span className="opacity-0">{currentHeroAyah.text}</span>
                 <span
                   className="absolute inset-y-0 right-0 overflow-hidden whitespace-nowrap transition-[max-width] duration-150 ease-out"
@@ -190,7 +196,7 @@ export default function LandingPage() {
                   {currentHeroAyah.text}
                 </span>
                 <span
-                  className={`absolute top-[0.4em] w-[2px] rounded-full bg-[#C5963D] dark:bg-[#E3BE72] ${isHoldingAyah ? 'opacity-0' : 'animate-landing-caret'}`}
+                  className={`absolute top-[0.4em] w-[2px] rounded-full bg-[#C5963D] dark:bg-[#E3BE72] shadow-[0_0_8px_rgba(227,190,114,0.6)] ${isHoldingAyah ? 'opacity-0' : 'animate-landing-caret'}`}
                   style={{
                     right: `${Math.max(0, Math.min(100, revealProgress * 100))}%`,
                     height: "1.5em",
@@ -201,101 +207,99 @@ export default function LandingPage() {
               </span>
             </div>
           </div>
-          {/* <p className="text-lg md:text-xl text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
-            A premium, distraction-free environment to practice writing, reviewing mistakes, 
-            and reinforcing your memorization.
-          </p> */}
+          
+          <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
+            <Link href="/write" className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 font-bold text-[15px] hover:scale-105 transition-transform shadow-[0_4px_14px_rgba(0,0,0,0.15)] dark:shadow-[0_4px_14px_rgba(255,255,255,0.15)] flex items-center justify-center gap-2">
+              {t("start_writing")}
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="rtl:rotate-180"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </Link>
+          </div>
         </div>
 
-        <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5 sm:gap-4 xl:gap-5 animate-in slide-in-from-bottom-8 fade-in duration-1000 delay-150">
-
-          <Link href="/write" className="group relative overflow-hidden rounded-[1.5rem] sm:rounded-3xl bg-white dark:bg-neutral-800/80 p-3.5 sm:p-6 lg:p-8 xl:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm">
-            <div className={`absolute -top-4 ${language === "ar" ? "-left-4" : "-right-4"} p-6 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-all duration-500 scale-50 group-hover:scale-150 ${language === "ar" ? "rotate-[15deg]" : "rotate-[-15deg]"} group-hover:rotate-0`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#D6C19E" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
-            </div>
-            <div className="mb-3 sm:mb-6 xl:mb-4 flex items-center gap-3 sm:block">
-              <div className="inline-flex h-11 w-11 sm:h-12 sm:w-12 xl:h-11 xl:w-11 items-center justify-center rounded-xl sm:rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300 shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
+        <div className="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-6 gap-4 sm:gap-6 animate-in slide-in-from-bottom-8 fade-in duration-1000 delay-150 relative z-10">
+          
+          {/* Primary Action 1: Start Writing */}
+          <Link href="/write" className="group relative overflow-hidden rounded-[1.5rem] bg-white dark:bg-white/[0.02] p-6 sm:p-8 md:col-span-3 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-none border border-neutral-200/60 dark:border-white/5 transition-all duration-500 hover:-translate-y-1 hover:bg-neutral-50 dark:hover:bg-white/[0.04] hover:border-[#D6C19E]/30 dark:hover:border-white/10 backdrop-blur-md flex flex-col justify-between min-h-[14rem]">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#D6C19E]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative z-10">
+              <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-105 transition-transform duration-500 shrink-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
               </div>
-              <h3 className="mb-0 sm:mb-1.5 text-[1.18rem] sm:text-xl xl:text-lg font-bold text-neutral-800 dark:text-neutral-100 whitespace-nowrap">{t("start_writing")}</h3>
+              <h3 className="mb-2 text-2xl font-bold text-neutral-800 dark:text-neutral-100">{t("start_writing")}</h3>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
+                {t("start_writing_desc")}
+              </p>
             </div>
-            <p className="text-[13px] sm:text-sm xl:text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
-              {t("start_writing_desc")}
-            </p>
-            <div className="mt-2.5 sm:mt-6 xl:mt-4 flex items-center text-[13px] sm:text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E] group-hover:gap-2 transition-all">
+            <div className="mt-8 flex items-center text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E] group-hover:pl-2 transition-all duration-300 relative z-10">
               {t("begin_practice")} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 rtl:rotate-180"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
             </div>
           </Link>
 
-          <Link href="/review" className="group relative overflow-hidden rounded-[1.5rem] sm:rounded-3xl bg-white dark:bg-neutral-800/80 p-3.5 sm:p-6 lg:p-8 xl:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm">
-            <div className={`absolute -top-4 ${language === "ar" ? "-left-4" : "-right-4"} p-6 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-all duration-500 scale-50 group-hover:scale-150 ${language === "ar" ? "rotate-[-15deg]" : "rotate-[15deg]"} group-hover:rotate-0`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#D6C19E" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><path d="M16 13H8" /><path d="M16 17H8" /><path d="M10 9H8" /></svg>
-            </div>
-            <div className="mb-3 sm:mb-6 xl:mb-4 flex items-center gap-3 sm:block">
-              <div className="inline-flex h-11 w-11 sm:h-12 sm:w-12 xl:h-11 xl:w-11 items-center justify-center rounded-xl sm:rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300 shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /><path d="m15 5 4 4" /></svg>
+          {/* Primary Action 2: Review Mistakes */}
+          <Link href="/review" className="group relative overflow-hidden rounded-[1.5rem] bg-white dark:bg-white/[0.02] p-6 sm:p-8 md:col-span-3 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-none border border-neutral-200/60 dark:border-white/5 transition-all duration-500 hover:-translate-y-1 hover:bg-neutral-50 dark:hover:bg-white/[0.04] hover:border-[#D6C19E]/30 dark:hover:border-white/10 backdrop-blur-md flex flex-col justify-between min-h-[14rem]">
+            <div className="absolute inset-0 bg-gradient-to-bl from-[#D6C19E]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative z-10">
+              <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-105 transition-transform duration-500 shrink-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /><path d="m15 5 4 4" /></svg>
               </div>
-              <h3 className="mb-0 sm:mb-1.5 text-[1.18rem] sm:text-xl xl:text-lg font-bold text-neutral-800 dark:text-neutral-100 whitespace-nowrap">{t("review_mistakes")}</h3>
+              <h3 className="mb-2 text-2xl font-bold text-neutral-800 dark:text-neutral-100">{t("review_mistakes")}</h3>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
+                {t("review_mistakes_desc")}
+              </p>
             </div>
-            <p className="text-[13px] sm:text-sm xl:text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
-              {t("review_mistakes_desc")}
-            </p>
-            <div className="mt-2.5 sm:mt-6 xl:mt-4 flex items-center text-[13px] sm:text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E] group-hover:gap-2 transition-all">
+            <div className="mt-8 flex items-center text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E] group-hover:pl-2 transition-all duration-300 relative z-10">
               {t("check_status")} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 rtl:rotate-180"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
             </div>
           </Link>
 
-          <button onClick={() => setShowMemoModal(true)} className={`group relative overflow-hidden rounded-[1.5rem] sm:rounded-3xl bg-white dark:bg-neutral-800/80 p-3.5 sm:p-6 lg:p-8 xl:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm ${language === "ar" ? "text-right" : "text-left"}`}>
-            <div className={`absolute -top-4 ${language === "ar" ? "-left-4" : "-right-4"} p-6 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-all duration-500 scale-50 group-hover:scale-150 rotate-180 group-hover:rotate-0`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#D6C19E" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-            </div>
-            <div className="mb-3 sm:mb-6 xl:mb-4 flex items-center gap-3 sm:block">
-              <div className="inline-flex h-11 w-11 sm:h-12 sm:w-12 xl:h-11 xl:w-11 items-center justify-center rounded-xl sm:rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300 shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path d="M12 11h4" /><path d="M12 16h4" /><path d="M8 11h.01" /><path d="M8 16h.01" /></svg>
+          {/* Secondary Action 1: Memorization Test */}
+          <button onClick={() => setShowMemoModal(true)} className={`group relative overflow-hidden rounded-[1.5rem] bg-white dark:bg-white/[0.02] p-5 sm:p-7 md:col-span-2 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-none border border-neutral-200/60 dark:border-white/5 transition-all duration-500 hover:-translate-y-1 hover:bg-neutral-50 dark:hover:bg-white/[0.04] hover:border-[#D6C19E]/30 dark:hover:border-white/10 backdrop-blur-md flex flex-col justify-between ${language === "ar" ? "text-right" : "text-left"}`}>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            <div className="relative z-10">
+              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 dark:bg-white/5 text-neutral-600 dark:text-neutral-300 group-hover:text-[#D6C19E] group-hover:bg-[#D6C19E]/10 transition-colors duration-300 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path d="M12 11h4" /><path d="M12 16h4" /><path d="M8 11h.01" /><path d="M8 16h.01" /></svg>
               </div>
-              <h3 className="mb-0 sm:mb-1.5 text-[1.18rem] sm:text-xl xl:text-lg font-bold text-neutral-800 dark:text-neutral-100 whitespace-nowrap">{t("memorization_test")}</h3>
+              <h3 className="mb-2 text-lg font-bold text-neutral-800 dark:text-neutral-100">{t("memorization_test")}</h3>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
+                {t("memorization_test_desc")}
+              </p>
             </div>
-            <p className="text-[13px] sm:text-sm xl:text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
-              {t("memorization_test_desc")}
-            </p>
-            <div className="mt-2.5 sm:mt-6 xl:mt-4 flex items-center text-[13px] sm:text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E] group-hover:gap-2 transition-all">
-              {t("test_memory")} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 rtl:rotate-180"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+            <div className="mt-6 flex items-center text-xs font-bold text-neutral-400 group-hover:text-[#D6C19E] group-hover:pl-2 transition-all duration-300 relative z-10">
+              {t("test_memory")} <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 rtl:rotate-180"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
             </div>
           </button>
 
-          <Link href="/progress" className={`group relative overflow-hidden rounded-[1.5rem] sm:rounded-3xl bg-white dark:bg-neutral-800/80 p-3.5 sm:p-6 lg:p-8 xl:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm ${language === "ar" ? "text-right" : "text-left"}`}>
-            <div className={`absolute -top-4 ${language === "ar" ? "-left-4" : "-right-4"} p-6 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-all duration-500 scale-50 group-hover:scale-150 ${language === "ar" ? "rotate-[15deg]" : "rotate-[-15deg]"} group-hover:rotate-0`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#D6C19E" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="m7 14 3-3 3 2 4-5" /><circle cx="7" cy="14" r="1" /><circle cx="10" cy="11" r="1" /><circle cx="13" cy="13" r="1" /><circle cx="17" cy="8" r="1" /></svg>
-            </div>
-            <div className="mb-3 sm:mb-6 xl:mb-4 flex items-center gap-3 sm:block">
-              <div className="inline-flex h-11 w-11 sm:h-12 sm:w-12 xl:h-11 xl:w-11 items-center justify-center rounded-xl sm:rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300 shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="m7 14 3-3 3 2 4-5" /><circle cx="7" cy="14" r="1" /><circle cx="10" cy="11" r="1" /><circle cx="13" cy="13" r="1" /><circle cx="17" cy="8" r="1" /></svg>
+          {/* Secondary Action 2: My Progress */}
+          <Link href="/progress" className={`group relative overflow-hidden rounded-[1.5rem] bg-white dark:bg-white/[0.02] p-5 sm:p-7 md:col-span-2 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-none border border-neutral-200/60 dark:border-white/5 transition-all duration-500 hover:-translate-y-1 hover:bg-neutral-50 dark:hover:bg-white/[0.04] hover:border-[#D6C19E]/30 dark:hover:border-white/10 backdrop-blur-md flex flex-col justify-between ${language === "ar" ? "text-right" : "text-left"}`}>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            <div className="relative z-10">
+              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 dark:bg-white/5 text-neutral-600 dark:text-neutral-300 group-hover:text-[#D6C19E] group-hover:bg-[#D6C19E]/10 transition-colors duration-300 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="m7 14 3-3 3 2 4-5" /><circle cx="7" cy="14" r="1" /><circle cx="10" cy="11" r="1" /><circle cx="13" cy="13" r="1" /><circle cx="17" cy="8" r="1" /></svg>
               </div>
-              <h3 className="mb-0 sm:mb-2 text-[1.18rem] sm:text-xl xl:text-lg font-bold text-neutral-800 dark:text-neutral-100 whitespace-nowrap">{t("my_progress")}</h3>
+              <h3 className="mb-2 text-lg font-bold text-neutral-800 dark:text-neutral-100">{t("my_progress")}</h3>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
+                {t("my_progress_desc")}
+              </p>
             </div>
-            <p className="text-sm xl:text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
-              {t("my_progress_desc")}
-            </p>
-            <div className="mt-4 sm:mt-6 xl:mt-4 flex items-center text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E] group-hover:gap-2 transition-all">
-              {t("view_progress")} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 rtl:rotate-180"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+            <div className="mt-6 flex items-center text-xs font-bold text-neutral-400 group-hover:text-[#D6C19E] group-hover:pl-2 transition-all duration-300 relative z-10">
+              {t("view_progress")} <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 rtl:rotate-180"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
             </div>
           </Link>
 
-          <Link href="/leaderboard" className={`group relative overflow-hidden rounded-3xl bg-white dark:bg-neutral-800/80 p-5 sm:p-6 lg:p-8 xl:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-neutral-200/60 dark:border-neutral-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgb(214,193,158,0.15)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] hover:border-[#D6C19E]/40 backdrop-blur-sm ${language === "ar" ? "text-right" : "text-left"}`}>
-            <div className={`absolute -top-4 ${language === "ar" ? "-left-4" : "-right-4"} p-6 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-all duration-500 scale-50 group-hover:scale-150 ${language === "ar" ? "rotate-[15deg]" : "rotate-[-15deg]"} group-hover:rotate-0`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#D6C19E" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-            </div>
-            <div className="mb-3 sm:mb-6 xl:mb-4 flex items-center gap-3 sm:block">
-              <div className="inline-flex h-11 w-11 sm:h-12 sm:w-12 xl:h-11 xl:w-11 items-center justify-center rounded-xl sm:rounded-2xl bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E] group-hover:scale-110 transition-transform duration-300 shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          {/* Secondary Action 3: Leaderboard */}
+          <Link href="/leaderboard" className={`group relative overflow-hidden rounded-[1.5rem] bg-white dark:bg-white/[0.02] p-5 sm:p-7 md:col-span-2 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-none border border-neutral-200/60 dark:border-white/5 transition-all duration-500 hover:-translate-y-1 hover:bg-neutral-50 dark:hover:bg-white/[0.04] hover:border-[#D6C19E]/30 dark:hover:border-white/10 backdrop-blur-md flex flex-col justify-between ${language === "ar" ? "text-right" : "text-left"}`}>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            <div className="relative z-10">
+              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 dark:bg-white/5 text-neutral-600 dark:text-neutral-300 group-hover:text-[#D6C19E] group-hover:bg-[#D6C19E]/10 transition-colors duration-300 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
               </div>
-              <h3 className="mb-0 sm:mb-2 text-[1.18rem] sm:text-xl xl:text-lg font-bold text-neutral-800 dark:text-neutral-100 whitespace-nowrap">{t("leaderboard")}</h3>
+              <h3 className="mb-2 text-lg font-bold text-neutral-800 dark:text-neutral-100">{t("leaderboard")}</h3>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
+                {t("leaderboard_desc")}
+              </p>
             </div>
-            <p className="text-sm xl:text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">
-              {t("leaderboard_desc")}
-            </p>
-            <div className="mt-4 sm:mt-6 xl:mt-4 flex items-center text-sm font-bold text-[#B18E4E] dark:text-[#D6C19E] group-hover:gap-2 transition-all">
-              {t("view_rankings")} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 rtl:rotate-180"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+            <div className="mt-6 flex items-center text-xs font-bold text-neutral-400 group-hover:text-[#D6C19E] group-hover:pl-2 transition-all duration-300 relative z-10">
+              {t("view_rankings")} <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 rtl:rotate-180"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
             </div>
           </Link>
 
