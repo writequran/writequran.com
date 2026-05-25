@@ -385,7 +385,7 @@ export function TypingArea({
     if (currentIndex < globalCheckString.length) {
       hintTimeoutRef.current = setTimeout(() => {
         setShowHint(true);
-      }, 5000);
+      }, 10000);
     }
 
     return () => {
@@ -945,11 +945,11 @@ export function TypingArea({
     let tCount = 0;
     let total = 0;
     for (let i = 0; i < globalCheckString.length; i++) {
-        const char = globalCheckString[i];
-        if (char !== ' ' && char !== '\u200C') {
-            total++;
-            if (typedIndices.has(i)) tCount++;
-        }
+      const char = globalCheckString[i];
+      if (char !== ' ' && char !== '\u200C') {
+        total++;
+        if (typedIndices.has(i)) tCount++;
+      }
     }
     return [tCount, total];
   }, [globalCheckString, typedIndices]);
@@ -1027,7 +1027,7 @@ export function TypingArea({
               <input
                 type="text"
                 inputMode="numeric"
-                className="no-spinner bg-neutral-50 dark:bg-neutral-800/50 hover:bg-white dark:hover:bg-neutral-800 w-12 h-12 flex items-center justify-center text-center text-lg font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-100 dark:border-neutral-800 group-hover/ctrl:border-[#D6C19E]/40 focus:border-[#D6C19E] focus:bg-white dark:focus:bg-neutral-900 focus:outline-none shadow-sm transition-all cursor-pointer" 
+                className="no-spinner bg-neutral-50 dark:bg-neutral-800/50 hover:bg-white dark:hover:bg-neutral-800 w-12 h-12 flex items-center justify-center text-center text-lg font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-100 dark:border-neutral-800 group-hover/ctrl:border-[#D6C19E]/40 focus:border-[#D6C19E] focus:bg-white dark:focus:bg-neutral-900 focus:outline-none shadow-sm transition-all cursor-pointer"
                 defaultValue={n(currentBlock?.page || 1)}
                 key={`page-${currentBlock?.page}-${language}`}
                 onBlur={(e) => {
@@ -1054,7 +1054,7 @@ export function TypingArea({
               <input
                 type="text"
                 inputMode="numeric"
-                className="no-spinner bg-neutral-50 dark:bg-neutral-800/50 hover:bg-white dark:hover:bg-neutral-800 w-12 h-12 flex items-center justify-center text-center text-lg font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-100 dark:border-neutral-800 group-hover/ctrl:border-[#D6C19E]/40 focus:border-[#D6C19E] focus:bg-white dark:focus:bg-neutral-900 focus:outline-none shadow-sm transition-all cursor-pointer" 
+                className="no-spinner bg-neutral-50 dark:bg-neutral-800/50 hover:bg-white dark:hover:bg-neutral-800 w-12 h-12 flex items-center justify-center text-center text-lg font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-100 dark:border-neutral-800 group-hover/ctrl:border-[#D6C19E]/40 focus:border-[#D6C19E] focus:bg-white dark:focus:bg-neutral-900 focus:outline-none shadow-sm transition-all cursor-pointer"
                 defaultValue={n(currentBlock?.juz || 1)}
                 key={`juz-${currentBlock?.juz}-${language}`}
                 onBlur={(e) => {
@@ -1081,7 +1081,7 @@ export function TypingArea({
               <input
                 type="text"
                 inputMode="numeric"
-                className="no-spinner bg-neutral-50 dark:bg-neutral-800/50 hover:bg-white dark:hover:bg-neutral-800 w-12 h-12 flex items-center justify-center text-center text-lg font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-100 dark:border-neutral-800 group-hover/ctrl:border-[#D6C19E]/40 focus:border-[#D6C19E] focus:bg-white dark:focus:bg-neutral-900 focus:outline-none shadow-sm transition-all cursor-pointer" 
+                className="no-spinner bg-neutral-50 dark:bg-neutral-800/50 hover:bg-white dark:hover:bg-neutral-800 w-12 h-12 flex items-center justify-center text-center text-lg font-bold text-neutral-800 dark:text-neutral-100 rounded-full border border-neutral-100 dark:border-neutral-800 group-hover/ctrl:border-[#D6C19E]/40 focus:border-[#D6C19E] focus:bg-white dark:focus:bg-neutral-900 focus:outline-none shadow-sm transition-all cursor-pointer"
                 defaultValue={n(currentBlock?.ayahNumber || 1)}
                 key={`ayah-${currentBlock?.ayahNumber}-${language}`}
                 onBlur={(e) => {

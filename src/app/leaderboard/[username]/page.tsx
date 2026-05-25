@@ -422,9 +422,6 @@ export default function LeaderboardProfilePage() {
                       {visibleDisplayName ? visibleDisplayName[0] : "U"}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="hidden sm:block text-[11px] font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
-                        {t("player_profile")}
-                      </p>
                       <h2 className="text-lg sm:text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50 break-words leading-tight sm:mt-1">
                         {visibleDisplayName}
                       </h2>
