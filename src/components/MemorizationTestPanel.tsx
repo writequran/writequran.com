@@ -291,14 +291,13 @@ export function MemorizationTestPanel({
 
   return (
     <div className="w-full max-w-[900px] px-4 sm:px-0 pb-40">
-      <div className="mb-6 sm:mb-8 rounded-[28px] border border-[#D6C19E]/40 bg-white/90 dark:bg-neutral-900/90 shadow-xl backdrop-blur-sm p-4 sm:p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-6 sm:mb-8 rounded-2xl sm:rounded-3xl border border-[#D6C19E]/40 bg-white/90 dark:bg-neutral-900/90 shadow-lg backdrop-blur-sm px-4 py-3 sm:px-6 sm:py-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#C1A063]">{t("memorization_test")}</p>
-            <h2 className="mt-2 text-xl sm:text-2xl font-bold text-neutral-800 dark:text-neutral-100">
+            <h2 className="text-lg sm:text-xl font-bold text-neutral-800 dark:text-neutral-100">
               {n(surahMeta?.number || 0)}. {language === 'ar' ? surahMeta?.name : surahMeta?.englishName}
             </h2>
-            <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+            <p className="mt-0.5 text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 font-medium">
               {t("ayah")} {n(ayahBlock.ayahNumber)} · {typingMode === "word" ? t("word_by_word") : t("letter_by_letter")}
             </p>
           </div>

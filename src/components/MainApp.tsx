@@ -6,6 +6,7 @@ import { MemorizationTestPanel } from "@/components/MemorizationTestPanel";
 import { AuthWidget } from "@/components/AuthWidget";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 import { MenuDrawer } from "@/components/MenuDrawer";
+import { MemorizationSetupModal } from "@/components/MemorizationSetupModal";
 import Image from "next/image";
 import Link from "next/link";
 import { getAllSurahsMeta, getSurah, getLocationByPage, getLocationByJuz } from "@/lib/quran-data";
@@ -64,7 +65,7 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
 
   const [reviewQueue, setReviewQueue] = useState<WeakSpot[]>([]);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(-1);
-  const [modalType, setModalType] = useState<"review" | "clear" | "no-mistakes" | "review-complete" | "review-scheduled" | null>(null);
+  const [modalType, setModalType] = useState<"review" | "clear" | "no-mistakes" | "review-complete" | "review-scheduled" | "memorize-setup" | null>(null);
   const [navInfo, setNavInfo] = useState({ page: 1, juz: 1, ayah: 1 });
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -352,7 +353,7 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
     if (isMounted && !hasInitializedRef.current) {
       hasInitializedRef.current = true;
       if (initialMode === "memorize") {
-        startMemorizationTest();
+        setModalType("memorize-setup");
       } else if (initialMode === "review") {
         startReview();
       }
@@ -391,7 +392,10 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
         >
           <button
             onClick={() => {
-              if (isMemorizationMode) return;
+              if (isMemorizationMode) {
+                setModalType("memorize-setup");
+                return;
+              }
               setIsDropdownOpen(!isDropdownOpen);
               setIsNavOpen(false);
             }}
@@ -404,14 +408,12 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
                 </span>
               )}
             </span>
-            {!isMemorizationMode && (
-              <svg
-                className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-neutral-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
-                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-              >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            )}
+            <svg
+              className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-neutral-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+              xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
           </button>
 
           {/* MOBILE-ONLY NAV BOX */}
@@ -593,6 +595,15 @@ export function MainApp({ initialMode = "write" }: { initialMode?: "write" | "re
             memorizationRange={memorizationRange}
             onMemorizationRangeChange={handleMemorizationRangeChange}
             onStartMemorizationTest={startMemorizationTest}
+            isMemorizationMode={isMemorizationMode}
+          />
+
+          <MemorizationSetupModal
+            isOpen={modalType === "memorize-setup"}
+            onClose={() => setModalType(null)}
+            memorizationRange={memorizationRange}
+            onRangeChange={handleMemorizationRangeChange}
+            onStart={startMemorizationTest}
             isMemorizationMode={isMemorizationMode}
           />
         </div>

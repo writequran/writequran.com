@@ -107,7 +107,15 @@ export function MenuDrawer({
                 <Link
                   key={href}
                   href={href}
-                  onClick={onClose}
+                  onClick={(e) => {
+                    if (href === "/memorize" && active && isMemorizationMode) {
+                      e.preventDefault();
+                      // NextJS will not trigger a remount if clicking the same link,
+                      // so we'll force the browser to reload if they want to restart the flow from the menu
+                      window.location.href = "/memorize";
+                    }
+                    onClose();
+                  }}
                   aria-current={active ? "page" : undefined}
                   className={`flex items-center gap-4 px-4 py-3 rounded-2xl transition-all group ${active
                     ? "bg-[#D6C19E]/12 dark:bg-[#D6C19E]/10 text-[#B18E4E] dark:text-[#D6C19E]"
