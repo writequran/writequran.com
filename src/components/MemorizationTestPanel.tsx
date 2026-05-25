@@ -77,6 +77,7 @@ export function MemorizationTestPanel({
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [wordDraft, setWordDraft] = useState("");
   const [isComplete, setIsComplete] = useState(false);
+  const [keyboardScale, setKeyboardScale] = useState(1);
 
   const targetRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -148,10 +149,20 @@ export function MemorizationTestPanel({
   }, [isDarkMode, updateCursorPos]);
 
   useEffect(() => {
+    if (showKeyboard) {
+      document.documentElement.style.scrollPaddingBottom = `${300 * keyboardScale}px`;
+    } else {
+      document.documentElement.style.scrollPaddingBottom = "0px";
+    }
+    
     if (targetRef.current) {
       targetRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
     }
-  }, [currentIndex]);
+    
+    return () => {
+      document.documentElement.style.scrollPaddingBottom = "0px";
+    };
+  }, [currentIndex, showKeyboard, keyboardScale]);
 
   const completeIfNeeded = useCallback((nextTypedIndices: Set<number>) => {
     if (nextTypedIndices.size >= ayahBlock.checkString.length) {
@@ -411,6 +422,9 @@ export function MemorizationTestPanel({
           )}
         </div>
       </div>
+      
+      {/* Spacer at bottom to ensure last elements can be scrolled into view above keyboard */}
+      <div style={{ height: Math.max(320, 300 * keyboardScale + 50) }} />
 
       <VirtualKeyboard
         showKeyboard={showKeyboard}
@@ -418,6 +432,7 @@ export function MemorizationTestPanel({
         typingMode={typingMode}
         activeWordDraft={wordDraft}
         wrongChar={wrongChar}
+        onScaleChange={setKeyboardScale}
         mobileToolbar={
           <>
         {typingMode === "word" && showKeyboard && (wordDraft.length > 0 || wrongChar) && (

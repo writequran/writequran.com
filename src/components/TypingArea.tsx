@@ -250,6 +250,8 @@ function MistakePopover({
         )}
       </div>
 
+      {/* Spacer at bottom to ensure last elements can be scrolled into view above keyboard */}
+      <div style={{ height: Math.max(320, 300 * keyboardScale + 50) }} />
       {/* Adaptive Arrow */}
       <div className={`absolute w-3 h-3 bg-white dark:bg-neutral-900 rotate-45 z-[-1] ${variant === "top"
         ? "-bottom-1.5 right-4 border-r border-b border-neutral-200 dark:border-neutral-800"
@@ -376,6 +378,7 @@ export function TypingArea({
 
   const [cursorPos, setCursorPos] = useState({ top: 0, left: 0, width: 0, height: 0 });
   const [showHint, setShowHint] = useState(false);
+  const [keyboardScale, setKeyboardScale] = useState(1);
   const hintTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -594,6 +597,22 @@ export function TypingArea({
       targetRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [currentIndex]);
+
+  useEffect(() => {
+    if (showKeyboard) {
+      document.documentElement.style.scrollPaddingBottom = `${300 * keyboardScale}px`;
+    } else {
+      document.documentElement.style.scrollPaddingBottom = "0px";
+    }
+    
+    if (targetRef.current) {
+      targetRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    
+    return () => {
+      document.documentElement.style.scrollPaddingBottom = "0px";
+    };
+  }, [showKeyboard, keyboardScale]);
 
   const handleResetSessionStats = () => {
     setModalType("mistake_menu");
@@ -1373,6 +1392,7 @@ export function TypingArea({
         typingMode={typingMode}
         activeWordDraft={activeWordDraft}
         wrongChar={wrongChar}
+        onScaleChange={setKeyboardScale}
         mobileToolbar={
           <>
         {typingMode === "word" && showKeyboard && (activeWordDraft.length > 0 || wrongChar) && (

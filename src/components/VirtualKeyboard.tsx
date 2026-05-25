@@ -11,6 +11,7 @@ interface VirtualKeyboardProps {
   activeWordDraft?: string;
   wrongChar?: string | null;
   mobileToolbar?: ReactNode;
+  onScaleChange?: (scale: number) => void;
 }
 
 export function VirtualKeyboard({
@@ -19,7 +20,8 @@ export function VirtualKeyboard({
   typingMode = 'letter',
   activeWordDraft = '',
   wrongChar = null,
-  mobileToolbar
+  mobileToolbar,
+  onScaleChange
 }: VirtualKeyboardProps) {
   const { t } = useLanguage();
 
@@ -29,6 +31,12 @@ export function VirtualKeyboard({
   const [startScale, setStartScale] = useState(1);
   const [isMobile, setIsMobile] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    if (onScaleChange) {
+      onScaleChange(scale);
+    }
+  }, [scale, onScaleChange]);
 
   useEffect(() => {
     let mounted = true;
