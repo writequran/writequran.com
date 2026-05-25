@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getAllSurahsMeta, getSurah } from "@/lib/quran-data";
 import { useLanguage } from "@/lib/i18n";
+import { VirtualKeyboard } from "./VirtualKeyboard";
 
 interface MemorizationTestPanelProps {
   surahNumber: number;
@@ -411,7 +412,14 @@ export function MemorizationTestPanel({
         </div>
       </div>
 
-      <div className={`fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[750px] bg-white/95 dark:bg-neutral-800/95 backdrop-blur-md rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t border-neutral-200 dark:border-neutral-800 transition-all duration-500 transform z-[60] ${showKeyboard ? "translate-y-0" : "translate-y-[calc(100%-54px)] sm:translate-y-full sm:opacity-0 sm:pointer-events-none"}`} dir="rtl">
+      <VirtualKeyboard
+        showKeyboard={showKeyboard}
+        onInput={handleInput}
+        typingMode={typingMode}
+        activeWordDraft={wordDraft}
+        wrongChar={wrongChar}
+        mobileToolbar={
+          <>
         {typingMode === "word" && showKeyboard && (wordDraft.length > 0 || wrongChar) && (
           <div className="absolute bottom-full mb-1.5 sm:mb-2 left-1/2 -translate-x-1/2 w-fit max-w-[min(68vw,14rem)] pointer-events-none">
             <div className="rounded-full border border-[#E3C57A]/45 dark:border-[#D6C19E]/35 bg-[#F3E3BE]/55 dark:bg-[#6B5730]/28 backdrop-blur-xl px-4 py-2 shadow-[0_8px_24px_rgba(180,140,60,0.16)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.24)]">
@@ -451,43 +459,9 @@ export function MemorizationTestPanel({
           </div>
         </div>
 
-        <div className="p-2 sm:p-6 pb-4 sm:pb-8">
-          <div className="flex flex-col gap-0.5 sm:gap-2">
-            {[
-              ["ض", "ص", "ث", "ق", "ف", "غ", "ع", "ه", "خ", "ح", "ج", "د"],
-              ["ش", "س", "ي", "ب", "ل", "ا", "ت", "ن", "م", "ك", "ط", "ذ"],
-              ["ئ", "ء", "ؤ", "ر", "ى", "ة", "و", "ز", "ظ", "أ", "إ", "آ"]
-            ].map((row, rowIndex) => (
-              <div key={rowIndex} className="flex justify-center gap-0.5 sm:gap-1.5">
-                {row.map((letter) => (
-                  <button
-                    key={letter}
-                    onClick={() => handleInput(letter)}
-                    className="flex-1 min-w-[28px] sm:min-w-[42px] h-12 sm:h-12 bg-neutral-100/50 dark:bg-neutral-800/50 hover:bg-[#D6C19E]/30 dark:hover:bg-[#D6C19E]/20 text-[#2A2826] dark:text-neutral-100 text-base sm:text-xl rounded-lg transition-all border border-neutral-200 dark:border-neutral-700 active:scale-95"
-                  >
-                    {letter}
-                  </button>
-                ))}
-              </div>
-            ))}
-            <div className="flex justify-center gap-0.5 sm:gap-1.5 mt-1">
-              <button
-                onClick={() => handleInput("Backspace")}
-                className="px-4 sm:px-6 h-10 sm:h-12 bg-red-50/50 dark:bg-red-900/20 hover:bg-red-100/50 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-medium rounded-lg transition-all border border-red-100 dark:border-red-900/30 active:scale-95 flex items-center gap-2"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
-                <span className="hidden sm:inline">{t("backspace")}</span>
-              </button>
-              <button
-                onClick={() => handleInput(" ")}
-                className="flex-[3] h-10 sm:h-12 bg-neutral-100/50 dark:bg-neutral-800/50 hover:bg-[#D6C19E]/30 dark:hover:bg-[#D6C19E]/20 text-[#2A2826] dark:text-neutral-100 rounded-lg transition-all border border-neutral-200 dark:border-neutral-700 active:scale-95 text-xs font-bold uppercase tracking-widest"
-              >
-                {t("space")}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       <div className="fixed right-6 top-1/2 -translate-y-1/2 hidden sm:flex flex-col items-center gap-4 bg-white/95 dark:bg-neutral-800/95 backdrop-blur-xl rounded-full shadow-2xl border border-neutral-200/50 dark:border-neutral-800/50 py-2 px-2 z-50 transition-all duration-500 w-[64px]">
         <button
